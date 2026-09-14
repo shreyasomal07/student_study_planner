@@ -58,64 +58,64 @@ export default function AnalyticsView({ tasks, topics, timetable, student, subje
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-xl font-bold text-slate-800 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-indigo-600" />
-            Study Progress & Academic Analytics
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Track your study consistency, subject distribution, and task completion metrics.
+          <h2 className="font-display text-xl font-extrabold text-[#181A1D] flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-[#181A1D]" />
+            Study Progress & Analytics
+          </h2>
+          <p className="text-xs sm:text-sm text-[#8E8880]">
+            Track your consistency, subject allocation, and assignment resolution rate.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shadow-2xs">
-          <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
+        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181A1D] text-white text-xs font-bold shadow-xs">
+          <Flame className="w-4 h-4 text-[#FACC15] fill-[#FACC15]" />
           <span>5-Day Study Streak Active! 🔥</span>
         </div>
       </div>
 
       {/* KPI Overview Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-          <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+        <div className="rounded-[30px] border border-[#ECE6DC] bg-white p-5 shadow-xs">
+          <div className="w-9 h-9 rounded-full bg-[#F4F1EB] text-[#181A1D] flex items-center justify-center mb-3">
             <Clock className="w-4 h-4" />
           </div>
-          <p className="font-display text-2xl font-bold text-slate-800">{completedHours}h <span className="text-xs text-slate-400 font-normal">/ {scheduledHours}h</span></p>
-          <p className="text-xs text-slate-500 mt-0.5">Study Time Logged</p>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
-            <div className="bg-indigo-600 h-1.5 rounded-full transition-all" style={{ width: `${scheduledHours ? (completedHours / scheduledHours) * 100 : 0}%` }} />
+          <p className="font-display text-2xl font-extrabold text-[#181A1D]">{completedHours}h <span className="text-xs text-[#8E8880] font-normal">/ {scheduledHours}h</span></p>
+          <p className="text-xs text-[#8E8880] mt-0.5 font-medium">Study Time Logged</p>
+          <div className="w-full bg-[#F4F1EB] rounded-full h-2 mt-3 overflow-hidden">
+            <div className="bg-[#181A1D] h-2 rounded-full transition-all" style={{ width: `${scheduledHours ? (completedHours / scheduledHours) * 100 : 0}%` }} />
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+        <div className="rounded-[30px] border border-[#ECE6DC] bg-white p-5 shadow-xs">
+          <div className="w-9 h-9 rounded-full bg-[#F0FDF4] text-[#16A34A] flex items-center justify-center mb-3">
             <CheckCircle2 className="w-4 h-4" />
           </div>
-          <p className="font-display text-2xl font-bold text-slate-800">{taskCompletionRate}%</p>
-          <p className="text-xs text-slate-500 mt-0.5">{completedTasks} of {totalTasks} Tasks Done</p>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
-            <div className="bg-emerald-500 h-1.5 rounded-full transition-all" style={{ width: `${taskCompletionRate}%` }} />
+          <p className="font-display text-2xl font-extrabold text-[#181A1D]">{taskCompletionRate}%</p>
+          <p className="text-xs text-[#8E8880] mt-0.5 font-medium">{completedTasks} of {totalTasks} Tasks Done</p>
+          <div className="w-full bg-[#F4F1EB] rounded-full h-2 mt-3 overflow-hidden">
+            <div className="bg-[#34D399] h-2 rounded-full transition-all" style={{ width: `${taskCompletionRate}%` }} />
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-          <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
+        <div className="rounded-[30px] border border-[#ECE6DC] bg-white p-5 shadow-xs">
+          <div className="w-9 h-9 rounded-full bg-[#FEFCE8] text-[#CA8A04] flex items-center justify-center mb-3">
             <BookOpen className="w-4 h-4" />
           </div>
-          <p className="font-display text-2xl font-bold text-slate-800">{topicCompletionRate}%</p>
-          <p className="text-xs text-slate-500 mt-0.5">{completedTopics} of {totalTopics} Topics Revised</p>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
-            <div className="bg-purple-500 h-1.5 rounded-full transition-all" style={{ width: `${topicCompletionRate}%` }} />
+          <p className="font-display text-2xl font-extrabold text-[#181A1D]">{topicCompletionRate}%</p>
+          <p className="text-xs text-[#8E8880] mt-0.5 font-medium">{completedTopics} of {totalTopics} Topics Revised</p>
+          <div className="w-full bg-[#F4F1EB] rounded-full h-2 mt-3 overflow-hidden">
+            <div className="bg-[#FACC15] h-2 rounded-full transition-all" style={{ width: `${topicCompletionRate}%` }} />
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-          <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
+        <div className="rounded-[30px] border border-[#ECE6DC] bg-white p-5 shadow-xs">
+          <div className="w-9 h-9 rounded-full bg-[#FFF1F2] text-[#E11D48] flex items-center justify-center mb-3">
             <Target className="w-4 h-4" />
           </div>
-          <p className="font-display text-2xl font-bold text-slate-800">{goalProgress}%</p>
-          <p className="text-xs text-slate-500 mt-0.5">Weekly Target ({weeklyGoalHours}h Goal)</p>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
-            <div className="bg-amber-500 h-1.5 rounded-full transition-all" style={{ width: `${goalProgress}%` }} />
+          <p className="font-display text-2xl font-extrabold text-[#181A1D]">{goalProgress}%</p>
+          <p className="text-xs text-[#8E8880] mt-0.5 font-medium">Weekly Goal ({weeklyGoalHours}h)</p>
+          <div className="w-full bg-[#F4F1EB] rounded-full h-2 mt-3 overflow-hidden">
+            <div className="bg-[#FB7185] h-2 rounded-full transition-all" style={{ width: `${goalProgress}%` }} />
           </div>
         </div>
       </div>
@@ -123,29 +123,29 @@ export default function AnalyticsView({ tasks, topics, timetable, student, subje
       <div className="grid lg:grid-cols-2 gap-5">
         
         {/* Subject-Wise Time Allocation */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
+        <div className="rounded-[32px] border border-[#ECE6DC] bg-white p-6 shadow-xs">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-semibold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-indigo-600" />
+            <h3 className="font-display font-extrabold text-[#181A1D] text-sm sm:text-base flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-[#181A1D]" />
               Subject Time Distribution
             </h3>
-            <span className="text-xs text-slate-400">{subjectStats.length} Subjects</span>
+            <span className="text-xs text-[#8E8880] font-bold">{subjectStats.length} Subjects</span>
           </div>
 
           {subjectStats.length === 0 ? (
-            <p className="text-xs text-slate-400 py-6 text-center">Generate a timetable to view subject time analytics.</p>
+            <p className="text-xs text-[#8E8880] py-6 text-center">Generate a timetable to view subject time analytics.</p>
           ) : (
             <div className="space-y-3.5">
               {subjectStats.map((item, idx) => (
                 <div key={item.subject}>
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-semibold text-slate-700">{item.subject}</span>
-                    <span className="text-slate-500 font-medium">{item.hours}h ({item.percent}%)</span>
+                    <span className="font-bold text-[#181A1D]">{item.subject}</span>
+                    <span className="text-[#8E8880] font-semibold">{item.hours}h ({item.percent}%)</span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-[#F4F1EB] rounded-full h-2 overflow-hidden">
                     <div
                       className={`h-2 rounded-full transition-all ${
-                        idx === 0 ? 'bg-indigo-600' : idx === 1 ? 'bg-sky-500' : idx === 2 ? 'bg-purple-500' : 'bg-teal-500'
+                        idx === 0 ? 'bg-[#181A1D]' : idx === 1 ? 'bg-[#FACC15]' : idx === 2 ? 'bg-[#FB7185]' : 'bg-[#60A5FA]'
                       }`}
                       style={{ width: `${item.percent}%` }}
                     />
@@ -157,55 +157,55 @@ export default function AnalyticsView({ tasks, topics, timetable, student, subje
         </div>
 
         {/* Priority Task Execution Status */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
+        <div className="rounded-[32px] border border-[#ECE6DC] bg-white p-6 shadow-xs">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-semibold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-              <Award className="w-4 h-4 text-amber-500" />
+            <h3 className="font-display font-extrabold text-[#181A1D] text-sm sm:text-base flex items-center gap-2">
+              <Award className="w-4 h-4 text-[#FACC15]" />
               Priority-Based Task Completion
             </h3>
-            <span className="text-xs text-slate-400">{completedTasks}/{totalTasks} Resolved</span>
+            <span className="text-xs text-[#8E8880] font-bold">{completedTasks}/{totalTasks} Done</span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* High Priority */}
-            <div className="p-3.5 rounded-xl border border-rose-100 bg-rose-50/40">
+            <div className="p-3.5 rounded-2xl border border-[#FECDD3] bg-[#FFF1F2]">
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-bold text-rose-700 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                <span className="font-bold text-[#E11D48] flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#E11D48]" />
                   High Priority Tasks
                 </span>
-                <span className="text-rose-800 font-semibold">{highDone} of {highPriority.length} completed</span>
+                <span className="text-[#9F1239] font-bold">{highDone} of {highPriority.length} completed</span>
               </div>
-              <div className="w-full bg-rose-100 rounded-full h-2 overflow-hidden">
-                <div className="bg-rose-500 h-2 rounded-full transition-all" style={{ width: `${highPriority.length ? (highDone / highPriority.length) * 100 : 0}%` }} />
+              <div className="w-full bg-white rounded-full h-2 overflow-hidden">
+                <div className="bg-[#E11D48] h-2 rounded-full transition-all" style={{ width: `${highPriority.length ? (highDone / highPriority.length) * 100 : 0}%` }} />
               </div>
             </div>
 
             {/* Medium Priority */}
-            <div className="p-3.5 rounded-xl border border-amber-100 bg-amber-50/40">
+            <div className="p-3.5 rounded-2xl border border-[#FEF08A] bg-[#FEFCE8]">
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-bold text-amber-700 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <span className="font-bold text-[#CA8A04] flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#CA8A04]" />
                   Medium Priority Tasks
                 </span>
-                <span className="text-amber-800 font-semibold">{medDone} of {medPriority.length} completed</span>
+                <span className="text-[#854D0E] font-bold">{medDone} of {medPriority.length} completed</span>
               </div>
-              <div className="w-full bg-amber-100 rounded-full h-2 overflow-hidden">
-                <div className="bg-amber-500 h-2 rounded-full transition-all" style={{ width: `${medPriority.length ? (medDone / medPriority.length) * 100 : 0}%` }} />
+              <div className="w-full bg-white rounded-full h-2 overflow-hidden">
+                <div className="bg-[#CA8A04] h-2 rounded-full transition-all" style={{ width: `${medPriority.length ? (medDone / medPriority.length) * 100 : 0}%` }} />
               </div>
             </div>
 
             {/* Low Priority */}
-            <div className="p-3.5 rounded-xl border border-emerald-100 bg-emerald-50/40">
+            <div className="p-3.5 rounded-2xl border border-[#BBF7D0] bg-[#F0FDF4]">
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-bold text-emerald-700 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="font-bold text-[#16A34A] flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#16A34A]" />
                   Low Priority Tasks
                 </span>
-                <span className="text-emerald-800 font-semibold">{lowDone} of {lowPriority.length} completed</span>
+                <span className="text-[#14532D] font-bold">{lowDone} of {lowPriority.length} completed</span>
               </div>
-              <div className="w-full bg-emerald-100 rounded-full h-2 overflow-hidden">
-                <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{ width: `${lowPriority.length ? (lowDone / lowPriority.length) * 100 : 0}%` }} />
+              <div className="w-full bg-white rounded-full h-2 overflow-hidden">
+                <div className="bg-[#16A34A] h-2 rounded-full transition-all" style={{ width: `${lowPriority.length ? (lowDone / lowPriority.length) * 100 : 0}%` }} />
               </div>
             </div>
           </div>
@@ -213,23 +213,23 @@ export default function AnalyticsView({ tasks, topics, timetable, student, subje
 
       </div>
 
-      {/* Weekly Schedule Efficiency & AI Recommendations */}
-      <div className="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/80 to-purple-50/80 p-5 sm:p-6">
+      {/* AI Recommendations */}
+      <div className="rounded-[32px] border border-[#ECE6DC] bg-[#181A1D] text-white p-6">
         <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-xl bg-indigo-600 text-white shrink-0 shadow-sm mt-0.5">
+          <div className="p-2.5 rounded-full bg-[#262A30] text-[#FACC15] shrink-0 mt-0.5">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="font-display font-bold text-indigo-950 text-sm sm:text-base">
+            <h4 className="font-display font-extrabold text-white text-sm sm:text-base">
               AI Study Optimization Insights
             </h4>
-            <p className="text-xs sm:text-sm text-indigo-900/80 mt-1 leading-relaxed">
-              Based on your {student.dailyTargetHours || 4}h daily target and upcoming assignments, your timetable distributes revision evenly with 10-minute rest cycles. You have scheduled <strong>{scheduledHours} hours</strong> of focused learning across the next 7 days.
+            <p className="text-xs sm:text-sm text-[#9CA3AF] mt-1 leading-relaxed">
+              Based on your {student.dailyTargetHours || 4}h daily target, your study schedule is distributed evenly with 10-minute rest intervals. You have scheduled <strong>{scheduledHours} hours</strong> of focused study across the week.
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-indigo-700">
-              <span className="px-2.5 py-1 rounded-lg bg-white/80 border border-indigo-200">✨ Balanced Workload</span>
-              <span className="px-2.5 py-1 rounded-lg bg-white/80 border border-indigo-200">⏱️ Pomodoro Optimized</span>
-              <span className="px-2.5 py-1 rounded-lg bg-white/80 border border-indigo-200">🎯 Zero Overdue Risk</span>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold text-white">
+              <span className="px-3 py-1 rounded-full bg-[#262A30]">✨ Balanced Routine</span>
+              <span className="px-3 py-1 rounded-full bg-[#262A30]">⏱️ Pomodoro Paced</span>
+              <span className="px-3 py-1 rounded-full bg-[#262A30]">🎯 Exam Ready</span>
             </div>
           </div>
         </div>

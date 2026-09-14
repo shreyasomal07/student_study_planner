@@ -533,14 +533,14 @@ export default function ExamTimetableManager({
   return (
     <div className="space-y-6">
       {/* Header controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-[28px] border border-[#ECE6DC] shadow-2xs">
         <div>
-          <h2 className="font-display font-bold text-slate-800 text-base sm:text-lg flex items-center gap-2">
-            <Award className="w-5 h-5 text-rose-600" />
+          <h2 className="font-display font-extrabold text-[#181A1D] text-base sm:text-lg flex items-center gap-2">
+            <Award className="w-5 h-5 text-[#FB7185]" />
             Exam Timetable & Syllabus Tracker
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Upload a photo/image of your exam schedule, CSV, or enter dates. The AI automatically schedules high-priority revision sprints before each exam date.
+          <p className="text-xs text-[#8E8880] mt-0.5">
+            Upload an image of your exam schedule or enter dates. The AI automatically schedules high-priority revision sprints before each exam.
           </p>
         </div>
 
@@ -548,9 +548,9 @@ export default function ExamTimetableManager({
           {exams.length === 0 && (
             <button
               onClick={loadSampleExams}
-              className="px-3 py-2 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-full text-xs font-bold bg-[#F4F1EB] hover:bg-[#EAE4DA] text-[#181A1D] transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <Sparkles className="w-3.5 h-3.5" /> Sample Exams
+              <Sparkles className="w-3.5 h-3.5 text-[#FACC15]" /> Sample Exams
             </button>
           )}
 
@@ -562,16 +562,16 @@ export default function ExamTimetableManager({
               setUploadedFileName('');
               setImagePreviewUrl(null);
             }}
-            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            className="px-4 py-2 rounded-full text-xs font-bold bg-[#F4F1EB] hover:bg-[#EAE4DA] text-[#181A1D] border border-[#ECE6DC] transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
-            <Upload className="w-3.5 h-3.5 text-rose-600" /> Upload Image / Document
+            <Upload className="w-3.5 h-3.5 text-[#FB7185]" /> Upload Image / Document
           </button>
 
           <button
             onClick={openAddModal}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+            className="px-4 py-2 rounded-full text-xs font-bold bg-[#181A1D] hover:bg-black text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
-            <Plus className="w-4 h-4" /> Add Exam
+            <Plus className="w-4 h-4 text-[#FACC15]" /> Add Exam
           </button>
         </div>
       </div>

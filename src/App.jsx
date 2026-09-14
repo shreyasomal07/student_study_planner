@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import StudentPlanner from './StudentPlanner';
+import StudentPlanner, { generateTimetable, startOfWeek } from './StudentPlanner';
 import SignIn from './components/SignIn';
 
 const ACCOUNTS_KEY = 'study_planner_registered_accounts_v2';
@@ -67,12 +67,46 @@ export default function App() {
 
   const handleRegister = (newAccountData) => {
     const username = newAccountData.username.toLowerCase();
+    
+    let initialPlannerData = null;
+    if (newAccountData.topics && newAccountData.topics.length > 0) {
+      const defaultAvail = {
+        Mon: [8, 9, 17, 18, 19, 20],
+        Tue: [17, 18, 19, 20],
+        Wed: [8, 9, 17, 18, 19, 20],
+        Thu: [17, 18, 19, 20],
+        Fri: [17, 18, 19, 20],
+        Sat: [9, 10, 11, 12, 13, 14, 15],
+        Sun: [9, 10, 11, 12, 13, 14, 15],
+      };
+      const avail = newAccountData.availability || defaultAvail;
+      const tasks = newAccountData.tasks || [];
+      const topics = newAccountData.topics || [];
+      const generatedTimetable = generateTimetable(
+        tasks,
+        topics,
+        avail,
+        startOfWeek(new Date()),
+        [],
+        []
+      );
+      initialPlannerData = {
+        tasks,
+        topics,
+        availability: avail,
+        timetable: generatedTimetable,
+        collegeSchedule: [],
+        examSchedule: [],
+        lastGenerated: new Date().toISOString()
+      };
+    }
+
     const updated = {
       ...accounts,
       [username]: {
         ...newAccountData,
         username,
-        plannerData: null
+        plannerData: initialPlannerData
       }
     };
     persistAccounts(updated);
@@ -114,13 +148,11 @@ export default function App() {
   }, []);
 
   const handleSignOut = () => {
-    if (window.confirm(`Are you sure you want to sign out, ${currentUser?.profile?.name || 'Student'}? Your saved timetable, tasks, and topics are preserved securely.`)) {
-      setActiveUsername(null);
-      setIsEditingProfile(false);
-      try {
-        localStorage.removeItem(ACTIVE_USER_KEY);
-      } catch (e) {}
-    }
+    setActiveUsername(null);
+    setIsEditingProfile(false);
+    try {
+      localStorage.removeItem(ACTIVE_USER_KEY);
+    } catch (e) {}
   };
 
   const handleDeleteAccount = (usernameToDelete = null) => {
@@ -161,7 +193,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+    <div className="min-h-screen bg-[#EBE6DF] text-[#1E2024] font-sans antialiased p-3 sm:p-5 lg:p-7 flex items-center justify-center">
       <StudentPlanner
         userProfile={currentUser.profile}
         savedPlannerData={currentUser.plannerData}

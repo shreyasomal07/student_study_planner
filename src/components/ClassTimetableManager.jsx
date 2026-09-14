@@ -404,14 +404,14 @@ export default function ClassTimetableManager({
   return (
     <div className="space-y-6">
       {/* Header controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-[28px] border border-[#ECE6DC] shadow-2xs">
         <div>
-          <h2 className="font-display font-bold text-slate-800 text-base sm:text-lg flex items-center gap-2">
-            <School className="w-5 h-5 text-indigo-600" />
+          <h2 className="font-display font-extrabold text-[#181A1D] text-base sm:text-lg flex items-center gap-2">
+            <School className="w-5 h-5 text-[#181A1D]" />
             College & School Class Timetable
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Upload a photo/picture of your timetable, CSV, or enter classes. The AI scheduler avoids booking self-study during your classes.
+          <p className="text-xs text-[#8E8880] mt-0.5">
+            Upload a photo of your routine or enter lectures. The AI scheduler avoids booking study slots during classes.
           </p>
         </div>
 
@@ -419,9 +419,9 @@ export default function ClassTimetableManager({
           {classes.length === 0 && (
             <button
               onClick={loadSampleRoutine}
-              className="px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-full text-xs font-bold bg-[#F4F1EB] hover:bg-[#EAE4DA] text-[#181A1D] transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <Sparkles className="w-3.5 h-3.5" /> Sample Routine
+              <Sparkles className="w-3.5 h-3.5 text-[#FACC15]" /> Sample Routine
             </button>
           )}
 
@@ -433,16 +433,16 @@ export default function ClassTimetableManager({
               setUploadedFileName('');
               setImagePreviewUrl(null);
             }}
-            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            className="px-4 py-2 rounded-full text-xs font-bold bg-[#F4F1EB] hover:bg-[#EAE4DA] text-[#181A1D] border border-[#ECE6DC] transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
-            <Upload className="w-3.5 h-3.5 text-indigo-600" /> Upload Image / Document
+            <Upload className="w-3.5 h-3.5 text-[#181A1D]" /> Upload Photo / Document
           </button>
 
           <button
             onClick={openAddModal}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+            className="px-4 py-2 rounded-full text-xs font-bold bg-[#181A1D] hover:bg-black text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
-            <Plus className="w-4 h-4" /> Add Class
+            <Plus className="w-4 h-4 text-[#FACC15]" /> Add Class
           </button>
         </div>
       </div>
@@ -451,8 +451,8 @@ export default function ClassTimetableManager({
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
         <button
           onClick={() => setSelectedDayFilter('All')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            selectedDayFilter === 'All' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            selectedDayFilter === 'All' ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
           }`}
         >
           All Days ({classes.length})
@@ -464,13 +464,13 @@ export default function ClassTimetableManager({
             <button
               key={d}
               onClick={() => setSelectedDayFilter(d)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                isActive ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                isActive ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
               }`}
             >
               <span>{d}</span>
               {count > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-[#FACC15] text-[#181A1D]' : 'bg-[#F4F1EB] text-[#8E8880]'}`}>
                   {count}
                 </span>
               )}
