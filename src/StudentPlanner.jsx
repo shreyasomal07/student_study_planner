@@ -669,7 +669,7 @@ export default function StudentPlanner({
   }, [timetable, tasks, now]);
 
   return (
-    <div className="w-full max-w-[1520px] bg-[#F5F2EB] rounded-[38px] p-3 sm:p-5 lg:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-[#E8E2D8] flex flex-col md:flex-row gap-4 sm:gap-6 min-h-[92vh]">
+    <div className="w-full bg-[#F5F2EB] rounded-[34px] sm:rounded-[38px] p-3 sm:p-5 lg:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-[#E8E2D8] flex flex-col md:flex-row gap-4 sm:gap-6 min-h-[94vh]">
       
       {/* =========================================================================
          1. MINIMALIST ICON-ONLY SIDEBAR (As requested)
@@ -814,24 +814,45 @@ export default function StudentPlanner({
         
         {/* ----------------- SCHEDULE / TIMETABLE VIEW ----------------- */}
         {view === "timetable" && (
-          <div className="space-y-3 flex-1 flex flex-col min-w-0">
+          <div className="space-y-4 flex-1 flex flex-col min-w-0">
             
             {/* Top Toolbar for Schedule */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-[#E8E2D8]/60">
-              <div className="flex items-center gap-2">
-                <span className="font-display font-extrabold text-base sm:text-lg text-[#181A1D] tracking-tight">
-                  Weekly Timetable
-                </span>
-                <span className="text-xs font-semibold text-[#8E8880] bg-white/80 px-2.5 py-0.5 rounded-full border border-[#ECE6DC]">
-                  {fmtDisplayDate(toISODate(weekStart))} – {fmtDisplayDate(toISODate(weekEnd))}
-                </span>
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[#E8E2D8]/60">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-base sm:text-lg text-[#181A1D] tracking-tight">
+                    Weekly Timetable
+                  </span>
+                  <div className="text-xs font-normal text-[#6B655E] bg-white/80 px-3 py-1 rounded-full border border-[#ECE6DC] flex items-center gap-1.5 shadow-2xs">
+                    <Calendar className="w-3.5 h-3.5 text-[#EAB308]" />
+                    <span>{fmtDisplayDate(toISODate(weekStart))} – {fmtDisplayDate(toISODate(weekEnd))}</span>
+                  </div>
+                </div>
+
+                {/* Subtle weekly summary chips matching dashboard palette */}
+                <div className="hidden md:flex items-center gap-2">
+                  <span className="text-[11px] font-normal text-[#92400E] bg-[#FEF3C7]/80 border border-[#FDE68A] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
+                    {timetable.filter(b => b.type === "study").length} Study Sessions
+                  </span>
+                  <span className="text-[11px] font-normal text-[#1E40AF] bg-[#DBEAFE]/80 border border-[#BFDBFE] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
+                    {timetable.filter(b => b.type === "class").length} Classes
+                  </span>
+                  {timetable.some(b => b.type === "exam") && (
+                    <span className="text-[11px] font-normal text-[#9F1239] bg-[#FFE4E6]/80 border border-[#FECDD3] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" />
+                      {timetable.filter(b => b.type === "exam").length} Exams
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="px-3.5 py-1.5 rounded-full bg-white border border-[#ECE6DC] hover:bg-[#F8F6F1] text-xs font-bold text-[#181A1D] shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-full bg-white border border-[#ECE6DC] hover:bg-[#F8F6F1] text-xs font-medium text-[#181A1D] shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all"
                   title="Regenerate Plan"
                 >
                   <RotateCcw className={`w-3.5 h-3.5 text-[#EAB308] ${generating ? "animate-spin" : ""}`} />
@@ -840,7 +861,7 @@ export default function StudentPlanner({
 
                 <button
                   onClick={() => setTaskModal({ open: true, editing: null })}
-                  className="bg-[#181A1D] hover:bg-black text-white px-4 py-1.5 rounded-full font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                  className="bg-[#181A1D] hover:bg-[#282C33] text-white px-4 py-1.5 rounded-full font-medium text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
                   <span>Add Task</span>
@@ -849,43 +870,62 @@ export default function StudentPlanner({
             </div>
 
             {/* 7 Columns Timetable Grid */}
-            <div className="flex-1 overflow-x-auto pb-2">
-              <div className="grid grid-cols-7 gap-2.5 min-w-[960px]">
+            <div className="flex-1 overflow-x-auto pb-3">
+              <div className="grid grid-cols-7 gap-3 min-w-[1020px]">
                 {DAY_KEYS.map((d, i) => {
-                  const colDateISO = toISODate(addDays(weekStart, i));
+                  const colDate = addDays(weekStart, i);
+                  const colDateISO = toISODate(colDate);
                   const isToday = colDateISO === toISODate(now);
                   const dayBlocks = timetable.filter(b => b.date === colDateISO);
+                  const activeBlocks = dayBlocks.filter(b => b.type !== "break");
 
                   return (
                     <div 
                       key={d} 
-                      className={`rounded-[24px] p-2 space-y-2 flex flex-col transition-all ${
+                      className={`rounded-[24px] p-2.5 space-y-2 flex flex-col transition-all ${
                         isToday 
-                          ? "bg-white/80 border border-[#E0D8CA] shadow-xs" 
-                          : "bg-white/40 border border-[#ECE6DC]"
+                          ? "bg-[#FFFDF8]/90 border-2 border-[#FDE047]/80 shadow-xs" 
+                          : "bg-white/45 hover:bg-white/60 border border-[#ECE6DC]"
                       }`}
                     >
                       {/* Column Header */}
-                      <div className={`px-3 py-2 rounded-[18px] flex items-center justify-between ${
+                      <div className={`p-2.5 rounded-[18px] transition-all ${
                         isToday 
-                          ? "bg-white border border-[#E8E2D8] shadow-2xs" 
-                          : "bg-white/60 border border-[#ECE6DC]"
+                          ? "bg-[#FFFBEB] border border-[#FDE68A] shadow-2xs" 
+                          : "bg-white/80 border border-[#ECE6DC]"
                       }`}>
-                        <span className="font-display font-extrabold text-xs text-[#181A1D]">
-                          {DAY_LABELS[d]}
-                        </span>
-                        {isToday && (
-                          <span className="bg-[#FDE047] text-[#181A1D] text-[9px] font-black px-2 py-0.5 rounded-full shadow-2xs">
-                            Today
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-xs text-[#252320]">
+                            <span className="hidden sm:inline">{DAY_LABELS[d]}</span>
+                            <span className="sm:hidden">{d}</span>
                           </span>
-                        )}
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-medium transition-colors ${
+                            isToday 
+                              ? "bg-[#FACC15] text-[#181A1D] shadow-2xs" 
+                              : "bg-[#F0ECE4] text-[#6B655E]"
+                          }`}>
+                            {colDate.getDate()}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mt-1 text-[10px] font-normal">
+                          <span className="text-[#8E8880]">
+                            {activeBlocks.length === 0 ? "Rest Day" : `${activeBlocks.length} ${activeBlocks.length === 1 ? 'item' : 'items'}`}
+                          </span>
+                          {isToday && (
+                            <span className="text-[9px] font-medium text-[#92400E] bg-[#FEF08A] px-1.5 py-0.2 rounded-full">
+                              Today
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Day Event Cards */}
                       <div className="space-y-2 flex-1">
                         {dayBlocks.length === 0 ? (
-                          <div className="h-32 rounded-[18px] bg-white/30 border border-dashed border-[#ECE6DC] p-3 text-center flex items-center justify-center text-[10px] text-[#A8A29E]">
-                            No activities
+                          <div className="h-36 rounded-[18px] bg-white/30 border border-dashed border-[#E0D8CB] p-4 text-center flex flex-col items-center justify-center gap-1.5 text-[#A8A29E]">
+                            <Coffee className="w-5 h-5 text-[#C4BDB3]" />
+                            <span className="text-[11px] font-normal text-[#8E8880]">Rest Day</span>
+                            <span className="text-[9.5px] text-[#A8A29E]">No sessions scheduled</span>
                           </div>
                         ) : (
                           dayBlocks.map((b) => (
@@ -1029,101 +1069,288 @@ export default function StudentPlanner({
    SCHEDULE CARD ITEM (Matching Exact Colors & Layout from Reference)
    ========================================================================== */
 
-const SUBJECT_DOT_COLORS = {
-  Calculus: "bg-[#EAB308]",
-  "Data Structures": "bg-[#FB7185]",
-  Electronics: "bg-[#3B82F6]",
-  Marketing: "bg-[#10B981]",
-  Physics: "bg-[#8B5CF6]",
+/* ============================================================================
+   SCHEDULE CARD ITEM (Matching Dashboard Palette & Soft Approachable Aesthetics)
+   ========================================================================== */
+
+const SUBJECT_THEMES = {
+  EDC: {
+    bg: "bg-[#F0F7FF]",
+    border: "border-[#D0E2FF]",
+    hoverBorder: "hover:border-[#93C5FD]",
+    tagBg: "bg-[#DBEAFE]",
+    tagText: "text-[#1E40AF]",
+    accent: "#3B82F6",
+    dot: "bg-[#3B82F6]",
+    lightText: "text-[#3B82F6]"
+  },
+  ECA: {
+    bg: "bg-[#FAF5FF]",
+    border: "border-[#E9D8FD]",
+    hoverBorder: "hover:border-[#D8B4FE]",
+    tagBg: "bg-[#F3E8FF]",
+    tagText: "text-[#6B21A8]",
+    accent: "#9333EA",
+    dot: "bg-[#9333EA]",
+    lightText: "text-[#9333EA]"
+  },
+  Calculus: {
+    bg: "bg-[#FFFDF0]",
+    border: "border-[#FDE894]",
+    hoverBorder: "hover:border-[#FCD34D]",
+    tagBg: "bg-[#FEF3C7]",
+    tagText: "text-[#92400E]",
+    accent: "#D97706",
+    dot: "bg-[#D97706]",
+    lightText: "text-[#B45309]"
+  },
+  Physics: {
+    bg: "bg-[#FFF5F6]",
+    border: "border-[#FECDD3]",
+    hoverBorder: "hover:border-[#FDA4AF]",
+    tagBg: "bg-[#FFE4E6]",
+    tagText: "text-[#9F1239]",
+    accent: "#E11D48",
+    dot: "bg-[#E11D48]",
+    lightText: "text-[#E11D48]"
+  },
+  "Data Structures": {
+    bg: "bg-[#F0FDFA]",
+    border: "border-[#CCFBF1]",
+    hoverBorder: "hover:border-[#5EEAD4]",
+    tagBg: "bg-[#CCFBF1]",
+    tagText: "text-[#115E59]",
+    accent: "#0D9488",
+    dot: "bg-[#0D9488]",
+    lightText: "text-[#0D9488]"
+  },
+  Marketing: {
+    bg: "bg-[#F2FAF5]",
+    border: "border-[#C6F6D5]",
+    hoverBorder: "hover:border-[#86EFAC]",
+    tagBg: "bg-[#DCFCE7]",
+    tagText: "text-[#166534]",
+    accent: "#16A34A",
+    dot: "bg-[#16A34A]",
+    lightText: "text-[#166534]"
+  }
 };
 
-function getSubjectDotColor(subject) {
-  if (!subject) return "bg-[#EAB308]";
-  return SUBJECT_DOT_COLORS[subject] || "bg-[#6366F1]";
+const FALLBACK_PALETTES = [
+  {
+    bg: "bg-[#F0F7FF]",
+    border: "border-[#D0E2FF]",
+    hoverBorder: "hover:border-[#93C5FD]",
+    tagBg: "bg-[#DBEAFE]",
+    tagText: "text-[#1E40AF]",
+    accent: "#3B82F6",
+    dot: "bg-[#3B82F6]"
+  },
+  {
+    bg: "bg-[#FAF5FF]",
+    border: "border-[#E9D8FD]",
+    hoverBorder: "hover:border-[#D8B4FE]",
+    tagBg: "bg-[#F3E8FF]",
+    tagText: "text-[#6B21A8]",
+    accent: "#9333EA",
+    dot: "bg-[#9333EA]"
+  },
+  {
+    bg: "bg-[#FFFDF0]",
+    border: "border-[#FDE894]",
+    hoverBorder: "hover:border-[#FCD34D]",
+    tagBg: "bg-[#FEF3C7]",
+    tagText: "text-[#92400E]",
+    accent: "#D97706",
+    dot: "bg-[#D97706]"
+  },
+  {
+    bg: "bg-[#FFF5F6]",
+    border: "border-[#FECDD3]",
+    hoverBorder: "hover:border-[#FDA4AF]",
+    tagBg: "bg-[#FFE4E6]",
+    tagText: "text-[#9F1239]",
+    accent: "#E11D48",
+    dot: "bg-[#E11D48]"
+  },
+  {
+    bg: "bg-[#F2FAF5]",
+    border: "border-[#C6F6D5]",
+    hoverBorder: "hover:border-[#86EFAC]",
+    tagBg: "bg-[#DCFCE7]",
+    tagText: "text-[#166534]",
+    accent: "#16A34A",
+    dot: "bg-[#16A34A]"
+  },
+  {
+    bg: "bg-[#FFF7ED]",
+    border: "border-[#FED7AA]",
+    hoverBorder: "hover:border-[#FB923C]",
+    tagBg: "bg-[#FFEDD5]",
+    tagText: "text-[#9A3412]",
+    accent: "#EA580C",
+    dot: "bg-[#EA580C]"
+  },
+  {
+    bg: "bg-[#F0FDFA]",
+    border: "border-[#CCFBF1]",
+    hoverBorder: "hover:border-[#5EEAD4]",
+    tagBg: "bg-[#CCFBF1]",
+    tagText: "text-[#115E59]",
+    accent: "#0D9488",
+    dot: "bg-[#0D9488]"
+  }
+];
+
+function getSubjectTheme(subject) {
+  if (!subject) return FALLBACK_PALETTES[2];
+  if (SUBJECT_THEMES[subject]) return SUBJECT_THEMES[subject];
+  let hash = 0;
+  for (let i = 0; i < subject.length; i++) {
+    hash = subject.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return FALLBACK_PALETTES[Math.abs(hash) % FALLBACK_PALETTES.length];
 }
 
 function ScheduleCardItem({ block, onToggle }) {
-  // Break row
+  // Break row - Clean, slim, cozy pill divider
   if (block.type === "break") {
     return (
-      <div className="py-1 px-2.5 rounded-xl bg-white/40 border border-[#ECE6DC] text-[10px] text-[#8E8880] flex items-center gap-1.5">
-        <Coffee className="w-3 h-3 text-[#EAB308]" />
+      <div className="py-0.5 px-2.5 my-0.5 rounded-full bg-[#FAF7F2]/80 border border-[#E8E1D5] text-[9.5px] font-normal text-[#8A8275] flex items-center justify-center gap-1.5 shadow-2xs hover:bg-[#F4EFE6] transition-colors whitespace-nowrap">
+        <Coffee className="w-2.5 h-2.5 text-[#D97706]/80 shrink-0" />
         <span>Break · {fmtTime12(block.start)}–{fmtTime12(block.end)}</span>
       </div>
     );
   }
 
-  // Class (Lecture / Lab / Tutorial) - Soft Sky Blue
+  // Class (Lecture / Lab / Tutorial) - Harmonious Sky Blue
   if (block.type === "class") {
+    const classType = block.assigned?.classType || "Lecture";
+    const subject = block.assigned?.subject || "College";
     return (
-      <div className="p-3 rounded-[20px] bg-[#EDF5FF] text-[#1E3A8A] border border-[#BFDBFE] shadow-2xs space-y-1.5 transition-all hover:scale-[1.01]">
+      <div className="p-2.5 rounded-[18px] bg-[#F1F7FF] text-[#1E3A8A] border border-[#D0E2FF] shadow-2xs space-y-1.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xs">
         <div className="flex items-center justify-between gap-1">
-          <p className="text-xs font-extrabold text-[#1E3A8A] truncate">{block.assigned?.title}</p>
-          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#DBEAFE] text-[#1D4ED8] shrink-0">
-            {block.assigned?.classType || "Lecture"}
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-medium bg-[#DBEAFE] text-[#1D4ED8]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB]" />
+            <span className="truncate max-w-[80px]">{subject}</span>
+          </span>
+          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-white/80 border border-[#BFDBFE] text-[#1D4ED8] shrink-0">
+            {classType}
           </span>
         </div>
-        <p className="text-[10px] font-bold text-[#2563EB]">
-          {fmtTime12(block.start)}–{fmtTime12(block.end)}
+        <p className="text-[12px] font-medium text-[#1E3A8A] leading-snug line-clamp-2">
+          {block.assigned?.title}
         </p>
-        <p className="text-[10px] font-medium text-[#3B82F6] flex items-center gap-1">
-          <MapPin className="w-2.5 h-2.5 text-[#3B82F6]" />
-          <span>{block.assigned?.room || "Room 101"}</span>
-        </p>
+        <div className="flex items-center justify-between gap-1 pt-1 border-t border-[#BFDBFE]/50 text-[10px] font-normal text-[#3B82F6]">
+          <span className="flex items-center gap-1">
+            <Clock className="w-2.5 h-2.5 shrink-0" />
+            {fmtTime12(block.start)}–{fmtTime12(block.end)}
+          </span>
+          <span className="flex items-center gap-1 text-[#2563EB] truncate">
+            <MapPin className="w-2.5 h-2.5 shrink-0" />
+            <span>{block.assigned?.room || "Room 101"}</span>
+          </span>
+        </div>
       </div>
     );
   }
 
-  // Exam - Soft Rose / Pink
+  // Exam - Harmonious Coral / Rose
   if (block.type === "exam") {
+    const subject = block.assigned?.subject || "Exam";
     return (
-      <div className="p-3 rounded-[20px] bg-[#FFF1F2] text-[#9F1239] border border-[#FECDD3] shadow-2xs space-y-1.5 transition-all hover:scale-[1.01] animate-pulse">
+      <div className="p-2.5 rounded-[18px] bg-[#FFF2F4] text-[#9F1239] border border-[#FECDD3] shadow-2xs space-y-1.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xs">
         <div className="flex items-center justify-between gap-1">
-          <p className="text-xs font-black text-[#9F1239] truncate flex items-center gap-1">
-            <span>⚡</span> {block.assigned?.title}
-          </p>
-          <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-[#FFE4E6] text-[#E11D48] shrink-0">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-medium bg-[#FFE4E6] text-[#E11D48]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" />
+            <span className="truncate max-w-[80px]">{subject}</span>
+          </span>
+          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md bg-[#E11D48] text-white shrink-0">
             EXAM
           </span>
         </div>
-        <p className="text-[10px] font-bold text-[#E11D48]">
-          {fmtTime12(block.start)}–{fmtTime12(block.end)}
+        <p className="text-[12px] font-medium text-[#9F1239] leading-snug line-clamp-2">
+          {block.assigned?.title}
         </p>
-        <p className="text-[10px] font-medium text-[#BE123C] flex items-center gap-1">
-          <MapPin className="w-2.5 h-2.5 text-[#E11D48]" />
-          <span>{block.assigned?.room || "Examination Hall"}</span>
-        </p>
+        <div className="flex items-center justify-between gap-1 pt-1 border-t border-[#FECDD3]/60 text-[10px] font-normal text-[#BE123C]">
+          <span className="flex items-center gap-1">
+            <Clock className="w-2.5 h-2.5 shrink-0" />
+            {fmtTime12(block.start)}–{fmtTime12(block.end)}
+          </span>
+          <span className="flex items-center gap-1 truncate">
+            <MapPin className="w-2.5 h-2.5 shrink-0" />
+            <span>{block.assigned?.room || "Exam Hall"}</span>
+          </span>
+        </div>
       </div>
     );
   }
 
-  // Regular Study Tasks & Topics - Warm White Card with Subject Dot
+  // Regular Study / Tasks / Topics
   const isExamPrep = block.type === "exam_prep" || block.assigned?.itemType === "exam_prep";
+  const isTopic = block.assigned?.itemType === "topic";
   const subject = block.assigned?.subject || "Calculus";
+  const theme = getSubjectTheme(subject);
+  
+  // Clean up title: remove redundant "Topic: " prefix if present for clean readability
+  const rawTitle = block.assigned?.title || "Study Session";
+  const displayTitle = rawTitle.replace(/^Topic:\s*/i, "");
 
   return (
-    <div className={`p-3 rounded-[20px] border transition-all ${
-      block.completed 
-        ? "bg-[#F8F6F1] border-[#ECE6DC] opacity-60" 
-        : "bg-white border-[#ECE6DC] shadow-2xs hover:border-[#181A1D]"
+    <div className={`p-2.5 rounded-[18px] border transition-all duration-150 ${
+      block.completed
+        ? "bg-[#FAF8F5]/80 border-[#E8E2D8] opacity-60"
+        : `${theme.bg} ${theme.border} ${theme.hoverBorder} shadow-2xs hover:-translate-y-0.5 hover:shadow-xs`
     } space-y-1.5`}>
-      <div className="flex items-start gap-2">
-        <button onClick={onToggle} className="mt-0.5 text-[#A8A29E] hover:text-[#181A1D] cursor-pointer">
-          {block.completed ? <CheckCircle2 className="w-4 h-4 text-[#181A1D]" /> : <Circle className="w-4 h-4 text-[#D6D3D1]" />}
+      {/* Top Header: Subject Badge + Type Tag */}
+      <div className="flex items-center justify-between gap-1">
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-medium ${theme.tagBg} ${theme.tagText}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
+          <span className="truncate max-w-[85px]">{subject}</span>
+        </span>
+
+        {isExamPrep ? (
+          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md bg-[#FEF3C7] text-[#92400E] shrink-0">
+            ⚡ Prep
+          </span>
+        ) : isTopic ? (
+          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-white/80 text-[#6B655E] border border-black/[0.04] shrink-0">
+            Topic
+          </span>
+        ) : (
+          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-white/80 text-[#6B655E] border border-black/[0.04] shrink-0">
+            Task
+          </span>
+        )}
+      </div>
+
+      {/* Card Content with Completion Toggle */}
+      <div className="flex items-start gap-1.5">
+        <button
+          onClick={onToggle}
+          className="mt-0.5 text-[#B5AEA4] hover:text-[#181A1D] transition-colors cursor-pointer shrink-0"
+          title={block.completed ? "Mark incomplete" : "Mark complete"}
+        >
+          {block.completed ? (
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+          ) : (
+            <Circle className="w-3.5 h-3.5 text-[#D1C9BD] hover:text-[#181A1D]" />
+          )}
         </button>
-        <div className="min-w-0 flex-1">
-          <p className={`text-xs font-bold leading-snug truncate ${block.completed ? "line-through text-[#A8A29E]" : "text-[#181A1D]"}`}>
-            {isExamPrep && <span className="text-[#EAB308] mr-1">⚡</span>}
-            {block.assigned?.title || "Study Session"}
-          </p>
-          <div className="flex items-center gap-1.5 mt-1">
-            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getSubjectDotColor(subject)}`} />
-            <span className="text-[10px] text-[#78716C] font-medium truncate">{subject}</span>
-          </div>
-          <p className="text-[10px] text-[#A8A29E] font-medium mt-1">
-            {fmtTime12(block.start)}–{fmtTime12(block.end)}
-          </p>
+        <p className={`text-[12px] font-medium leading-snug line-clamp-2 ${
+          block.completed ? "line-through text-[#9E988E]" : "text-[#1E2024]"
+        }`}>
+          {displayTitle}
+        </p>
+      </div>
+
+      {/* Card Footer: Time & Duration */}
+      <div className="flex items-center justify-between gap-1 pt-1 border-t border-black/[0.04] text-[10px] font-normal text-[#78716C]">
+        <div className="flex items-center gap-1">
+          <Clock className="w-2.5 h-2.5 text-[#A8A29A] shrink-0" />
+          <span>{fmtTime12(block.start)}–{fmtTime12(block.end)}</span>
         </div>
+        <span className="text-[9.5px] text-[#A8A29A]">50m</span>
       </div>
     </div>
   );
@@ -1350,85 +1577,621 @@ function DashboardView({
 
 function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [selectedSubject, setSelectedSubject] = useState("all");
+
+  const subjects = useMemo(() => {
+    const set = new Set(tasks.map(t => t.subject).filter(Boolean));
+    return Array.from(set);
+  }, [tasks]);
+
+  const stats = useMemo(() => {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.completed).length;
+    const pending = total - completed;
+    const highPriority = tasks.filter(t => !t.completed && t.priority === "High").length;
+    const totalEstHours = tasks.filter(t => !t.completed).reduce((acc, t) => acc + (Number(t.estHours) || 2), 0);
+    return { total, completed, pending, highPriority, totalEstHours };
+  }, [tasks]);
+
   const filtered = useMemo(() => {
-    if (!searchQuery.trim()) return tasks;
-    const q = searchQuery.toLowerCase();
-    return tasks.filter(t => t.title.toLowerCase().includes(q) || t.subject.toLowerCase().includes(q));
-  }, [tasks, searchQuery]);
+    return tasks.filter(t => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesQuery = (t.title || "").toLowerCase().includes(q) || (t.subject || "").toLowerCase().includes(q) || (t.category || "").toLowerCase().includes(q);
+        if (!matchesQuery) return false;
+      }
+      if (selectedFilter === "pending" && t.completed) return false;
+      if (selectedFilter === "completed" && !t.completed) return false;
+      if (selectedFilter === "high" && (t.completed || t.priority !== "High")) return false;
+      if (selectedSubject !== "all" && t.subject !== selectedSubject) return false;
+      return true;
+    });
+  }, [tasks, searchQuery, selectedFilter, selectedSubject]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-display text-xl font-extrabold text-[#181A1D]">Assignments & Tasks</h2>
-        <button onClick={onAdd} className="bg-[#181A1D] hover:bg-black text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer">
-          <Plus className="w-4 h-4 text-[#FACC15]" /> Add Task
+    <div className="space-y-4 w-full">
+      {/* Header Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#E8E2D8]/60">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-medium text-lg sm:text-xl text-[#181A1D] tracking-tight">Assignments & Tasks</h2>
+            <span className="text-xs font-normal text-[#6B655E] bg-white/80 px-2.5 py-0.5 rounded-full border border-[#ECE6DC] shadow-2xs">
+              {stats.pending} pending · {stats.completed} done
+            </span>
+          </div>
+          <p className="text-xs text-[#78716C] font-normal">
+            Track your homework, projects, and upcoming assignment deadlines
+          </p>
+        </div>
+
+        <button
+          onClick={onAdd}
+          className="bg-[#181A1D] hover:bg-[#282C33] text-white px-4 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm transition-all cursor-pointer self-start sm:self-auto"
+        >
+          <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
+          <span>Add Task</span>
         </button>
       </div>
 
-      <div className="space-y-2.5">
-        {filtered.map((t) => (
-          <div key={t.id} className="p-4 rounded-[24px] bg-white border border-[#ECE6DC] flex items-center justify-between gap-3 shadow-2xs">
-            <div className="flex items-center gap-3">
-              <button onClick={() => onToggle(t.id)} className="cursor-pointer">
-                {t.completed ? <CheckCircle2 className="w-5 h-5 text-[#181A1D]" /> : <Circle className="w-5 h-5 text-[#D6D3D1]" />}
-              </button>
-              <div>
-                <p className={`text-xs sm:text-sm font-bold ${t.completed ? "line-through text-[#8E8880]" : "text-[#181A1D]"}`}>{t.title}</p>
-                <p className="text-[11px] text-[#8E8880]">{t.subject} · Due {fmtDisplayDate(t.dueDate)} ({fmtTime12(t.dueTime)})</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <button onClick={() => onEdit(t)} className="p-1.5 rounded-full hover:bg-[#F8F6F1] text-[#8E8880]"><Pencil className="w-3.5 h-3.5" /></button>
-              <button onClick={() => onDelete(t.id)} className="p-1.5 rounded-full hover:bg-[#FFF1F2] text-[#E11D48]"><Trash2 className="w-3.5 h-3.5" /></button>
-            </div>
+      {/* Summary KPI Badges (Matching Dashboard Hero/Pill scheme) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="p-3 rounded-[20px] bg-[#FFFDF0] border border-[#FDE894] shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
+            <CheckSquare className="w-4 h-4" />
           </div>
-        ))}
+          <div>
+            <p className="text-[10px] font-normal text-[#92400E] uppercase tracking-wider">Pending</p>
+            <p className="text-sm font-medium text-[#181A1D]">{stats.pending} tasks</p>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-[20px] bg-[#FFF5F6] border border-[#FECDD3] shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center shrink-0">
+            <Zap className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-normal text-[#9F1239] uppercase tracking-wider">High Priority</p>
+            <p className="text-sm font-medium text-[#181A1D]">{stats.highPriority} urgent</p>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-[20px] bg-[#F1F7FF] border border-[#D0E2FF] shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#DBEAFE] text-[#2563EB] flex items-center justify-center shrink-0">
+            <Clock className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-normal text-[#1E40AF] uppercase tracking-wider">Est. Workload</p>
+            <p className="text-sm font-medium text-[#181A1D]">{stats.totalEstHours.toFixed(1)} hrs</p>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-[20px] bg-[#F2FAF5] border border-[#C6F6D5] shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-normal text-[#166534] uppercase tracking-wider">Completed</p>
+            <p className="text-sm font-medium text-[#181A1D]">{stats.completed} finished</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="p-2.5 rounded-[22px] bg-white/70 border border-[#ECE6DC] shadow-2xs flex flex-wrap items-center justify-between gap-2.5">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="w-3.5 h-3.5 text-[#A8A29A] absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search assignments or subjects..."
+            className="w-full bg-[#FAF8F5] border border-[#E8E2D8] rounded-full pl-8.5 pr-3 py-1.5 text-xs text-[#181A1D] placeholder-[#A8A29E] focus:outline-none focus:border-[#181A1D]"
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A8A29E] hover:text-[#181A1D]">
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {[
+            { id: "all", label: "All" },
+            { id: "pending", label: "Pending" },
+            { id: "high", label: "Urgent" },
+            { id: "completed", label: "Done" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedFilter(tab.id)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                selectedFilter === tab.id
+                  ? "bg-[#181A1D] text-[#FACC15] shadow-xs"
+                  : "bg-white hover:bg-[#F8F6F1] text-[#6B655E] border border-[#ECE6DC]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+
+          {subjects.length > 0 && (
+            <select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              className="bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] text-[#6B655E] rounded-full px-3 py-1 text-xs font-medium cursor-pointer focus:outline-none"
+            >
+              <option value="all">All Subjects</option>
+              {subjects.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+
+      {/* Task Cards List */}
+      <div className="space-y-2.5">
+        {filtered.length === 0 ? (
+          <div className="py-12 px-4 rounded-[26px] bg-white/40 border border-dashed border-[#E0D8CB] text-center flex flex-col items-center justify-center gap-2 text-[#A8A29E]">
+            <CheckSquare className="w-8 h-8 text-[#C4BDB3]" />
+            <p className="text-xs font-medium text-[#78716C]">No tasks found</p>
+            <p className="text-[11px] text-[#A8A29A]">Try changing your search or filter, or click "Add Task" to create one.</p>
+          </div>
+        ) : (
+          filtered.map((t) => {
+            const theme = getSubjectTheme(t.subject);
+            const isPriorityHigh = t.priority === "High";
+
+            return (
+              <div
+                key={t.id}
+                className={`p-3.5 sm:p-4 rounded-[22px] border transition-all duration-150 ${
+                  t.completed
+                    ? "bg-[#FAF8F5]/80 border-[#E8E2D8] opacity-60"
+                    : `${theme.bg} ${theme.border} ${theme.hoverBorder} shadow-2xs hover:-translate-y-0.5 hover:shadow-xs`
+                } flex flex-col sm:flex-row sm:items-center justify-between gap-3`}
+              >
+                <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                  <button
+                    onClick={() => onToggle(t.id)}
+                    className="mt-0.5 sm:mt-0 text-[#B5AEA4] hover:text-[#181A1D] transition-colors cursor-pointer shrink-0"
+                    title={t.completed ? "Mark incomplete" : "Mark complete"}
+                  >
+                    {t.completed ? (
+                      <CheckCircle2 className="w-5 h-5 text-[#10B981]" />
+                    ) : (
+                      <Circle className="w-5 h-5 text-[#D1C9BD] hover:text-[#181A1D]" />
+                    )}
+                  </button>
+
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${theme.tagBg} ${theme.tagText}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
+                        <span>{t.subject || "General"}</span>
+                      </span>
+
+                      {t.category && (
+                        <span className="text-[9.5px] font-normal px-2 py-0.5 rounded-full bg-white/80 text-[#6B655E] border border-black/[0.04]">
+                          {t.category}
+                        </span>
+                      )}
+
+                      {isPriorityHigh && (
+                        <span className="text-[9.5px] font-medium px-2 py-0.2 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center gap-1">
+                          <Zap className="w-2.5 h-2.5" /> High Priority
+                        </span>
+                      )}
+                    </div>
+
+                    <p className={`text-xs sm:text-sm font-medium leading-snug ${
+                      t.completed ? "line-through text-[#9E988E]" : "text-[#181A1D]"
+                    }`}>
+                      {t.title}
+                    </p>
+
+                    <div className="flex items-center gap-3 text-[10.5px] font-normal text-[#78716C] flex-wrap">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-[#A8A29A]" />
+                        <span>Due {fmtDisplayDate(t.dueDate)} {t.dueTime ? `(${fmtTime12(t.dueTime)})` : ""}</span>
+                      </span>
+                      {t.estHours && (
+                        <span className="flex items-center gap-1 text-[#8A847C]">
+                          <Clock className="w-3 h-3 text-[#A8A29A]" />
+                          <span>~{t.estHours}h required</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-black/[0.04] w-full sm:w-auto justify-end">
+                  <button
+                    onClick={() => onEdit(t)}
+                    className="p-2 rounded-full hover:bg-white/80 text-[#78716C] hover:text-[#181A1D] transition-colors cursor-pointer"
+                    title="Edit task"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => onDelete(t.id)}
+                    className="p-2 rounded-full hover:bg-[#FFE4E6]/80 text-[#78716C] hover:text-[#E11D48] transition-colors cursor-pointer"
+                    title="Delete task"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
 }
 
-function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availability, toggleSlot, onApplyPreset }) {
+function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle }) {
   const [form, setForm] = useState({ name: "", subject: "", difficulty: "Medium" });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [activeSubjectFilter, setActiveSubjectFilter] = useState("all");
 
-  const submit = () => {
+  const distinctSubjects = useMemo(() => {
+    const set = new Set();
+    topics.forEach((t) => { if (t.subject) set.add(t.subject); });
+    (subjectList || []).forEach((s) => { if (s) set.add(s); });
+    return Array.from(set);
+  }, [topics, subjectList]);
+
+  // High-level analytics
+  const stats = useMemo(() => {
+    const total = topics.length;
+    const completed = topics.filter((t) => t.completed).length;
+    const hard = topics.filter((t) => t.difficulty === "Hard" && !t.completed).length;
+    const inProgress = total - completed;
+    const masteryRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { total, completed, hard, inProgress, masteryRate };
+  }, [topics]);
+
+  // Group topics by subject
+  const groupedBySubject = useMemo(() => {
+    const groups = {};
+    const q = searchQuery.toLowerCase().trim();
+
+    topics.forEach((t) => {
+      // Filter by search
+      if (q && !t.name.toLowerCase().includes(q) && !t.subject.toLowerCase().includes(q)) {
+        return;
+      }
+      // Filter by difficulty
+      if (difficultyFilter !== "all" && t.difficulty !== difficultyFilter) {
+        return;
+      }
+      // Filter by subject
+      if (activeSubjectFilter !== "all" && t.subject !== activeSubjectFilter) {
+        return;
+      }
+
+      const subj = t.subject || "General";
+      if (!groups[subj]) groups[subj] = [];
+      groups[subj].push(t);
+    });
+
+    return groups;
+  }, [topics, searchQuery, difficultyFilter, activeSubjectFilter]);
+
+  const submit = (e) => {
+    e?.preventDefault();
     if (!form.name.trim() || !form.subject.trim()) return;
     onAdd(form);
     setForm({ name: "", subject: "", difficulty: "Medium" });
+    setShowAddForm(false);
+  };
+
+  const openAddForSubject = (subj) => {
+    setForm({ name: "", subject: subj, difficulty: "Medium" });
+    setShowAddForm(true);
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-xl font-extrabold text-[#181A1D] mb-3">Study Topics & Mastery</h2>
-        <div className="p-4 rounded-[28px] bg-white border border-[#ECE6DC] mb-4 flex gap-3 flex-wrap items-end">
-          <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Topic / Concept name" className="flex-1 min-w-[200px] bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D]" />
-          <input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="Subject" className="w-40 bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D]" />
-          <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value })} className="bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D]">
-            <option>Easy</option><option>Medium</option><option>Hard</option>
-          </select>
-          <button onClick={submit} className="bg-[#181A1D] text-white px-5 py-2 rounded-full text-xs font-bold cursor-pointer flex items-center gap-1.5">
-            <Plus className="w-4 h-4 text-[#FACC15]" /> Add Topic
-          </button>
+    <div className="space-y-5 w-full">
+      {/* Header Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#E8E2D8]/60">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-medium text-lg sm:text-xl text-[#181A1D] tracking-tight">Study Topics & Mastery</h2>
+            <span className="text-xs font-normal text-[#6B655E] bg-white/80 px-2.5 py-0.5 rounded-full border border-[#ECE6DC] shadow-2xs">
+              {stats.completed} of {stats.total} Mastered ({stats.masteryRate}%)
+            </span>
+          </div>
+          <p className="text-xs text-[#78716C] font-normal">
+            Syllabus breakdown, concept difficulty ratings, and automated revision scheduling
+          </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-3">
-          {topics.map((t) => (
-            <div key={t.id} className="p-3.5 rounded-[24px] bg-white border border-[#ECE6DC] flex items-center justify-between gap-3 shadow-2xs">
-              <div className="flex items-center gap-3 min-w-0">
-                <button onClick={() => onToggle(t.id)} className="cursor-pointer">
-                  {t.completed ? <CheckCircle2 className="w-5 h-5 text-[#181A1D]" /> : <Circle className="w-5 h-5 text-[#D6D3D1]" />}
-                </button>
-                <div className="min-w-0">
-                  <p className={`text-xs font-bold truncate ${t.completed ? "line-through text-[#8E8880]" : "text-[#181A1D]"}`}>{t.name}</p>
-                  <p className="text-[10px] text-[#8E8880]">{t.subject} · {t.difficulty}</p>
-                </div>
-              </div>
-              <button onClick={() => onDelete(t.id)} className="p-1 rounded-full text-[#8E8880] hover:text-[#E11D48]"><Trash2 className="w-4 h-4" /></button>
+        <button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="bg-[#181A1D] hover:bg-[#282C33] text-white px-4 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm transition-all cursor-pointer self-start sm:self-auto"
+        >
+          <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
+          <span>{showAddForm ? "Close Form" : "Add Concept"}</span>
+        </button>
+      </div>
+
+      {/* KPI Mastery Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="p-3 rounded-[20px] bg-[#FFFDF0] border border-[#FDE894] shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
+            <BookOpenCheck className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-normal text-[#92400E] uppercase tracking-wider">Total Syllabus</p>
+            <p className="text-sm font-medium text-[#181A1D]">{stats.total} concepts</p>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-[20px] bg-[#FFF5F6] border border-[#FECDD3] shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center shrink-0">
+            <Zap className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-normal text-[#9F1239] uppercase tracking-wider">Hard Topics</p>
+            <p className="text-sm font-medium text-[#181A1D]">{stats.hard} high focus</p>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-[20px] bg-[#F1F7FF] border border-[#D0E2FF] shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#DBEAFE] text-[#2563EB] flex items-center justify-center shrink-0">
+            <Clock className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-normal text-[#1E40AF] uppercase tracking-wider">In Revision</p>
+            <p className="text-sm font-medium text-[#181A1D]">{stats.inProgress} to review</p>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-[20px] bg-[#F2FAF5] border border-[#C6F6D5] shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-normal text-[#166534] uppercase tracking-wider">Mastered</p>
+            <p className="text-sm font-medium text-[#181A1D]">{stats.completed} solid</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Slide-out / Collapsible Add Topic Form */}
+      {showAddForm && (
+        <form onSubmit={submit} className="p-4 sm:p-5 rounded-[24px] bg-white border border-[#E2DDD3] shadow-xs space-y-3 transition-all animate-fadeIn">
+          <div className="flex items-center justify-between pb-2 border-b border-[#F4F0E8]">
+            <span className="font-medium text-xs text-[#181A1D]">New Concept / Syllabus Topic</span>
+            <span className="text-[11px] text-[#8E8880]">Will automatically queue into your weekly study plan</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
+            <div className="sm:col-span-5">
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Topic / Concept (e.g. MOSFETs, Chain Rule)"
+                className="w-full bg-[#FAF8F5] border border-[#E5DFD4] rounded-full px-4 py-2 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#181A1D]"
+                autoFocus
+              />
             </div>
+
+            <div className="sm:col-span-3">
+              <input
+                value={form.subject}
+                onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                placeholder="Subject (e.g. EDC, Calculus)"
+                className="w-full bg-[#FAF8F5] border border-[#E5DFD4] rounded-full px-4 py-2 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#181A1D]"
+                list="subjects-datalist"
+              />
+              <datalist id="subjects-datalist">
+                {distinctSubjects.map((s) => (
+                  <option key={s} value={s} />
+                ))}
+              </datalist>
+            </div>
+
+            <div className="sm:col-span-2">
+              <select
+                value={form.difficulty}
+                onChange={(e) => setForm({ ...form, difficulty: e.target.value })}
+                className="w-full bg-[#FAF8F5] border border-[#E5DFD4] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+              >
+                <option value="Easy">Easy (1h)</option>
+                <option value="Medium">Medium (2h)</option>
+                <option value="Hard">Hard (3h)</option>
+              </select>
+            </div>
+
+            <div className="sm:col-span-2 flex items-center gap-1.5">
+              <button
+                type="submit"
+                disabled={!form.name.trim() || !form.subject.trim()}
+                className="w-full bg-[#181A1D] hover:bg-[#282C33] text-white py-2 rounded-full text-xs font-medium cursor-pointer shadow-sm transition-all disabled:opacity-40"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAddForm(false)}
+                className="p-2 text-[#8E8880] hover:text-[#181A1D] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+
+      {/* Filter and Search Bar */}
+      <div className="p-2.5 rounded-[22px] bg-white/70 border border-[#ECE6DC] shadow-2xs flex flex-wrap items-center justify-between gap-2.5">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="w-3.5 h-3.5 text-[#A8A29A] absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search concepts or subjects..."
+            className="w-full bg-[#FAF8F5] border border-[#E8E2D8] rounded-full pl-8.5 pr-3 py-1.5 text-xs text-[#181A1D] placeholder-[#A8A29E] focus:outline-none focus:border-[#181A1D]"
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A8A29E] hover:text-[#181A1D]">
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <select
+            value={activeSubjectFilter}
+            onChange={(e) => setActiveSubjectFilter(e.target.value)}
+            className="bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] text-[#6B655E] rounded-full px-3 py-1 text-xs font-medium cursor-pointer focus:outline-none"
+          >
+            <option value="all">All Subjects</option>
+            {distinctSubjects.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+
+          {[
+            { id: "all", label: "All Difficulties" },
+            { id: "Hard", label: "⚡ Hard" },
+            { id: "Medium", label: "Medium" },
+            { id: "Easy", label: "Easy" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setDifficultyFilter(tab.id)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                difficultyFilter === tab.id
+                  ? "bg-[#181A1D] text-[#FACC15] shadow-xs"
+                  : "bg-white hover:bg-[#F8F6F1] text-[#6B655E] border border-[#ECE6DC]"
+              }`}
+            >
+              {tab.label}
+            </button>
           ))}
         </div>
       </div>
+
+      {/* Structured Subject Modules */}
+      {Object.keys(groupedBySubject).length === 0 ? (
+        <div className="py-12 px-4 rounded-[26px] bg-white/40 border border-dashed border-[#E0D8CB] text-center flex flex-col items-center justify-center gap-2 text-[#A8A29E]">
+          <BookOpenCheck className="w-8 h-8 text-[#C4BDB3]" />
+          <p className="text-xs font-medium text-[#78716C]">No syllabus topics found</p>
+          <p className="text-[11px] text-[#A8A29A]">Click "Add Concept" above to begin structuring your revision topics.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {Object.entries(groupedBySubject).map(([subj, items]) => {
+            const theme = getSubjectTheme(subj);
+            const subjCompleted = items.filter((i) => i.completed).length;
+            const subjPct = Math.round((subjCompleted / items.length) * 100);
+
+            return (
+              <div key={subj} className="rounded-[24px] bg-white/60 border border-[#ECE6DC] p-4 sm:p-5 shadow-2xs space-y-3.5">
+                {/* Subject Header */}
+                <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#F0EBE2]">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-medium ${theme.tagBg} ${theme.tagText}`}>
+                      <span className={`w-2 h-2 rounded-full ${theme.dot}`} />
+                      <span>{subj}</span>
+                    </span>
+                    <span className="text-xs font-normal text-[#78716C]">
+                      {subjCompleted} of {items.length} Mastered
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="hidden sm:flex items-center gap-2">
+                      <div className="w-24 bg-[#F0EBE2] h-1.5 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#181A1D] rounded-full transition-all duration-300" style={{ width: `${subjPct}%` }} />
+                      </div>
+                      <span className="text-[10.5px] font-normal text-[#8A847C]">{subjPct}%</span>
+                    </div>
+
+                    <button
+                      onClick={() => openAddForSubject(subj)}
+                      className="text-[11px] font-medium text-[#181A1D] hover:text-black bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+                    >
+                      <Plus className="w-3 h-3 text-[#EAB308]" />
+                      <span>Add Concept</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Concepts Grid for this Subject */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {items.map((t) => {
+                    const difficultyBadge =
+                      t.difficulty === "Hard" ? "bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3]" :
+                      t.difficulty === "Medium" ? "bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]" :
+                      "bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0]";
+
+                    const estTime = t.difficulty === "Hard" ? "3.0h" : t.difficulty === "Medium" ? "2.0h" : "1.0h";
+
+                    return (
+                      <div
+                        key={t.id}
+                        className={`p-3 rounded-[18px] border transition-all duration-150 ${
+                          t.completed
+                            ? "bg-[#FAF8F5]/80 border-[#E8E2D8] opacity-60"
+                            : `${theme.bg} ${theme.border} ${theme.hoverBorder} shadow-2xs hover:-translate-y-0.5 hover:shadow-xs`
+                        } flex items-center justify-between gap-3`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <button
+                            onClick={() => onToggle(t.id)}
+                            className="text-[#B5AEA4] hover:text-[#181A1D] transition-colors cursor-pointer shrink-0"
+                            title={t.completed ? "Mark incomplete" : "Mark mastered"}
+                          >
+                            {t.completed ? (
+                              <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                            ) : (
+                              <Circle className="w-4 h-4 text-[#D1C9BD] hover:text-[#181A1D]" />
+                            )}
+                          </button>
+
+                          <div className="min-w-0 flex-1">
+                            <p className={`text-xs font-medium leading-snug truncate ${
+                              t.completed ? "line-through text-[#9E988E]" : "text-[#1E2024]"
+                            }`}>
+                              {t.name}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`text-[9px] font-medium px-1.5 py-0.2 rounded-md ${difficultyBadge}`}>
+                                {t.difficulty}
+                              </span>
+                              <span className="text-[10px] font-normal text-[#8A847C] flex items-center gap-1">
+                                <Clock className="w-2.5 h-2.5 text-[#A8A29A]" />
+                                <span>~{estTime} revision</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => onDelete(t.id)}
+                          className="p-1.5 rounded-full text-[#8E8880] hover:text-[#E11D48] hover:bg-[#FFE4E6]/60 transition-colors cursor-pointer shrink-0"
+                          title="Delete concept"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -1443,20 +2206,60 @@ function TaskModal({ editing, subjectList, onClose, onSave }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
       <div className="w-full max-w-md bg-white rounded-[32px] shadow-2xl p-6 border border-[#ECE6DC] space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-[#F4F1EB]">
-          <h3 className="font-display font-extrabold text-[#181A1D]">{editing ? "Edit Task" : "Add Event / Task"}</h3>
-          <button onClick={onClose} className="text-[#8E8880] hover:text-[#181A1D]"><X className="w-5 h-5" /></button>
+          <h3 className="font-medium text-base text-[#181A1D]">{editing ? "Edit Task" : "Add Event / Task"}</h3>
+          <button onClick={onClose} className="text-[#8E8880] hover:text-[#181A1D] transition-colors"><X className="w-5 h-5" /></button>
         </div>
         <div className="space-y-3">
-          <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Event / Task Title" className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D]" />
-          <input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="Subject / Topic" className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D]" />
+          <input
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            placeholder="Event / Task Title"
+            className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
+          />
+          <input
+            value={form.subject}
+            onChange={(e) => setForm({ ...form, subject: e.target.value })}
+            placeholder="Subject / Topic"
+            className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
+          />
           <div className="grid grid-cols-2 gap-2">
-            <input type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D]" />
-            <input type="time" value={form.dueTime} onChange={(e) => setForm({ ...form, dueTime: e.target.value })} className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D]" />
+            <input
+              type="date"
+              value={form.dueDate}
+              onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
+            />
+            <input
+              type="time"
+              value={form.dueTime}
+              onChange={(e) => setForm({ ...form, dueTime: e.target.value })}
+              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              value={form.priority}
+              onChange={(e) => setForm({ ...form, priority: e.target.value })}
+              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+            >
+              <option value="Low">Low Priority</option>
+              <option value="Medium">Medium Priority</option>
+              <option value="High">High Priority</option>
+            </select>
+            <input
+              type="number"
+              min="0.5"
+              step="0.5"
+              value={form.estHours}
+              onChange={(e) => setForm({ ...form, estHours: parseFloat(e.target.value) || 1 })}
+              placeholder="Est. Hours"
+              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
+            />
           </div>
         </div>
         <div className="flex justify-end gap-2 pt-3 border-t border-[#F4F1EB]">
-          <button onClick={onClose} className="px-4 py-2 text-xs font-bold text-[#8E8880]">Cancel</button>
-          <button disabled={!valid} onClick={() => onSave(form)} className="px-5 py-2 rounded-full bg-[#181A1D] text-white text-xs font-bold cursor-pointer">Save</button>
+          <button onClick={onClose} className="px-4 py-2 text-xs font-medium text-[#8E8880] hover:text-[#181A1D] cursor-pointer">Cancel</button>
+          <button disabled={!valid} onClick={() => onSave(form)} className="px-5 py-2 rounded-full bg-[#181A1D] hover:bg-black text-white text-xs font-medium cursor-pointer shadow-sm transition-all disabled:opacity-50">Save</button>
         </div>
       </div>
     </div>
@@ -1469,14 +2272,14 @@ function NotificationDrawer({ alerts, onClose, setView }) {
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div className="absolute right-6 top-16 w-80 sm:w-96 max-h-96 overflow-y-auto rounded-3xl border border-[#ECE6DC] bg-white shadow-2xl z-50 p-2">
         <div className="px-4 py-3 border-b border-[#F4F1EB] flex items-center justify-between">
-          <p className="font-display font-bold text-sm text-[#181A1D]">Reminders & Alerts</p>
+          <p className="font-medium text-sm text-[#181A1D]">Reminders & Alerts</p>
           <button onClick={onClose} className="text-[#8E8880] hover:text-[#181A1D]"><X className="w-4 h-4" /></button>
         </div>
         <ul className="divide-y divide-[#F4F1EB] max-h-72 overflow-y-auto">
           {alerts.map((a) => (
-            <li key={a.id} className="px-4 py-3 hover:bg-[#F8F6F1] text-xs">
-              <p className="font-bold text-[#181A1D]">{a.title}</p>
-              <p className="text-[11px] text-[#8E8880]">{a.subject} · {fmtDisplayDate(a.dueDate)} ({fmtTime12(a.dueTime)})</p>
+            <li key={a.id} className="px-4 py-3 hover:bg-[#F8F6F1] text-xs transition-colors">
+              <p className="font-medium text-[#181A1D]">{a.title}</p>
+              <p className="text-[11px] text-[#8E8880] font-normal">{a.subject} · {fmtDisplayDate(a.dueDate)} ({fmtTime12(a.dueTime)})</p>
             </li>
           ))}
         </ul>

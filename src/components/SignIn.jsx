@@ -401,12 +401,12 @@ export default function SignIn({
         
         {/* Header Title */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181A1D] text-white text-xs font-bold uppercase tracking-wider mb-3 shadow-xs">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181A1D] text-[#FDE047] border border-[#2D3139] text-xs font-medium uppercase tracking-wider mb-3 shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-[#FACC15]" />
             {isEditing ? 'Profile Settings' : 'Be.study Planner'}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#181A1D] tracking-tight font-display mb-1.5">
+          <h1 className="text-2xl sm:text-3xl font-medium text-[#181A1D] tracking-tight mb-1.5">
             {isEditing 
               ? 'Update Your Details' 
               : mode === 'login' 
@@ -417,7 +417,7 @@ export default function SignIn({
                     ? 'Your Subjects & Topics' 
                     : 'Weekly Study Availability'}
           </h1>
-          <p className="text-[#8E8880] text-xs sm:text-sm max-w-md mx-auto">
+          <p className="text-[#78716C] text-xs sm:text-sm max-w-md mx-auto font-normal">
             {isEditing
               ? 'Modify your study preferences, academic information, or delete account.'
               : mode === 'login'
@@ -432,28 +432,28 @@ export default function SignIn({
 
         {/* Mode Switcher Tabs (Only on step 1) */}
         {!isEditing && regStep === 1 && (
-          <div className="flex items-center p-1 bg-[#F8F6F1] border border-[#ECE6DC] rounded-full mb-6">
+          <div className="flex items-center p-1 bg-[#FAF8F5] border border-[#E8E2D8] rounded-full mb-6">
             <button
               type="button"
               onClick={() => { setMode('login'); setErrors({}); }}
-              className={`flex-1 py-2.5 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 py-2.5 rounded-full text-xs sm:text-sm font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 mode === 'login'
-                  ? 'bg-[#181A1D] text-white shadow-sm'
-                  : 'text-[#8E8880] hover:text-[#181A1D]'
+                  ? 'bg-[#181A1D] text-white shadow-xs'
+                  : 'text-[#78716C] hover:text-[#181A1D]'
               }`}
             >
-              <LogIn className="w-4 h-4" /> Sign In
+              <LogIn className={`w-4 h-4 ${mode === 'login' ? 'text-[#FACC15]' : 'text-[#78716C]'}`} /> Sign In
             </button>
             <button
               type="button"
               onClick={() => { setMode('register'); setErrors({}); }}
-              className={`flex-1 py-2.5 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 py-2.5 rounded-full text-xs sm:text-sm font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 mode === 'register'
-                  ? 'bg-[#181A1D] text-white shadow-sm'
-                  : 'text-[#8E8880] hover:text-[#181A1D]'
+                  ? 'bg-[#181A1D] text-white shadow-xs'
+                  : 'text-[#78716C] hover:text-[#181A1D]'
               }`}
             >
-              <UserPlus className="w-4 h-4" /> Create Account
+              <UserPlus className={`w-4 h-4 ${mode === 'register' ? 'text-[#FB7185]' : 'text-[#78716C]'}`} /> Create Account
             </button>
           </div>
         )}
@@ -461,8 +461,8 @@ export default function SignIn({
         {/* Step Indicator on Multi-step Registration */}
         {!isEditing && mode === 'register' && (
           <div className="flex items-center justify-center gap-2 mb-6">
-            <span className={`w-8 h-1.5 rounded-full transition-all ${regStep >= 1 ? 'bg-[#181A1D]' : 'bg-[#ECE6DC]'}`} />
-            <span className={`w-8 h-1.5 rounded-full transition-all ${regStep >= 2 ? 'bg-[#181A1D]' : 'bg-[#ECE6DC]'}`} />
+            <span className={`w-8 h-1.5 rounded-full transition-all ${regStep >= 1 ? 'bg-[#FACC15]' : 'bg-[#ECE6DC]'}`} />
+            <span className={`w-8 h-1.5 rounded-full transition-all ${regStep >= 2 ? 'bg-[#FB7185]' : 'bg-[#ECE6DC]'}`} />
             <span className={`w-8 h-1.5 rounded-full transition-all ${regStep >= 3 ? 'bg-[#181A1D]' : 'bg-[#ECE6DC]'}`} />
           </div>
         )}
@@ -470,19 +470,20 @@ export default function SignIn({
         {/* Saved Profiles Quick Select */}
         {!isEditing && accountList.length > 0 && mode === 'login' && (
           <div className="mb-6 pb-5 border-b border-[#F4F1EB]">
-            <label className="block text-[11px] font-bold text-[#8E8880] uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-medium text-[#78716C] uppercase tracking-wider mb-2">
               Saved Profiles on this device
             </label>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-              {accountList.map((acc) => {
+              {accountList.map((acc, idx) => {
                 const isSelected = loginForm.username.toLowerCase() === acc.username.toLowerCase();
+                const avatarBg = idx % 2 === 0 ? 'bg-[#FEF3C7]' : 'bg-[#FFE4E6]';
                 return (
                   <div
                     key={acc.username}
-                    className={`px-3 py-2 rounded-2xl border text-left flex items-center gap-2.5 transition-all shrink-0 group ${
+                    className={`px-3.5 py-2 rounded-2xl border text-left flex items-center gap-2.5 transition-all shrink-0 group ${
                       isSelected
-                        ? 'bg-[#181A1D] border-[#181A1D] text-white shadow-xs'
-                        : 'bg-[#F8F6F1] border-[#ECE6DC] text-[#181A1D] hover:border-[#181A1D]'
+                        ? 'bg-[#FFFDF0] border-2 border-[#FACC15] text-[#181A1D] shadow-xs'
+                        : 'bg-[#FAF8F5] border border-[#ECE6DC] text-[#181A1D] hover:border-[#FACC15]'
                     }`}
                   >
                     <button
@@ -490,12 +491,12 @@ export default function SignIn({
                       onClick={() => selectQuickAccount(acc)}
                       className="flex items-center gap-2 cursor-pointer text-left"
                     >
-                      <span className="text-lg">{acc.profile?.avatar || '🎓'}</span>
+                      <span className={`text-lg ${avatarBg} p-1.5 rounded-full`}>{acc.profile?.avatar || '🎓'}</span>
                       <div>
-                        <p className={`text-xs font-bold leading-tight ${isSelected ? 'text-white' : 'text-[#181A1D]'}`}>
+                        <p className="text-xs font-medium leading-tight text-[#181A1D]">
                           {acc.profile?.name || acc.username}
                         </p>
-                        <p className={`text-[10px] ${isSelected ? 'text-[#8E95A2]' : 'text-[#8E8880]'}`}>
+                        <p className="text-[10px] text-[#8E8880] font-normal">
                           @{acc.username}
                         </p>
                       </div>
@@ -507,7 +508,7 @@ export default function SignIn({
                           e.stopPropagation();
                           onDeleteSavedAccount(acc.username);
                         }}
-                        className="p-1 rounded-full text-[#8E8880] hover:text-[#E11D48] cursor-pointer"
+                        className="p-1 rounded-full text-[#8E8880] hover:text-[#FB7185] cursor-pointer"
                         title={`Delete ${acc.profile?.name || acc.username}'s profile`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -524,7 +525,7 @@ export default function SignIn({
         {mode === 'login' && !isEditing && (
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-[#181A1D] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-medium text-[#252320] mb-1.5">
                 Username <span className="text-[#FB7185]">*</span>
               </label>
               <div className="relative">
@@ -539,16 +540,16 @@ export default function SignIn({
                     if (errors.username) setErrors({ ...errors, username: null });
                   }}
                   placeholder="e.g. amanda"
-                  className={`w-full bg-[#F8F6F1] border ${
-                    errors.username ? 'border-[#FB7185]' : 'border-[#ECE6DC] focus:border-[#181A1D]'
-                  } rounded-full pl-10 pr-4 py-3 text-xs text-[#181A1D] placeholder-[#8E8880] focus:outline-none transition-all`}
+                  className={`w-full bg-[#FAF8F5] border ${
+                    errors.username ? 'border-[#FB7185]' : 'border-[#ECE6DC] focus:border-[#FB7185]'
+                  } rounded-full pl-10 pr-4 py-3 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none transition-all`}
                 />
               </div>
-              {errors.username && <p className="mt-1 text-xs text-[#E11D48] font-bold">{errors.username}</p>}
+              {errors.username && <p className="mt-1 text-xs text-[#E11D48] font-normal">{errors.username}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181A1D] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-medium text-[#252320] mb-1.5">
                 Password <span className="text-[#FB7185]">*</span>
               </label>
               <div className="relative">
@@ -563,25 +564,25 @@ export default function SignIn({
                     if (errors.password) setErrors({ ...errors, password: null });
                   }}
                   placeholder="Enter your password"
-                  className={`w-full bg-[#F8F6F1] border ${
-                    errors.password ? 'border-[#FB7185]' : 'border-[#ECE6DC] focus:border-[#181A1D]'
-                  } rounded-full pl-10 pr-11 py-3 text-xs text-[#181A1D] placeholder-[#8E8880] focus:outline-none transition-all`}
+                  className={`w-full bg-[#FAF8F5] border ${
+                    errors.password ? 'border-[#FB7185]' : 'border-[#ECE6DC] focus:border-[#FB7185]'
+                  } rounded-full pl-10 pr-11 py-3 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none transition-all`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#8E8880] hover:text-[#181A1D] cursor-pointer"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4 text-[#FB7185]" />}
                 </button>
               </div>
-              {errors.password && <p className="mt-1 text-xs text-[#E11D48] font-bold">{errors.password}</p>}
+              {errors.password && <p className="mt-1 text-xs text-[#E11D48] font-normal">{errors.password}</p>}
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-[#181A1D] hover:bg-black text-white font-bold py-3.5 px-6 rounded-full shadow-md flex items-center justify-center gap-2 text-sm transition-all active:scale-[0.99] disabled:opacity-70 cursor-pointer mt-2"
+              className="w-full bg-[#181A1D] hover:bg-[#282B32] text-white font-medium py-3.5 px-6 rounded-full shadow-xs hover:shadow-sm flex items-center justify-center gap-2 text-sm transition-all active:scale-[0.99] disabled:opacity-70 cursor-pointer mt-2"
             >
               {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -593,12 +594,12 @@ export default function SignIn({
               )}
             </button>
 
-            <p className="text-center text-xs text-[#8E8880] pt-2">
+            <p className="text-center text-xs text-[#78716C] pt-2 font-normal">
               Don't have an account yet?{' '}
               <button
                 type="button"
                 onClick={() => { setMode('register'); setRegStep(1); setErrors({}); }}
-                className="text-[#181A1D] font-extrabold underline cursor-pointer"
+                className="text-[#FB7185] hover:text-[#E11D48] font-medium underline cursor-pointer"
               >
                 Create Account
               </button>
@@ -610,16 +611,16 @@ export default function SignIn({
         {((mode === 'register' && regStep === 1) || isEditing) && (
           <form onSubmit={handleStep1Submit} className="space-y-5">
             
-            {/* Account Credentials */}
+            {/* Account Credentials - Pink Theme Box */}
             {!isEditing && (
-              <div className="p-4 rounded-3xl bg-[#F8F6F1] border border-[#ECE6DC] space-y-3.5">
-                <div className="flex items-center gap-2 text-[#181A1D] text-xs font-bold uppercase tracking-wider">
-                  <KeyRound className="w-4 h-4 text-[#FACC15]" />
+              <div className="p-4 rounded-3xl bg-[#FFF5F6] border border-[#FECDD3] space-y-3.5">
+                <div className="flex items-center gap-2 text-[#9F1239] text-xs font-medium uppercase tracking-wider">
+                  <KeyRound className="w-4 h-4 text-[#FB7185]" />
                   Account Security
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#181A1D] mb-1">
+                  <label className="block text-xs font-medium text-[#252320] mb-1">
                     Choose Username <span className="text-[#FB7185]">*</span>
                   </label>
                   <div className="relative">
@@ -633,16 +634,16 @@ export default function SignIn({
                       }}
                       placeholder="e.g. amanda"
                       className={`w-full bg-white border ${
-                        errors.username ? 'border-[#FB7185]' : 'border-[#ECE6DC]'
-                      } rounded-full pl-10 pr-4 py-2.5 text-xs text-[#181A1D] placeholder-[#8E8880] focus:outline-none focus:border-[#181A1D]`}
+                        errors.username ? 'border-[#FB7185]' : 'border-[#FECDD3]'
+                      } rounded-full pl-10 pr-4 py-2.5 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#FB7185]`}
                     />
                   </div>
-                  {errors.username && <p className="mt-1 text-xs text-[#E11D48] font-bold">{errors.username}</p>}
+                  {errors.username && <p className="mt-1 text-xs text-[#E11D48] font-normal">{errors.username}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-[#181A1D] mb-1">
+                    <label className="block text-xs font-medium text-[#252320] mb-1">
                       Set Password <span className="text-[#FB7185]">*</span>
                     </label>
                     <div className="relative">
@@ -656,15 +657,15 @@ export default function SignIn({
                         }}
                         placeholder="Min 4 characters"
                         className={`w-full bg-white border ${
-                          errors.password ? 'border-[#FB7185]' : 'border-[#ECE6DC]'
-                        } rounded-full pl-10 pr-9 py-2.5 text-xs text-[#181A1D] placeholder-[#8E8880] focus:outline-none focus:border-[#181A1D]`}
+                          errors.password ? 'border-[#FB7185]' : 'border-[#FECDD3]'
+                        } rounded-full pl-10 pr-9 py-2.5 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#FB7185]`}
                       />
                     </div>
-                    {errors.password && <p className="mt-1 text-xs text-[#E11D48] font-bold">{errors.password}</p>}
+                    {errors.password && <p className="mt-1 text-xs text-[#E11D48] font-normal">{errors.password}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#181A1D] mb-1">
+                    <label className="block text-xs font-medium text-[#252320] mb-1">
                       Confirm Password <span className="text-[#FB7185]">*</span>
                     </label>
                     <div className="relative">
@@ -678,11 +679,11 @@ export default function SignIn({
                         }}
                         placeholder="Re-enter password"
                         className={`w-full bg-white border ${
-                          errors.confirmPassword ? 'border-[#FB7185]' : 'border-[#ECE6DC]'
-                        } rounded-full pl-10 pr-9 py-2.5 text-xs text-[#181A1D] placeholder-[#8E8880] focus:outline-none focus:border-[#181A1D]`}
+                          errors.confirmPassword ? 'border-[#FB7185]' : 'border-[#FECDD3]'
+                        } rounded-full pl-10 pr-9 py-2.5 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#FB7185]`}
                       />
                     </div>
-                    {errors.confirmPassword && <p className="mt-1 text-xs text-[#E11D48] font-bold">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && <p className="mt-1 text-xs text-[#E11D48] font-normal">{errors.confirmPassword}</p>}
                   </div>
                 </div>
               </div>
@@ -690,7 +691,7 @@ export default function SignIn({
 
             {/* Avatar Picker */}
             <div>
-              <label className="block text-xs font-bold text-[#181A1D] uppercase tracking-wider mb-2">
+              <label className="block text-xs font-medium text-[#252320] uppercase tracking-wider mb-2">
                 Choose Your Avatar
               </label>
               <div className="flex items-center gap-2.5 overflow-x-auto py-2 px-1 no-scrollbar">
@@ -703,8 +704,8 @@ export default function SignIn({
                       onClick={() => setRegForm({ ...regForm, avatar: emoji })}
                       className={`w-11 h-11 rounded-full flex items-center justify-center text-xl transition-all shrink-0 cursor-pointer ${
                         isSelected
-                          ? 'bg-[#181A1D] ring-2 ring-[#181A1D] shadow-md scale-105'
-                          : 'bg-[#F8F6F1] border border-[#ECE6DC] hover:scale-105'
+                          ? 'bg-[#181A1D] text-white ring-2 ring-[#FACC15] shadow-xs scale-105'
+                          : 'bg-[#FAF8F5] border border-[#ECE6DC] hover:scale-105'
                       }`}
                     >
                       <span className="select-none leading-none">{emoji}</span>
@@ -717,7 +718,7 @@ export default function SignIn({
             {/* Full Name & Age */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
               <div className="sm:col-span-8">
-                <label className="block text-xs font-bold text-[#181A1D] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-[#252320] mb-1">
                   Full Name <span className="text-[#FB7185]">*</span>
                 </label>
                 <input
@@ -728,15 +729,15 @@ export default function SignIn({
                     if (errors.name) setErrors({ ...errors, name: null });
                   }}
                   placeholder="e.g. Amanda Smith"
-                  className={`w-full bg-[#F8F6F1] border ${
+                  className={`w-full bg-[#FAF8F5] border ${
                     errors.name ? 'border-[#FB7185]' : 'border-[#ECE6DC]'
-                  } rounded-full px-4 py-2.5 text-xs sm:text-sm text-[#181A1D] placeholder-[#8E8880] focus:outline-none focus:border-[#181A1D]`}
+                  } rounded-full px-4 py-2.5 text-xs sm:text-sm text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#FB7185]`}
                 />
-                {errors.name && <p className="mt-1 text-xs text-[#E11D48] font-bold">{errors.name}</p>}
+                {errors.name && <p className="mt-1 text-xs text-[#E11D48] font-normal">{errors.name}</p>}
               </div>
 
               <div className="sm:col-span-4">
-                <label className="block text-xs font-bold text-[#181A1D] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-[#252320] mb-1">
                   Age <span className="text-[#FB7185]">*</span>
                 </label>
                 <input
@@ -749,17 +750,17 @@ export default function SignIn({
                     if (errors.age) setErrors({ ...errors, age: null });
                   }}
                   placeholder="e.g. 20"
-                  className={`w-full bg-[#F8F6F1] border ${
+                  className={`w-full bg-[#FAF8F5] border ${
                     errors.age ? 'border-[#FB7185]' : 'border-[#ECE6DC]'
-                  } rounded-full px-4 py-2.5 text-xs sm:text-sm text-[#181A1D] placeholder-[#8E8880] focus:outline-none focus:border-[#181A1D]`}
+                  } rounded-full px-4 py-2.5 text-xs sm:text-sm text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#FB7185]`}
                 />
-                {errors.age && <p className="mt-1 text-xs text-[#E11D48] font-bold">{errors.age}</p>}
+                {errors.age && <p className="mt-1 text-xs text-[#E11D48] font-normal">{errors.age}</p>}
               </div>
             </div>
 
             {/* Currently Studying */}
             <div>
-              <label className="block text-xs font-bold text-[#181A1D] uppercase tracking-wider mb-2">
+              <label className="block text-xs font-medium text-[#252320] mb-2">
                 What are you studying? <span className="text-[#FB7185]">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -776,18 +777,18 @@ export default function SignIn({
                       }}
                       className={`text-left p-3 rounded-2xl border transition-all flex items-start gap-2.5 cursor-pointer ${
                         isSelected
-                          ? 'bg-[#181A1D] text-white border-[#181A1D] shadow-xs'
-                          : 'bg-[#F8F6F1] border-[#ECE6DC] hover:border-[#181A1D]'
+                          ? 'bg-[#FFFDF0] text-[#181A1D] border-2 border-[#FACC15] shadow-2xs'
+                          : 'bg-[#FAF8F5] border border-[#ECE6DC] hover:border-[#FDE68A]'
                       }`}
                     >
-                      <div className={`p-1.5 rounded-full shrink-0 ${isSelected ? 'bg-white/20 text-[#FACC15]' : 'bg-[#EAE4DA] text-[#181A1D]'}`}>
+                      <div className={`p-1.5 rounded-full shrink-0 ${isSelected ? 'bg-[#FEF3C7] text-[#D97706]' : 'bg-[#EAE4DA] text-[#181A1D]'}`}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className={`text-xs font-bold leading-tight ${isSelected ? 'text-white' : 'text-[#181A1D]'}`}>
+                        <p className="text-xs font-medium leading-tight text-[#181A1D]">
                           {level.title}
                         </p>
-                        <p className={`text-[10px] mt-0.5 line-clamp-1 ${isSelected ? 'text-[#A6ADB8]' : 'text-[#8E8880]'}`}>
+                        <p className="text-[10px] mt-0.5 line-clamp-1 text-[#8A847C] font-normal">
                           {level.subtitle}
                         </p>
                       </div>
@@ -799,14 +800,14 @@ export default function SignIn({
 
             {/* Higher Studies Course & Year */}
             {regForm.studying === 'higher_studies' && (
-              <div className="bg-[#F8F6F1] border border-[#ECE6DC] rounded-3xl p-4 space-y-3.5">
+              <div className="bg-[#FFF5F6] border border-[#FECDD3] rounded-3xl p-4 space-y-3.5">
                 <div className="flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4 text-[#181A1D]" />
-                  <h3 className="text-xs font-bold text-[#181A1D] uppercase tracking-wider">Higher Studies Details</h3>
+                  <GraduationCap className="w-4 h-4 text-[#FB7185]" />
+                  <h3 className="text-xs font-medium text-[#9F1239] uppercase tracking-wider">Higher Studies Details</h3>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#181A1D] mb-1">
+                  <label className="block text-xs font-medium text-[#252320] mb-1">
                     Course / Degree / Major <span className="text-[#FB7185]">*</span>
                   </label>
                   <input
@@ -817,13 +818,13 @@ export default function SignIn({
                       if (errors.courseName) setErrors({ ...errors, courseName: null });
                     }}
                     placeholder="e.g. Computer Science, B.Tech CSE"
-                    className="w-full bg-white border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none focus:border-[#181A1D]"
+                    className="w-full bg-white border border-[#FECDD3] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none focus:border-[#FB7185]"
                   />
-                  {errors.courseName && <p className="mt-1 text-xs text-[#E11D48] font-bold">{errors.courseName}</p>}
+                  {errors.courseName && <p className="mt-1 text-xs text-[#E11D48] font-normal">{errors.courseName}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#181A1D] mb-1.5">
+                  <label className="block text-xs font-medium text-[#252320] mb-1.5">
                     Year of Study <span className="text-[#FB7185]">*</span>
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -837,10 +838,10 @@ export default function SignIn({
                             setRegForm({ ...regForm, collegeYear: yr.id });
                             if (errors.collegeYear) setErrors({ ...errors, collegeYear: null });
                           }}
-                          className={`px-2 py-2 rounded-xl text-xs font-bold text-center border transition-all cursor-pointer ${
+                          className={`px-2 py-2 rounded-xl text-xs font-medium text-center border transition-all cursor-pointer ${
                             isYearSelected
-                              ? 'bg-[#181A1D] text-white border-[#181A1D]'
-                              : 'bg-white border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
+                              ? 'bg-[#181A1D] text-[#FDE047] border-[#181A1D] shadow-2xs'
+                              : 'bg-white border-[#FECDD3] text-[#9F1239] hover:bg-[#FFE4E6]'
                           }`}
                         >
                           {yr.short}
@@ -853,22 +854,22 @@ export default function SignIn({
             )}
 
             {/* Daily Target */}
-            <div className="bg-[#F8F6F1] border border-[#ECE6DC] rounded-3xl p-3.5 flex items-center justify-between gap-3">
+            <div className="bg-[#FFFDF0] border border-[#FDE894] rounded-3xl p-3.5 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <Flame className="w-4 h-4 text-[#FB7185]" />
+                <Flame className="w-4 h-4 text-[#F59E0B]" />
                 <div>
-                  <p className="text-xs font-bold text-[#181A1D]">Daily Study Target</p>
-                  <p className="text-[10px] text-[#8E8880]">Hours planned each day</p>
+                  <p className="text-xs font-medium text-[#92400E]">Daily Study Target</p>
+                  <p className="text-[10px] text-[#A16207] font-normal">Hours planned each day</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1 bg-white border border-[#ECE6DC] rounded-full p-1">
+              <div className="flex items-center gap-1 bg-white border border-[#FDE68A] rounded-full p-1">
                 {[2, 3, 4, 6, 8].map((hrs) => (
                   <button
                     key={hrs}
                     type="button"
                     onClick={() => setRegForm({ ...regForm, dailyTargetHours: hrs })}
-                    className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                      regForm.dailyTargetHours === hrs ? 'bg-[#181A1D] text-white' : 'text-[#8E8880] hover:text-[#181A1D]'
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                      regForm.dailyTargetHours === hrs ? 'bg-[#FACC15] text-[#181A1D] shadow-2xs' : 'text-[#8E8880] hover:text-[#181A1D]'
                     }`}
                   >
                     {hrs}h
@@ -883,7 +884,7 @@ export default function SignIn({
                 <button
                   type="button"
                   onClick={onCancelEdit}
-                  className="px-5 py-3 rounded-full border border-[#ECE6DC] bg-[#F8F6F1] text-[#181A1D] font-bold text-xs hover:bg-[#EAE4DA] cursor-pointer"
+                  className="px-5 py-3 rounded-full border border-[#ECE6DC] bg-[#FAF8F5] text-[#181A1D] font-medium text-xs hover:bg-[#EAE4DA] cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -891,10 +892,10 @@ export default function SignIn({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 bg-[#181A1D] hover:bg-black text-white font-bold py-3.5 px-6 rounded-full shadow-md flex items-center justify-center gap-2 text-sm transition-all active:scale-[0.99] disabled:opacity-70 cursor-pointer"
+                className="flex-1 bg-[#181A1D] hover:bg-[#282B32] text-white font-medium py-3.5 px-6 rounded-full shadow-xs hover:shadow-sm flex items-center justify-center gap-2 text-sm transition-all active:scale-[0.99] disabled:opacity-70 cursor-pointer"
               >
                 <span>{isEditing ? 'Save Profile Changes' : 'Next: Add Subjects & Topics'}</span>
-                <ArrowRight className="w-4 h-4 text-[#FACC15]" />
+                <ArrowRight className="w-4 h-4 text-[#FB7185]" />
               </button>
             </div>
 
@@ -903,13 +904,13 @@ export default function SignIn({
               <div className="mt-6 pt-5 border-t border-[#F4F1EB]">
                 <div className="p-4 rounded-3xl border border-[#FECDD3] bg-[#FFF1F2] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-bold text-[#E11D48]">Permanently Delete Account</p>
-                    <p className="text-[11px] text-[#9F1239] mt-0.5">Erase your profile, tasks, availability, and AI timetables.</p>
+                    <p className="text-xs font-medium text-[#E11D48]">Permanently Delete Account</p>
+                    <p className="text-[11px] text-[#9F1239] mt-0.5 font-normal">Erase your profile, tasks, availability, and AI timetables.</p>
                   </div>
                   <button
                     type="button"
                     onClick={onDeleteAccount}
-                    className="px-4 py-2 rounded-full bg-[#E11D48] text-white text-xs font-bold hover:bg-[#BE123C] transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    className="px-4 py-2 rounded-full bg-[#E11D48] text-white text-xs font-medium hover:bg-[#BE123C] transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete Profile</span>
@@ -926,7 +927,7 @@ export default function SignIn({
             
             {/* Subject Tabs & Adder */}
             <div className="space-y-3">
-              <label className="block text-xs font-bold text-[#181A1D] uppercase tracking-wider">
+              <label className="block text-xs font-medium text-[#252320]">
                 1. Your Course Subjects
               </label>
 
@@ -938,14 +939,14 @@ export default function SignIn({
                   onChange={(e) => setNewSubjectInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSubject(); } }}
                   placeholder="Type course subject (e.g. Physics, Macroeconomics)..."
-                  className="flex-1 bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2.5 text-xs text-[#181A1D] placeholder-[#8E8880] focus:outline-none focus:border-[#181A1D]"
+                  className="flex-1 bg-[#FAF8F5] border border-[#ECE6DC] rounded-full px-4 py-2.5 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#FB7185]"
                 />
                 <button
                   type="button"
                   onClick={handleAddSubject}
-                  className="px-4 py-2.5 rounded-full bg-[#181A1D] text-white text-xs font-bold hover:bg-black flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
+                  className="px-4 py-2.5 rounded-full bg-[#FB7185] hover:bg-[#F43F5E] text-white text-xs font-medium flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
                 >
-                  <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
+                  <Plus className="w-3.5 h-3.5 text-white" />
                   <span>Add Subject</span>
                 </button>
               </div>
@@ -957,15 +958,15 @@ export default function SignIn({
                   return (
                     <div
                       key={s.id}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer border ${
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 transition-all shrink-0 cursor-pointer border ${
                         isActive
                           ? 'bg-[#181A1D] text-white border-[#181A1D] shadow-xs'
-                          : 'bg-[#F8F6F1] text-[#78716C] border-[#ECE6DC] hover:border-[#181A1D]'
+                          : 'bg-[#FAF8F5] text-[#78716C] border border-[#ECE6DC] hover:border-[#FB7185]'
                       }`}
                       onClick={() => setActiveSubjectId(s.id)}
                     >
                       <span>{s.name}</span>
-                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-white/20 text-[#FACC15]' : 'bg-[#E7E1D6] text-[#78716C]'}`}>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-[#FACC15] text-[#181A1D]' : 'bg-[#E7E1D6] text-[#78716C]'}`}>
                         {s.chapters.length}
                       </span>
                       {subjects.length > 1 && (
@@ -986,15 +987,15 @@ export default function SignIn({
 
             {/* Chapters & Topics for Active Subject */}
             {activeSubjectId && (
-              <div className="p-4 rounded-3xl bg-[#F8F6F1] border border-[#ECE6DC] space-y-3.5">
+              <div className="p-4 rounded-3xl bg-[#FFFDF5] border border-[#FDE894] space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-[#181A1D]" />
-                    <span className="text-xs font-bold text-[#181A1D]">
+                    <BookOpen className="w-4 h-4 text-[#D97706]" />
+                    <span className="text-xs font-medium text-[#92400E]">
                       Chapters & Topics for {subjects.find(s => s.id === activeSubjectId)?.name}
                     </span>
                   </div>
-                  <span className="text-[10px] font-bold text-[#8E8880]">
+                  <span className="text-[10px] font-normal text-[#A16207]">
                     {subjects.find(s => s.id === activeSubjectId)?.chapters.length || 0} chapters
                   </span>
                 </div>
@@ -1007,14 +1008,14 @@ export default function SignIn({
                     onChange={(e) => setNewChapterInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddChapter(); } }}
                     placeholder="Chapter / Topic name (e.g. Vector Algebra)..."
-                    className="w-full sm:flex-1 bg-white border border-[#ECE6DC] rounded-full px-3.5 py-2 text-xs text-[#181A1D] placeholder-[#8E8880] focus:outline-none focus:border-[#181A1D]"
+                    className="w-full sm:flex-1 bg-white border border-[#FDE68A] rounded-full px-3.5 py-2 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#FACC15]"
                   />
 
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     <select
                       value={newChapterDifficulty}
                       onChange={(e) => setNewChapterDifficulty(e.target.value)}
-                      className="bg-white border border-[#ECE6DC] rounded-full px-3 py-2 text-xs font-bold text-[#181A1D] focus:outline-none cursor-pointer"
+                      className="bg-white border border-[#FDE68A] rounded-full px-3 py-2 text-xs font-medium text-[#181A1D] focus:outline-none cursor-pointer"
                     >
                       <option value="Easy">🟢 Easy</option>
                       <option value="Medium">🟡 Medium</option>
@@ -1024,7 +1025,7 @@ export default function SignIn({
                     <button
                       type="button"
                       onClick={handleAddChapter}
-                      className="px-3.5 py-2 rounded-full bg-[#181A1D] text-white text-xs font-bold hover:bg-black flex items-center gap-1 cursor-pointer shrink-0"
+                      className="px-3.5 py-2 rounded-full bg-[#181A1D] hover:bg-[#282B32] text-[#FACC15] text-xs font-medium flex items-center gap-1 cursor-pointer shrink-0 shadow-2xs"
                     >
                       <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
                       <span>Add</span>
@@ -1035,22 +1036,26 @@ export default function SignIn({
                 {/* Chapters List */}
                 <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
                   {(subjects.find(s => s.id === activeSubjectId)?.chapters || []).length === 0 ? (
-                    <p className="text-xs text-[#8E8880] text-center py-3">No chapters added yet for this subject. Type above to add one!</p>
+                    <p className="text-xs text-[#8E8880] text-center py-3 font-normal">No chapters added yet for this subject. Type above to add one!</p>
                   ) : (
                     (subjects.find(s => s.id === activeSubjectId)?.chapters || []).map((ch) => (
-                      <div key={ch.id} className="p-2.5 rounded-2xl bg-white border border-[#ECE6DC] flex items-center justify-between text-xs">
+                      <div key={ch.id} className="p-2.5 rounded-2xl bg-white border border-[#FDE68A] flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${ch.difficulty === 'Hard' ? 'bg-[#E11D48]' : ch.difficulty === 'Medium' ? 'bg-[#EAB308]' : 'bg-[#10B981]'}`} />
-                          <span className="font-bold text-[#181A1D]">{ch.name}</span>
+                          <span className={`w-2 h-2 rounded-full ${ch.difficulty === 'Hard' ? 'bg-[#FB7185]' : ch.difficulty === 'Medium' ? 'bg-[#FACC15]' : 'bg-[#10B981]'}`} />
+                          <span className="font-medium text-[#181A1D]">{ch.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-[#F8F6F1] text-[#78716C]">
+                          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${
+                            ch.difficulty === 'Hard' ? 'bg-[#FFE4E6] text-[#9F1239]' :
+                            ch.difficulty === 'Medium' ? 'bg-[#FEF3C7] text-[#92400E]' :
+                            'bg-[#DCFCE7] text-[#166534]'
+                          }`}>
                             {ch.difficulty}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleRemoveChapter(activeSubjectId, ch.id)}
-                            className="text-[#8E8880] hover:text-[#E11D48] cursor-pointer"
+                            className="text-[#8E8880] hover:text-[#FB7185] cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1067,7 +1072,7 @@ export default function SignIn({
               <button
                 type="button"
                 onClick={() => setRegStep(1)}
-                className="px-5 py-3 rounded-full border border-[#ECE6DC] bg-[#F8F6F1] text-[#181A1D] font-bold text-xs hover:bg-[#EAE4DA] cursor-pointer"
+                className="px-5 py-3 rounded-full border border-[#ECE6DC] bg-[#FAF8F5] text-[#181A1D] font-medium text-xs hover:bg-[#EAE4DA] cursor-pointer"
               >
                 Back to Profile
               </button>
@@ -1081,7 +1086,7 @@ export default function SignIn({
                   }
                   setRegStep(3);
                 }}
-                className="flex-1 bg-[#181A1D] hover:bg-black text-white font-bold py-3.5 px-6 rounded-full shadow-md flex items-center justify-center gap-2 text-sm transition-all cursor-pointer"
+                className="flex-1 bg-[#181A1D] hover:bg-[#282B32] text-white font-medium py-3.5 px-6 rounded-full shadow-xs hover:shadow-sm flex items-center justify-center gap-2 text-sm transition-all cursor-pointer"
               >
                 <span>Next: Set Study Hours</span>
                 <ArrowRight className="w-4 h-4 text-[#FACC15]" />
@@ -1097,10 +1102,10 @@ export default function SignIn({
             {/* Presets Header */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-[#181A1D] uppercase tracking-wider">
+                <label className="block text-xs font-medium text-[#252320]">
                   Weekly Study Hours
                 </label>
-                <span className="text-[11px] font-bold text-[#8E8880]">
+                <span className="text-[11px] font-normal text-[#8E8880]">
                   Click cells to toggle free study slots
                 </span>
               </div>
@@ -1109,21 +1114,21 @@ export default function SignIn({
                 <button
                   type="button"
                   onClick={() => applyAvailabilityPreset("evenings")}
-                  className="px-3 py-1.5 rounded-full bg-[#F8F6F1] hover:bg-[#181A1D] hover:text-white border border-[#ECE6DC] text-xs font-bold text-[#181A1D] transition-all cursor-pointer shrink-0"
+                  className="px-3.5 py-1.5 rounded-full bg-[#FFFDF0] hover:bg-[#FEF3C7] border border-[#FDE68A] text-xs font-medium text-[#92400E] transition-all cursor-pointer shrink-0 shadow-2xs"
                 >
                   🌙 Evenings & Weekends
                 </button>
                 <button
                   type="button"
                   onClick={() => applyAvailabilityPreset("mornings")}
-                  className="px-3 py-1.5 rounded-full bg-[#F8F6F1] hover:bg-[#181A1D] hover:text-white border border-[#ECE6DC] text-xs font-bold text-[#181A1D] transition-all cursor-pointer shrink-0"
+                  className="px-3.5 py-1.5 rounded-full bg-[#FFF5F6] hover:bg-[#FFE4E6] border border-[#FECDD3] text-xs font-medium text-[#9F1239] transition-all cursor-pointer shrink-0 shadow-2xs"
                 >
                   ☀️ Morning Focus (8am–12pm)
                 </button>
                 <button
                   type="button"
                   onClick={() => applyAvailabilityPreset("fullday")}
-                  className="px-3 py-1.5 rounded-full bg-[#F8F6F1] hover:bg-[#181A1D] hover:text-white border border-[#ECE6DC] text-xs font-bold text-[#181A1D] transition-all cursor-pointer shrink-0"
+                  className="px-3.5 py-1.5 rounded-full bg-[#181A1D] hover:bg-[#282B32] border border-[#2D3139] text-xs font-medium text-[#FDE047] transition-all cursor-pointer shrink-0 shadow-2xs"
                 >
                   ⚡ Full Day Open
                 </button>
@@ -1131,13 +1136,13 @@ export default function SignIn({
             </div>
 
             {/* Availability Mini Grid */}
-            <div className="p-3.5 rounded-3xl bg-[#F8F6F1] border border-[#ECE6DC] space-y-2 overflow-x-auto">
+            <div className="p-3.5 rounded-3xl bg-[#FAF8F5] border border-[#ECE6DC] space-y-2 overflow-x-auto">
               <div className="min-w-[480px] space-y-1.5">
                 {DAYS_OF_WEEK.map((d) => {
                   const daySlots = availability[d] || [];
                   return (
                     <div key={d} className="flex items-center gap-2">
-                      <span className="w-10 text-xs font-bold text-[#181A1D] shrink-0">{d}</span>
+                      <span className="w-10 text-xs font-medium text-[#252320] shrink-0">{d}</span>
                       <div className="flex items-center gap-1 flex-1 flex-wrap">
                         {[8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21].map((h) => {
                           const isFree = daySlots.includes(h);
@@ -1146,10 +1151,10 @@ export default function SignIn({
                               key={h}
                               type="button"
                               onClick={() => toggleSlot(d, h)}
-                              className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                              className={`px-2 py-1 rounded-lg text-[10.5px] font-medium transition-all cursor-pointer ${
                                 isFree 
-                                  ? 'bg-[#181A1D] text-[#FACC15] shadow-xs' 
-                                  : 'bg-white border border-[#ECE6DC] text-[#A8A29E] hover:border-[#181A1D]'
+                                  ? 'bg-[#181A1D] text-[#FDE047] border border-[#181A1D] shadow-2xs hover:bg-[#282B32]' 
+                                  : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:border-[#FB7185]'
                               }`}
                             >
                               {h}:00
@@ -1164,9 +1169,9 @@ export default function SignIn({
             </div>
 
             {/* Summary Box */}
-            <div className="p-3 rounded-2xl bg-[#FDE047]/20 border border-[#FACC15]/40 flex items-center gap-2.5 text-xs text-[#181A1D]">
-              <Sparkles className="w-4 h-4 text-[#CA8A04] shrink-0" />
-              <span>The AI will schedule study sessions for your <strong>{subjects.reduce((sum, s) => sum + s.chapters.length, 0)} chapters</strong> into these free hours without collision.</span>
+            <div className="p-3.5 rounded-2xl bg-[#FFF5F6] border border-[#FECDD3] flex items-center gap-2.5 text-xs text-[#9F1239] font-normal">
+              <Sparkles className="w-4 h-4 text-[#FB7185] shrink-0" />
+              <span>The AI will schedule study sessions for your <strong className="font-medium text-[#181A1D]">{subjects.reduce((sum, s) => sum + s.chapters.length, 0)} chapters</strong> into these free hours without collision.</span>
             </div>
 
             {/* Stepper Navigation Buttons */}
@@ -1174,7 +1179,7 @@ export default function SignIn({
               <button
                 type="button"
                 onClick={() => setRegStep(2)}
-                className="px-5 py-3 rounded-full border border-[#ECE6DC] bg-[#F8F6F1] text-[#181A1D] font-bold text-xs hover:bg-[#EAE4DA] cursor-pointer"
+                className="px-5 py-3 rounded-full border border-[#ECE6DC] bg-[#FAF8F5] text-[#181A1D] font-medium text-xs hover:bg-[#EAE4DA] cursor-pointer"
               >
                 Back to Subjects
               </button>
@@ -1182,7 +1187,7 @@ export default function SignIn({
                 type="button"
                 onClick={handleFinalRegisterSubmit}
                 disabled={isSubmitting}
-                className="flex-1 bg-[#181A1D] hover:bg-black text-white font-bold py-3.5 px-6 rounded-full shadow-md flex items-center justify-center gap-2 text-sm transition-all cursor-pointer"
+                className="flex-1 bg-[#181A1D] hover:bg-[#282B32] text-white font-medium py-3.5 px-6 rounded-full shadow-xs hover:shadow-sm flex items-center justify-center gap-2 text-sm transition-all cursor-pointer"
               >
                 {isSubmitting ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
