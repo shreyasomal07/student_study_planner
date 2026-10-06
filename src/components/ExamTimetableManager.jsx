@@ -480,52 +480,6 @@ export default function ExamTimetableManager({
     document.body.removeChild(a);
   };
 
-  const loadSampleExams = () => {
-    const today = new Date();
-    const addD = (n) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() + n);
-      return d.toISOString().split('T')[0];
-    };
-
-    const samples = [
-      {
-        id: 'e1',
-        subject: 'Data Structures',
-        title: 'Mid-Term Theory Exam',
-        date: addD(3),
-        start: '10:00',
-        end: '12:00',
-        room: 'Examination Hall A',
-        weightage: 'Midterm',
-        syllabus: 'Binary Search Trees, Heaps, AVL Trees, Graph Algorithms'
-      },
-      {
-        id: 'e2',
-        subject: 'Calculus',
-        title: 'Calculus End-Semester Exam',
-        date: addD(8),
-        start: '14:00',
-        end: '17:00',
-        room: 'Main Auditorium',
-        weightage: 'Final Exam',
-        syllabus: 'Multivariable Calculus, Green Theorem, Taylor Series'
-      },
-      {
-        id: 'e3',
-        subject: 'Digital Electronics',
-        title: 'Mid-Semester Lab Quiz',
-        date: addD(14),
-        start: '09:30',
-        end: '11:00',
-        room: 'ECE Building Hall 2',
-        weightage: 'Quiz / Test',
-        syllabus: 'Logic Gates, Flip-Flops, Counters, K-Maps'
-      }
-    ];
-    onImportBulkExams(samples);
-  };
-
   const sortedExams = [...exams].sort((a, b) => {
     return new Date(`${a.date}T${a.start || '00:00'}`) - new Date(`${b.date}T${b.start || '00:00'}`);
   });
@@ -545,15 +499,6 @@ export default function ExamTimetableManager({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {exams.length === 0 && (
-            <button
-              onClick={loadSampleExams}
-              className="px-3.5 py-2 rounded-full text-xs font-bold bg-[#F4F1EB] hover:bg-[#EAE4DA] text-[#181A1D] transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#FACC15]" /> Sample Exams
-            </button>
-          )}
-
           <button
             onClick={() => {
               setBulkModalOpen(true);
@@ -600,10 +545,10 @@ export default function ExamTimetableManager({
               <ImageIcon className="w-4 h-4" /> Upload Exam Picture / File
             </button>
             <button
-              onClick={loadSampleExams}
+              onClick={openAddModal}
               className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all cursor-pointer flex items-center gap-2"
             >
-              <Sparkles className="w-4 h-4 text-rose-600" /> Load Sample Exams
+              <Plus className="w-4 h-4 text-rose-600" /> Add Exam Manually
             </button>
           </div>
         </div>

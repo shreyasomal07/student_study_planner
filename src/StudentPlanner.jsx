@@ -6,12 +6,14 @@ import {
   AlertTriangle, CalendarClock, Coffee, Target, BarChart3, Edit3, LogOut, User,
   Calendar, Search, Filter, Layers, Sun, Moon, Zap, Tag, Check, Award, School,
   Upload, FileText, MapPin, MoreHorizontal, ChevronDown, RotateCcw, Paperclip,
-  Activity, Users, FileSpreadsheet, Settings, MessageSquare, CreditCard, FolderArchive
+  Activity, Users, FileSpreadsheet, Settings, MessageSquare, CreditCard, FolderArchive,
+  Image as ImageIcon
 } from "lucide-react";
 import PomodoroTimer from "./components/PomodoroTimer";
-import AnalyticsView from "./components/AnalyticsView";
 import ClassTimetableManager from "./components/ClassTimetableManager";
 import ExamTimetableManager from "./components/ExamTimetableManager";
+import DashboardNotesAndTodo from "./components/DashboardNotesAndTodo";
+import TimetablePhotoViewer from "./components/TimetablePhotoViewer";
 
 /* ============================================================================
    CONSTANTS & THEME TOKENS
@@ -44,96 +46,78 @@ function startOfWeek(d) {
   return addDays(r, -dow);
 }
 function parseDateTime(dateStr, timeStr) {
-  return new Date(`${dateStr}T${timeStr || "23:59"}:00`);
+  if (!dateStr) return new Date(8640000000000000);
+  try {
+    const cleanDate = typeof dateStr === 'string' && dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+    const cleanTime = timeStr || "23:59";
+    const d = new Date(`${cleanDate}T${cleanTime}:00`);
+    if (isNaN(d.getTime())) return new Date(8640000000000000);
+    return d;
+  } catch (e) {
+    return new Date(8640000000000000);
+  }
 }
 function fmtDisplayDate(dateStr) {
-  const d = new Date(`${dateStr}T00:00:00`);
-  return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  if (!dateStr) return "";
+  try {
+    const cleanDate = typeof dateStr === 'string' && dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+    const d = new Date(`${cleanDate}T00:00:00`);
+    if (isNaN(d.getTime())) return String(dateStr);
+    return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  } catch (e) {
+    return String(dateStr);
+  }
 }
 function fmtShortDate(dateStr) {
   if (!dateStr) return "";
-  const [y, m, d] = dateStr.split("-");
-  return `${d}/${m}`;
+  try {
+    const cleanDate = typeof dateStr === 'string' && dateStr.includes('T') ? dateStr.split('T')[0] : String(dateStr);
+    const parts = cleanDate.split("-");
+    if (parts.length >= 3) {
+      return `${parts[2]}/${parts[1]}`;
+    }
+    return cleanDate;
+  } catch (e) {
+    return String(dateStr);
+  }
 }
 function fmtTime12(t) {
-  if (!t) return "";
-  const [h, m] = t.split(":").map(Number);
-  const period = h >= 12 ? "PM" : "AM";
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12}:${pad(m)} ${period}`;
+  if (!t || typeof t !== 'string') return "";
+  try {
+    const parts = t.split(":");
+    if (parts.length < 2) return t;
+    const h = Number(parts[0]);
+    const m = Number(parts[1]);
+    if (isNaN(h) || isNaN(m)) return t;
+    const period = h >= 12 ? "PM" : "AM";
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${h12}:${pad(m)} ${period}`;
+  } catch (e) {
+    return String(t);
+  }
 }
 function fmtTime24(t) {
-  if (!t) return "";
+  if (!t || typeof t !== 'string') return "";
   return t.slice(0, 5);
 }
 
 /* ============================================================================
-   MOCK DATA SEED
+   INITIAL EMPTY DATA TEMPLATE (Zero Mock Data)
    ========================================================================== */
 
 function buildMockData() {
-  const today = startOfDay(new Date());
-  const tasks = [
-    { id: uid(), title: "Calculus Problem Set 4", subject: "Calculus", category: "Assignment", dueDate: toISODate(addDays(today, 2)), dueTime: "23:59", priority: "High", estHours: 3, completed: false, sessionsDone: 9, totalSessions: 12 },
-    { id: uid(), title: "Data Structures Lab Report", subject: "Data Structures", category: "Reading / Lab", dueDate: toISODate(addDays(today, 1)), dueTime: "18:00", priority: "High", estHours: 2, completed: false, sessionsDone: 6, totalSessions: 10 },
-    { id: uid(), title: "Digital Electronics Circuit Simulation", subject: "Electronics", category: "Project", dueDate: toISODate(addDays(today, 4)), dueTime: "17:00", priority: "Medium", estHours: 3.5, completed: false, sessionsDone: 4, totalSessions: 8 },
-    { id: uid(), title: "Marketing Case Study Draft", subject: "Marketing", category: "Assignment", dueDate: toISODate(addDays(today, 5)), dueTime: "12:00", priority: "Medium", estHours: 4, completed: false, sessionsDone: 8, totalSessions: 10 },
-    { id: uid(), title: "Read Chapter 7 — Thermodynamics", subject: "Physics", category: "Homework", dueDate: toISODate(addDays(today, 7)), dueTime: "09:00", priority: "Low", estHours: 1.5, completed: false, sessionsDone: 2, totalSessions: 5 },
-  ];
-  const topics = [
-    { id: uid(), name: "Integration by Parts & Substitution", subject: "Calculus", difficulty: "Medium", completed: false, sessionsDone: 5, totalSessions: 6 },
-    { id: uid(), name: "Binary Search Trees & AVL Rotations", subject: "Data Structures", difficulty: "Hard", completed: false, sessionsDone: 7, totalSessions: 8 },
-    { id: uid(), name: "K-Maps & Logic Simplification", subject: "Electronics", difficulty: "Medium", completed: false, sessionsDone: 3, totalSessions: 4 },
-    { id: uid(), name: "Consumer Behaviour Models", subject: "Marketing", difficulty: "Easy", completed: false, sessionsDone: 4, totalSessions: 4 },
-  ];
-  const availability = {
-    Mon: [8, 9, 17, 18, 19, 20], Tue: [17, 18, 19, 20], Wed: [8, 9, 17, 18, 19, 20],
-    Thu: [17, 18, 19, 20], Fri: [17, 18, 19, 20],
-    Sat: [9, 10, 11, 12, 13, 14, 15], Sun: [9, 10, 11, 12, 13, 14, 15],
-  };
-
-  const collegeSchedule = [
-    { id: 'c1', day: 'Mon', start: '09:00', end: '10:30', subject: 'Calculus', type: 'Lecture', room: 'Hall 101' },
-    { id: 'c2', day: 'Mon', start: '11:00', end: '13:00', subject: 'Data Structures', type: 'Lab', room: 'CS Lab 2' },
-    { id: 'c3', day: 'Tue', start: '10:00', end: '11:30', subject: 'Digital Electronics', type: 'Lecture', room: 'ECE Hall A' },
-    { id: 'c4', day: 'Wed', start: '09:00', end: '10:30', subject: 'Data Structures', type: 'Lecture', room: 'Hall 102' },
-    { id: 'c5', day: 'Thu', start: '10:30', end: '12:00', subject: 'Marketing', type: 'Lecture', room: 'Management B' },
-    { id: 'c6', day: 'Fri', start: '09:00', end: '10:30', subject: 'Calculus', type: 'Tutorial', room: 'Room 204' }
-  ];
-
-  const examSchedule = [
-    {
-      id: 'e1',
-      subject: 'Data Structures',
-      title: 'Mid-Term Theory Exam',
-      date: toISODate(addDays(today, 3)),
-      start: '10:00',
-      end: '12:00',
-      room: 'Examination Hall A',
-      weightage: 'Midterm',
-      syllabus: 'Binary Search Trees, Heaps, AVL Trees, Graphs'
-    },
-    {
-      id: 'e2',
-      subject: 'Calculus',
-      title: 'Mid-Semester Written Paper',
-      date: toISODate(addDays(today, 6)),
-      start: '14:00',
-      end: '16:30',
-      room: 'Main Auditorium',
-      weightage: 'Midterm',
-      syllabus: 'Differential Equations, Multivariable Calculus'
-    }
-  ];
-
   return { 
-    tasks, 
-    topics, 
-    availability, 
-    collegeSchedule, 
-    examSchedule, 
+    tasks: [], 
+    topics: [], 
+    availability: {
+      Mon: [17, 18, 19, 20], Tue: [17, 18, 19, 20], Wed: [17, 18, 19, 20],
+      Thu: [17, 18, 19, 20], Fri: [17, 18, 19, 20],
+      Sat: [10, 11, 12, 13, 14, 15], Sun: [10, 11, 12, 13, 14, 15],
+    }, 
+    collegeSchedule: [], 
+    examSchedule: [], 
     timetable: [], 
-    student: { name: "Dr. Olivia", program: "Medicine & Health Sciences" } 
+    student: { name: "Student", program: "General Studies" } 
   };
 }
 
@@ -373,41 +357,108 @@ export default function StudentPlanner({
   const [tasks, setTasks] = useState(() => {
     if (savedPlannerData?.tasks && Array.isArray(savedPlannerData.tasks)) return savedPlannerData.tasks;
     if (savedPlannerData && typeof savedPlannerData === 'object') return [];
-    return buildMockData().tasks;
+    if (userProfile) return [];
+    return [];
   });
   const [topics, setTopics] = useState(() => {
     if (savedPlannerData?.topics && Array.isArray(savedPlannerData.topics)) return savedPlannerData.topics;
     if (savedPlannerData && typeof savedPlannerData === 'object') return [];
-    return buildMockData().topics;
+    if (userProfile) return [];
+    return [];
   });
   const [availability, setAvailability] = useState(() => {
     if (savedPlannerData?.availability && typeof savedPlannerData.availability === 'object') return savedPlannerData.availability;
-    return buildMockData().availability;
+    return {
+      Mon: [17, 18, 19, 20], Tue: [17, 18, 19, 20], Wed: [17, 18, 19, 20],
+      Thu: [17, 18, 19, 20], Fri: [17, 18, 19, 20],
+      Sat: [10, 11, 12, 13, 14, 15], Sun: [10, 11, 12, 13, 14, 15],
+    };
   });
   const [collegeSchedule, setCollegeSchedule] = useState(() => {
     if (savedPlannerData?.collegeSchedule && Array.isArray(savedPlannerData.collegeSchedule)) return savedPlannerData.collegeSchedule;
-    if (savedPlannerData && typeof savedPlannerData === 'object') return [];
-    return buildMockData().collegeSchedule;
+    return [];
   });
   const [examSchedule, setExamSchedule] = useState(() => {
     if (savedPlannerData?.examSchedule && Array.isArray(savedPlannerData.examSchedule)) return savedPlannerData.examSchedule;
-    if (savedPlannerData && typeof savedPlannerData === 'object') return [];
-    return buildMockData().examSchedule;
+    return [];
+  });
+  const [events, setEvents] = useState(() => {
+    if (savedPlannerData?.events && Array.isArray(savedPlannerData.events)) return savedPlannerData.events;
+    return [];
   });
   const [timetable, setTimetable] = useState(() => {
     if (savedPlannerData?.timetable && Array.isArray(savedPlannerData.timetable)) return savedPlannerData.timetable;
-    const initialTasks = savedPlannerData?.tasks || (savedPlannerData ? [] : buildMockData().tasks);
-    const initialTopics = savedPlannerData?.topics || (savedPlannerData ? [] : buildMockData().topics);
-    const initialAvail = savedPlannerData?.availability || buildMockData().availability;
-    const initialClasses = savedPlannerData?.collegeSchedule || (savedPlannerData ? [] : buildMockData().collegeSchedule);
-    const initialExams = savedPlannerData?.examSchedule || (savedPlannerData ? [] : buildMockData().examSchedule);
+    const initialTasks = savedPlannerData?.tasks || [];
+    const initialTopics = savedPlannerData?.topics || [];
+    const initialAvail = savedPlannerData?.availability || {
+      Mon: [17, 18, 19, 20], Tue: [17, 18, 19, 20], Wed: [17, 18, 19, 20],
+      Thu: [17, 18, 19, 20], Fri: [17, 18, 19, 20],
+      Sat: [10, 11, 12, 13, 14, 15], Sun: [10, 11, 12, 13, 14, 15],
+    };
+    const initialClasses = savedPlannerData?.collegeSchedule || [];
+    const initialExams = savedPlannerData?.examSchedule || [];
+
+    if (initialTasks.length === 0 && initialTopics.length === 0 && initialClasses.length === 0 && initialExams.length === 0) {
+      return [];
+    }
 
     return generateTimetable(initialTasks, initialTopics, initialAvail, startOfWeek(new Date()), initialClasses, initialExams);
   });
   const [lastGenerated, setLastGenerated] = useState(() => {
     return savedPlannerData?.lastGenerated || new Date().toISOString();
   });
-  const [studentState, setStudentState] = useState({ name: "Dr. Olivia", program: "Medicine & Health Sciences" });
+  const [studentState, setStudentState] = useState({ name: "Student", program: "Academic Studies" });
+
+  const [dashboardTodos, setDashboardTodos] = useState(() => {
+    if (savedPlannerData?.dashboardTodos && Array.isArray(savedPlannerData.dashboardTodos)) {
+      return savedPlannerData.dashboardTodos;
+    }
+    return [
+      { id: "td-1", text: "Review lecture slides and summary notes for next class", completed: false, priority: "High", tag: "Revision", createdAt: new Date().toISOString() },
+      { id: "td-2", text: "Organize assignment references and draft outline", completed: false, priority: "Medium", tag: "Assignment", createdAt: new Date().toISOString() },
+      { id: "td-3", text: "Set up 25-minute Pomodoro study sprint for today", completed: true, priority: "Low", tag: "Quick Task", createdAt: new Date().toISOString() }
+    ];
+  });
+
+  const [dashboardNotes, setDashboardNotes] = useState(() => {
+    if (savedPlannerData?.dashboardNotes && Array.isArray(savedPlannerData.dashboardNotes)) {
+      return savedPlannerData.dashboardNotes;
+    }
+    return [
+      {
+        id: "nt-1",
+        title: "⚡ Quick Study Rule",
+        content: "Pomodoro Focus: 25 mins deep study + 5 mins break. Active recall beats re-reading.",
+        color: "yellow",
+        tag: "Study Tip",
+        isPinned: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: "nt-2",
+        title: "📌 Portal & Datesheet Check",
+        content: "Check college LMS portal every Monday for updated syllabus and submission links.",
+        color: "purple",
+        tag: "Reminder",
+        isPinned: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+  });
+
+  const [dashboardScratchpad, setDashboardScratchpad] = useState(() => {
+    return savedPlannerData?.dashboardScratchpad || "";
+  });
+
+  const [timetablePhoto, setTimetablePhoto] = useState(() => {
+    return savedPlannerData?.timetablePhoto || null;
+  });
+
+  const [timetableSubTab, setTimetableSubTab] = useState(() => {
+    return savedPlannerData?.timetablePhoto ? "photo" : "grid";
+  });
 
   const student = useMemo(() => {
     if (userProfile) {
@@ -427,7 +478,7 @@ export default function StudentPlanner({
       }
 
       return {
-        name: userProfile.name || 'Dr. Olivia',
+        name: userProfile.name || 'Student',
         program: programStr,
         courseName: course,
         yearLabel: year,
@@ -471,15 +522,20 @@ export default function StudentPlanner({
           availability,
           collegeSchedule,
           examSchedule,
+          events,
           timetable,
-          lastGenerated
+          lastGenerated,
+          dashboardTodos,
+          dashboardNotes,
+          dashboardScratchpad,
+          timetablePhoto
         });
       }
     }, 300);
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
-  }, [tasks, topics, availability, collegeSchedule, examSchedule, timetable, lastGenerated]);
+  }, [tasks, topics, availability, collegeSchedule, examSchedule, events, timetable, lastGenerated, dashboardTodos, dashboardNotes, dashboardScratchpad, timetablePhoto]);
 
   /* ---- live clock ---- */
   useEffect(() => {
@@ -500,34 +556,146 @@ export default function StudentPlanner({
   const weekStart = useMemo(() => startOfWeek(now), [now]);
   const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart]);
 
-  /* ---- Handlers ---- */
-  const toggleTask = useCallback((id) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
+  /* ---- 15-Second Auto-Removal Timers for Completed Checklist Items (Silent 15s Delay) ---- */
+  const taskRemovalTimers = useRef({});
+  const topicRemovalTimers = useRef({});
+  const blockRemovalTimers = useRef({});
+  const eventRemovalTimers = useRef({});
+
+  // Cleanup active timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(taskRemovalTimers.current).forEach(clearTimeout);
+      Object.values(topicRemovalTimers.current).forEach(clearTimeout);
+      Object.values(blockRemovalTimers.current).forEach(clearTimeout);
+      Object.values(eventRemovalTimers.current).forEach(clearTimeout);
+    };
   }, []);
+
+  const deleteEvent = useCallback((id) => {
+    if (eventRemovalTimers.current[id]) {
+      clearTimeout(eventRemovalTimers.current[id]);
+      delete eventRemovalTimers.current[id];
+    }
+    setEvents((prev) => prev.filter((e) => e.id !== id));
+  }, []);
+
+  const toggleEvent = useCallback((id) => {
+    setEvents((prev) => {
+      const target = prev.find((e) => e.id === id);
+      if (!target) return prev;
+      const willComplete = !target.completed;
+
+      if (willComplete) {
+        // Start 15-second removal timer silently
+        if (eventRemovalTimers.current[id]) {
+          clearTimeout(eventRemovalTimers.current[id]);
+        }
+        eventRemovalTimers.current[id] = setTimeout(() => {
+          deleteEvent(id);
+        }, 15000);
+
+        return prev.map((e) => (e.id === id ? { ...e, completed: true } : e));
+      } else {
+        // Unchecking: Cancel 15-second removal timer
+        if (eventRemovalTimers.current[id]) {
+          clearTimeout(eventRemovalTimers.current[id]);
+          delete eventRemovalTimers.current[id];
+        }
+        return prev.map((e) => (e.id === id ? { ...e, completed: false } : e));
+      }
+    });
+  }, [deleteEvent]);
+
+  const saveEvent = useCallback((eventData) => {
+    if (eventData.id) {
+      setEvents((prev) => prev.map((e) => (e.id === eventData.id ? { ...e, ...eventData } : e)));
+    } else {
+      setEvents((prev) => [{ ...eventData, id: uid(), completed: false }, ...prev]);
+    }
+  }, []);
+
+  const deleteTask = useCallback((id) => {
+    if (taskRemovalTimers.current[id]) {
+      clearTimeout(taskRemovalTimers.current[id]);
+      delete taskRemovalTimers.current[id];
+    }
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const toggleTask = useCallback((id) => {
+    setTasks((prev) => {
+      const target = prev.find((t) => t.id === id);
+      if (!target) return prev;
+      const willComplete = !target.completed;
+
+      if (willComplete) {
+        // Start 15-second removal timer silently
+        if (taskRemovalTimers.current[id]) {
+          clearTimeout(taskRemovalTimers.current[id]);
+        }
+        taskRemovalTimers.current[id] = setTimeout(() => {
+          deleteTask(id);
+        }, 15000);
+
+        return prev.map((t) => (t.id === id ? { ...t, completed: true } : t));
+      } else {
+        // Unchecking: Cancel 15-second removal timer
+        if (taskRemovalTimers.current[id]) {
+          clearTimeout(taskRemovalTimers.current[id]);
+          delete taskRemovalTimers.current[id];
+        }
+        return prev.map((t) => (t.id === id ? { ...t, completed: false } : t));
+      }
+    });
+  }, [deleteTask]);
 
   const saveTask = useCallback((taskData) => {
     if (taskData.id) {
       setTasks((prev) => prev.map((t) => (t.id === taskData.id ? { ...t, ...taskData } : t)));
     } else {
-      setTasks((prev) => [{ ...taskData, id: uid(), completed: false, sessionsDone: 1, totalSessions: 6 }, ...prev]);
+      setTasks((prev) => [{ ...taskData, id: uid(), completed: false, sessionsDone: 0, totalSessions: taskData.totalSessions || 4 }, ...prev]);
     }
   }, []);
 
-  const deleteTask = useCallback((id) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
   const addTopic = useCallback((topicData) => {
-    setTopics((prev) => [...prev, { ...topicData, id: uid(), completed: false, sessionsDone: 0, totalSessions: 5 }]);
+    setTopics((prev) => [...prev, { ...topicData, id: uid(), completed: false, sessionsDone: 0, totalSessions: topicData.totalSessions || 4 }]);
   }, []);
 
   const deleteTopic = useCallback((id) => {
+    if (topicRemovalTimers.current[id]) {
+      clearTimeout(topicRemovalTimers.current[id]);
+      delete topicRemovalTimers.current[id];
+    }
     setTopics((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const toggleTopic = useCallback((id) => {
-    setTopics((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
-  }, []);
+    setTopics((prev) => {
+      const target = prev.find((t) => t.id === id);
+      if (!target) return prev;
+      const willComplete = !target.completed;
+
+      if (willComplete) {
+        // Start 15-second removal timer silently
+        if (topicRemovalTimers.current[id]) {
+          clearTimeout(topicRemovalTimers.current[id]);
+        }
+        topicRemovalTimers.current[id] = setTimeout(() => {
+          deleteTopic(id);
+        }, 15000);
+
+        return prev.map((t) => (t.id === id ? { ...t, completed: true } : t));
+      } else {
+        // Unchecking: Cancel 15-second removal timer
+        if (topicRemovalTimers.current[id]) {
+          clearTimeout(topicRemovalTimers.current[id]);
+          delete topicRemovalTimers.current[id];
+        }
+        return prev.map((t) => (t.id === id ? { ...t, completed: false } : t));
+      }
+    });
+  }, [deleteTopic]);
 
   const toggleSlot = useCallback((day, hour) => {
     setAvailability((prev) => {
@@ -605,7 +773,31 @@ export default function StudentPlanner({
   }, []);
 
   const toggleBlockDone = useCallback((blockId) => {
-    setTimetable((prev) => prev.map((b) => (b.id === blockId ? { ...b, completed: !b.completed } : b)));
+    setTimetable((prev) => {
+      const target = prev.find((b) => b.id === blockId);
+      if (!target) return prev;
+      const willComplete = !target.completed;
+
+      if (willComplete) {
+        // Start 15-second removal timer silently
+        if (blockRemovalTimers.current[blockId]) {
+          clearTimeout(blockRemovalTimers.current[blockId]);
+        }
+        blockRemovalTimers.current[blockId] = setTimeout(() => {
+          setTimetable((curr) => curr.filter((b) => b.id !== blockId));
+          delete blockRemovalTimers.current[blockId];
+        }, 15000);
+
+        return prev.map((b) => (b.id === blockId ? { ...b, completed: true } : b));
+      } else {
+        // Unchecking: Cancel 15-second removal timer
+        if (blockRemovalTimers.current[blockId]) {
+          clearTimeout(blockRemovalTimers.current[blockId]);
+          delete blockRemovalTimers.current[blockId];
+        }
+        return prev.map((b) => (b.id === blockId ? { ...b, completed: false } : b));
+      }
+    });
   }, []);
 
   const handleGenerate = useCallback(() => {
@@ -617,6 +809,44 @@ export default function StudentPlanner({
       setGenerating(false);
     }, 600);
   }, [tasks, topics, availability, weekStart, collegeSchedule, examSchedule]);
+
+  /* ---- Dashboard To-Do Handlers ---- */
+  const handleAddDashboardTodo = useCallback((newTodo) => {
+    setDashboardTodos(prev => [newTodo, ...prev]);
+  }, []);
+
+  const handleToggleDashboardTodo = useCallback((id) => {
+    setDashboardTodos(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  }, []);
+
+  const handleDeleteDashboardTodo = useCallback((id) => {
+    setDashboardTodos(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const handleClearCompletedDashboardTodos = useCallback(() => {
+    setDashboardTodos(prev => prev.filter(t => !t.completed));
+  }, []);
+
+  /* ---- Dashboard Notes Handlers ---- */
+  const handleAddDashboardNote = useCallback((newNote) => {
+    setDashboardNotes(prev => [newNote, ...prev]);
+  }, []);
+
+  const handleUpdateDashboardNote = useCallback((id, updatedFields) => {
+    setDashboardNotes(prev => prev.map(n => n.id === id ? { ...n, ...updatedFields } : n));
+  }, []);
+
+  const handleDeleteDashboardNote = useCallback((id) => {
+    setDashboardNotes(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  const handlePinDashboardNote = useCallback((id) => {
+    setDashboardNotes(prev => prev.map(n => n.id === id ? { ...n, isPinned: !n.isPinned } : n));
+  }, []);
+
+  const handleUpdateDashboardScratchpad = useCallback((text) => {
+    setDashboardScratchpad(text);
+  }, []);
 
   /* ---- Computed metrics ---- */
   const alerts = useMemo(() => {
@@ -665,151 +895,299 @@ export default function StudentPlanner({
       .filter((t) => !t.completed)
       .sort((a, b) => parseDateTime(a.dueDate, a.dueTime) - parseDateTime(b.dueDate, b.dueTime))[0];
     if (upcomingTask) return { kind: "task", task: upcomingTask };
+
     return null;
-  }, [timetable, tasks, now]);
+  }, [now, timetable, tasks]);
+
+  const currentHour = now.getHours();
+  const timeGreeting = currentHour < 12 ? 'Good morning' : currentHour < 17 ? 'Good afternoon' : 'Good evening';
+  const studentName = student?.name || 'Student';
 
   return (
-    <div className="w-full bg-[#F5F2EB] rounded-[34px] sm:rounded-[38px] p-3 sm:p-5 lg:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-[#E8E2D8] flex flex-col md:flex-row gap-4 sm:gap-6 min-h-[94vh]">
+    <div className="w-full bg-[#F5F2EB] rounded-[34px] sm:rounded-[38px] p-4 sm:p-6 lg:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-[#E8E2D8] flex flex-col gap-4 sm:gap-6 min-h-[94vh]">
       
-      {/* =========================================================================
-         1. MINIMALIST ICON-ONLY SIDEBAR (As requested)
-         ========================================================================= */}
-      <aside className="w-full md:w-16 flex md:flex-col items-center justify-between py-2 md:py-3 px-2 md:px-0 shrink-0 gap-2 border-b md:border-b-0 md:border-r border-[#E8E2D8]/80">
-        
-        {/* Navigation Icon Buttons */}
-        <div className="flex md:flex-col items-center gap-2.5">
-          {/* Dashboard */}
-          <button
-            onClick={() => setView("dashboard")}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              view === "dashboard"
-                ? "bg-[#181A1D] text-[#FACC15] shadow-md"
-                : "text-[#8E8880] hover:text-[#181A1D] hover:bg-white/80"
-            }`}
-            title="Dashboard"
-          >
-            <LayoutDashboard className="w-5 h-5" />
-          </button>
-
-          {/* Tasks & Routine */}
-          <button
-            onClick={() => setView("tasks")}
-            className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              view === "tasks"
-                ? "bg-[#181A1D] text-[#FACC15] shadow-md"
-                : "text-[#8E8880] hover:text-[#181A1D] hover:bg-white/80"
-            }`}
-            title="Tasks & Assignments"
-          >
-            <CheckSquare className="w-5 h-5" />
-            {alerts.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 px-1 py-0.2 rounded-full bg-[#FB7185] text-white text-[8px] font-black">
-                {alerts.length}
+      {/* ----------------- GLOBAL TOP HEADER: GREETING & PROFILE ----------------- */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8E2D8]/80">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="font-display font-black text-xl sm:text-2xl text-[#181A1D] tracking-tight">
+              {timeGreeting}, {studentName}! 👋
+            </h1>
+            {student.summaryTag && (
+              <span className="px-2.5 py-0.5 rounded-full bg-[#181A1D] text-[#FDE047] text-[10px] font-black tracking-wide shadow-2xs">
+                {student.summaryTag}
               </span>
             )}
-          </button>
-
-          {/* Topics & Mastery */}
-          <button
-            onClick={() => setView("topics")}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              view === "topics"
-                ? "bg-[#181A1D] text-[#FACC15] shadow-md"
-                : "text-[#8E8880] hover:text-[#181A1D] hover:bg-white/80"
-            }`}
-            title="Study Topics & Availability"
-          >
-            <BookOpenCheck className="w-5 h-5" />
-          </button>
-
-          {/* Schedule / Timetable */}
-          <button
-            onClick={() => setView("timetable")}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              view === "timetable"
-                ? "bg-[#181A1D] text-[#FACC15] shadow-md"
-                : "text-[#8E8880] hover:text-[#181A1D] hover:bg-white/80"
-            }`}
-            title="Weekly Timetable"
-          >
-            <CalendarRange className="w-5 h-5" />
-          </button>
-
-          {/* Statistics & Reports */}
-          <button
-            onClick={() => setView("analytics")}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              view === "analytics"
-                ? "bg-[#181A1D] text-[#FACC15] shadow-md"
-                : "text-[#8E8880] hover:text-[#181A1D] hover:bg-white/80"
-            }`}
-            title="Statistics & Reports"
-          >
-            <BarChart3 className="w-5 h-5" />
-          </button>
-
-          {/* Classes & Routine */}
-          <button
-            onClick={() => setView("classes")}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              view === "classes"
-                ? "bg-[#181A1D] text-[#FACC15] shadow-md"
-                : "text-[#8E8880] hover:text-[#181A1D] hover:bg-white/80"
-            }`}
-            title="College Classes & Timetable"
-          >
-            <School className="w-5 h-5" />
-          </button>
-
-          {/* Exam Milestones */}
-          <button
-            onClick={() => setView("exams")}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              view === "exams"
-                ? "bg-[#181A1D] text-[#FACC15] shadow-md"
-                : "text-[#8E8880] hover:text-[#181A1D] hover:bg-white/80"
-            }`}
-            title="Exam Schedule & Vision Engine"
-          >
-            <Award className="w-5 h-5" />
-          </button>
-
-          {/* Focus Pomodoro */}
-          <button
-            onClick={() => setView("pomodoro")}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              view === "pomodoro"
-                ? "bg-[#181A1D] text-[#FACC15] shadow-md"
-                : "text-[#8E8880] hover:text-[#181A1D] hover:bg-white/80"
-            }`}
-            title="Focus Pomodoro Timer"
-          >
-            <Target className="w-5 h-5" />
-          </button>
+          </div>
+          <p className="text-xs text-[#78716C] font-medium">
+            {student.courseName ? `Here's your academic workspace for ${student.courseName}. ` : student.program ? `Here's your academic workspace for ${student.program}. ` : ''}
+            Manage your routines, exams, study sprint focus, and AI timetables.
+          </p>
         </div>
 
-        {/* Bottom User / Settings / Logout */}
-        <div className="flex md:flex-col items-center gap-2 pt-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          <div className="px-3.5 py-1.5 rounded-full bg-white/80 border border-[#ECE6DC] shadow-2xs text-xs font-bold text-[#181A1D] flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-[#EAB308]" />
+            <span>{now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
+          </div>
           <button
             onClick={onEditProfile}
-            className="w-9 h-9 rounded-full bg-white border border-[#ECE6DC] flex items-center justify-center text-[#181A1D] hover:bg-[#F8F6F1] shadow-2xs cursor-pointer text-xs font-bold"
-            title="Profile & Settings"
+            className="px-3.5 py-1.5 rounded-full bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] text-xs font-bold text-[#181A1D] shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all"
+            title="Edit Profile"
           >
-            {student.avatar ? <span className="text-sm">{student.avatar}</span> : (student.name || "S")[0]}
+            <Pencil className="w-3 h-3 text-[#78716C]" />
+            <span className="hidden sm:inline">Edit Profile</span>
           </button>
           <button
             onClick={onSignOut}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#9CA3AF] hover:text-[#FB7185] hover:bg-rose-50 transition-all cursor-pointer"
+            className="w-8.5 h-8.5 rounded-full bg-white hover:bg-rose-50 border border-[#ECE6DC] text-[#9CA3AF] hover:text-[#FB7185] shadow-2xs flex items-center justify-center cursor-pointer transition-all"
             title="Log out"
           >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
-      </aside>
+      </div>
 
-      {/* =========================================================================
-         2. MAIN CONTENT CANVAS
-         ========================================================================= */}
+      {/* ----------------- GLOBAL SINGLE LINE ACADEMIC MODULES TASKBAR ----------------- */}
+      <div className="bg-white rounded-[26px] p-2 sm:p-2.5 shadow-xs border border-[#ECE6DC] overflow-x-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 min-w-[720px] lg:min-w-0">
+          {/* 1. Dashboard Tab */}
+          <button
+            onClick={() => setView("dashboard")}
+            className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
+              view === "dashboard"
+                ? "bg-[#181A1D] text-white border border-[#181A1D]"
+                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                view === "dashboard"
+                  ? "bg-[#FACC15] text-[#181A1D]"
+                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+              }`}>
+                <LayoutDashboard className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
+                  view === "dashboard" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                }`}>
+                  Dashboard
+                </h4>
+                <p className={`text-[9.5px] truncate transition-all ${
+                  view === "dashboard" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                }`}>
+                  Overview
+                </p>
+              </div>
+            </div>
+            <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
+              view === "dashboard"
+                ? "bg-white/20 text-white"
+                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+            }`}>
+              Home
+            </span>
+          </button>
+
+          {/* 2. Weekly Timetable */}
+          <button
+            onClick={() => setView("timetable")}
+            className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
+              view === "timetable"
+                ? "bg-[#181A1D] text-white border border-[#181A1D]"
+                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                view === "timetable"
+                  ? "bg-[#FACC15] text-[#181A1D]"
+                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+              }`}>
+                <CalendarRange className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
+                  view === "timetable" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                }`}>
+                  Timetable
+                </h4>
+                <p className={`text-[9.5px] truncate transition-all ${
+                  view === "timetable" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                }`}>
+                  Weekly Plan
+                </p>
+              </div>
+            </div>
+            <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
+              view === "timetable"
+                ? "bg-white/20 text-white"
+                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+            }`}>
+              AI
+            </span>
+          </button>
+
+          {/* 3. Tasks & Assignments */}
+          <button
+            onClick={() => setView("tasks")}
+            className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
+              view === "tasks"
+                ? "bg-[#181A1D] text-white border border-[#181A1D]"
+                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                view === "tasks"
+                  ? "bg-[#FACC15] text-[#181A1D]"
+                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+              }`}>
+                <CheckSquare className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
+                  view === "tasks" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                }`}>
+                  Tasks
+                </h4>
+                <p className={`text-[9.5px] truncate transition-all ${
+                  view === "tasks" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                }`}>
+                  Assignments
+                </p>
+              </div>
+            </div>
+            <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
+              view === "tasks"
+                ? "bg-white/20 text-white"
+                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+            }`}>
+              {tasks.length}
+            </span>
+          </button>
+
+          {/* 4. College Timetable */}
+          <button
+            onClick={() => setView("classes")}
+            className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
+              view === "classes"
+                ? "bg-[#181A1D] text-white border border-[#181A1D]"
+                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                view === "classes"
+                  ? "bg-[#FACC15] text-[#181A1D]"
+                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+              }`}>
+                <School className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
+                  view === "classes" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                }`}>
+                  Classes
+                </h4>
+                <p className={`text-[9.5px] truncate transition-all ${
+                  view === "classes" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                }`}>
+                  Routine
+                </p>
+              </div>
+            </div>
+            <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
+              view === "classes"
+                ? "bg-white/20 text-white"
+                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+            }`}>
+              {collegeSchedule.length}
+            </span>
+          </button>
+
+          {/* 5. Exam Schedule */}
+          <button
+            onClick={() => setView("exams")}
+            className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
+              view === "exams"
+                ? "bg-[#181A1D] text-white border border-[#181A1D]"
+                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                view === "exams"
+                  ? "bg-[#FACC15] text-[#181A1D]"
+                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+              }`}>
+                <Award className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
+                  view === "exams" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                }`}>
+                  Exams
+                </h4>
+                <p className={`text-[9.5px] truncate transition-all ${
+                  view === "exams" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                }`}>
+                  Datesheets
+                </p>
+              </div>
+            </div>
+            <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
+              view === "exams"
+                ? "bg-white/20 text-white"
+                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+            }`}>
+              {examSchedule.length}
+            </span>
+          </button>
+
+          {/* 6. Focus Pomodoro Timer */}
+          <button
+            onClick={() => setView("pomodoro")}
+            className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
+              view === "pomodoro"
+                ? "bg-[#181A1D] text-white border border-[#181A1D]"
+                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                view === "pomodoro"
+                  ? "bg-[#FACC15] text-[#181A1D]"
+                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+              }`}>
+                <Target className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
+                  view === "pomodoro" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                }`}>
+                  Focus Mode
+                </h4>
+                <p className={`text-[9.5px] truncate transition-all ${
+                  view === "pomodoro" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                }`}>
+                  Pomodoro
+                </p>
+              </div>
+            </div>
+            <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
+              view === "pomodoro"
+                ? "bg-white/20 text-white"
+                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+            }`}>
+              Timer
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT CANVAS */}
       <main className="flex-1 min-w-0 flex flex-col gap-4 overflow-hidden">
         
         {/* ----------------- SCHEDULE / TIMETABLE VIEW ----------------- */}
@@ -949,6 +1327,7 @@ export default function StudentPlanner({
         {/* ----------------- DASHBOARD VIEW ----------------- */}
         {view === "dashboard" && (
           <DashboardView
+            view={view}
             stats={stats}
             upNext={upNext}
             timetable={timetable}
@@ -966,8 +1345,25 @@ export default function StudentPlanner({
             setView={setView}
             onAddTask={() => setTaskModal({ open: true, editing: null })}
             onEditProfile={onEditProfile}
-            collegeScheduleCount={collegeSchedule.length}
-            examScheduleCount={examSchedule.length}
+            onSignOut={onSignOut}
+            collegeSchedule={collegeSchedule}
+            examSchedule={examSchedule}
+            events={events}
+            onSaveEvent={saveEvent}
+            onDeleteEvent={deleteEvent}
+            onToggleEvent={toggleEvent}
+            dashboardTodos={dashboardTodos}
+            onAddDashboardTodo={handleAddDashboardTodo}
+            onToggleDashboardTodo={handleToggleDashboardTodo}
+            onDeleteDashboardTodo={handleDeleteDashboardTodo}
+            onClearCompletedDashboardTodos={handleClearCompletedDashboardTodos}
+            dashboardNotes={dashboardNotes}
+            onAddDashboardNote={handleAddDashboardNote}
+            onUpdateDashboardNote={handleUpdateDashboardNote}
+            onDeleteDashboardNote={handleDeleteDashboardNote}
+            onPinDashboardNote={handlePinDashboardNote}
+            dashboardScratchpad={dashboardScratchpad}
+            onUpdateDashboardScratchpad={handleUpdateDashboardScratchpad}
           />
         )}
 
@@ -1005,6 +1401,9 @@ export default function StudentPlanner({
             onDeleteClass={handleDeleteClass}
             onImportBulkClasses={handleImportBulkClasses}
             subjectList={subjectList}
+            timetablePhoto={timetablePhoto}
+            onSaveTimetablePhoto={setTimetablePhoto}
+            onRemoveTimetablePhoto={() => setTimetablePhoto(null)}
           />
         )}
 
@@ -1015,17 +1414,6 @@ export default function StudentPlanner({
             onSaveExam={handleSaveExam}
             onDeleteExam={handleDeleteExam}
             onImportBulkExams={handleImportBulkExams}
-            subjectList={subjectList}
-          />
-        )}
-
-        {/* ----------------- ANALYTICS VIEW ----------------- */}
-        {view === "analytics" && (
-          <AnalyticsView
-            tasks={tasks}
-            topics={topics}
-            timetable={timetable}
-            student={student}
             subjectList={subjectList}
           />
         )}
@@ -1289,7 +1677,7 @@ function ScheduleCardItem({ block, onToggle }) {
   // Regular Study / Tasks / Topics
   const isExamPrep = block.type === "exam_prep" || block.assigned?.itemType === "exam_prep";
   const isTopic = block.assigned?.itemType === "topic";
-  const subject = block.assigned?.subject || "Calculus";
+  const subject = block.assigned?.subject || "General";
   const theme = getSubjectTheme(subject);
   
   // Clean up title: remove redundant "Topic: " prefix if present for clean readability
@@ -1357,10 +1745,730 @@ function ScheduleCardItem({ block, onToggle }) {
 }
 
 /* ============================================================================
+   ACADEMIC CALENDAR COMPONENT (Exams, Quizzes, Assignments, Routine, Events)
+   ========================================================================== */
+
+function cleanISODate(dateVal) {
+  if (!dateVal) return '';
+  if (typeof dateVal === 'string') {
+    const trimmed = dateVal.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+    if (trimmed.includes('T')) return trimmed.split('T')[0];
+    const d = new Date(trimmed);
+    if (!isNaN(d.getTime())) {
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+  }
+  if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
+    return `${dateVal.getFullYear()}-${pad(dateVal.getMonth() + 1)}-${pad(dateVal.getDate())}`;
+  }
+  return '';
+}
+
+function AcademicCalendar({ 
+  now, 
+  tasks = [], 
+  timetable = [], 
+  collegeSchedule = [], 
+  examSchedule = [],
+  events = [],
+  onSaveEvent,
+  onDeleteEvent,
+  onToggleEvent,
+  toggleTask,
+  toggleBlockDone,
+  onAddTask,
+  setView
+}) {
+  const [calendarViewMode, setCalendarViewMode] = useState('grid'); // 'grid' | 'agenda'
+  const [currentMonthDate, setCurrentMonthDate] = useState(() => new Date(now.getFullYear(), now.getMonth(), 1));
+  const [selectedDateISO, setSelectedDateISO] = useState(() => toISODate(now));
+  const [filterType, setFilterType] = useState('all'); // 'all' | 'exam' | 'task' | 'event'
+  const [eventModal, setEventModal] = useState({ open: false, editing: null, defaultDate: '' });
+
+  const currentYear = currentMonthDate.getFullYear();
+  const currentMonth = currentMonthDate.getMonth();
+
+  const handlePrevMonth = () => {
+    setCurrentMonthDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonthDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const handleJumpToday = () => {
+    const today = new Date();
+    setCurrentMonthDate(new Date(today.getFullYear(), today.getMonth(), 1));
+    setSelectedDateISO(toISODate(today));
+  };
+
+  // Calendar math
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const firstDayDow = (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7; // Monday = 0
+
+  // Aggregate events for any ISO date
+  const getEventsForDate = useCallback((isoStr) => {
+    const list = [];
+
+    // 1. Scheduled Exams / Quizzes (from examSchedule)
+    (examSchedule || []).forEach(ex => {
+      const exISO = cleanISODate(ex.date);
+      if (exISO === isoStr) {
+        const isQuiz = (ex.type || '').toLowerCase().includes('quiz') || (ex.title || '').toLowerCase().includes('quiz') || (ex.weightage || '').toLowerCase().includes('quiz');
+        list.push({
+          id: `ex-${ex.id}`,
+          type: 'exam',
+          isQuiz,
+          categoryLabel: isQuiz ? 'Quiz / Test' : (ex.weightage || ex.type || 'Exam'),
+          title: ex.title || `${ex.subject} ${isQuiz ? 'Quiz' : 'Exam'}`,
+          subject: ex.subject,
+          date: exISO,
+          time: ex.start ? `${fmtTime12(ex.start)}${ex.end ? ` - ${fmtTime12(ex.end)}` : ''}` : 'Scheduled Exam',
+          venue: ex.room || ex.venue || 'Main Exam Hall',
+          weightage: ex.weightage || ex.type || (isQuiz ? 'Quiz' : 'Exam'),
+          syllabus: ex.syllabus || '',
+          raw: ex
+        });
+      }
+    });
+
+    // 2. Tasks / Assignments / Quizzes (from tasks)
+    (tasks || []).forEach(t => {
+      const taskISO = cleanISODate(t.dueDate);
+      if (taskISO === isoStr) {
+        const isQuiz = (t.category || '').toLowerCase().includes('quiz') || (t.title || '').toLowerCase().includes('quiz');
+        list.push({
+          id: `task-${t.id}`,
+          type: 'task',
+          isQuiz,
+          categoryLabel: t.category || (isQuiz ? 'Quiz' : 'Assignment'),
+          title: t.title,
+          subject: t.subject,
+          date: taskISO,
+          priority: t.priority || 'Medium',
+          category: t.category || 'Assignment',
+          time: t.dueTime ? `Due ${fmtTime12(t.dueTime)}` : 'Due Today',
+          completed: Boolean(t.completed),
+          raw: t
+        });
+      }
+    });
+
+    // 3. Custom Events (Hackathons, Fests, Club Meets, Workshops, etc.)
+    (events || []).forEach(ev => {
+      const evISO = cleanISODate(ev.date);
+      if (evISO === isoStr) {
+        let timeStr = 'All Day / Scheduled';
+        if (ev.startTime) {
+          timeStr = ev.endTime ? `${fmtTime12(ev.startTime)} - ${fmtTime12(ev.endTime)}` : fmtTime12(ev.startTime);
+        } else if (ev.time) {
+          timeStr = ev.time;
+        }
+
+        list.push({
+          id: `event-${ev.id}`,
+          type: 'event',
+          categoryLabel: ev.category || 'Event',
+          title: ev.title,
+          date: evISO,
+          time: timeStr,
+          venue: ev.venue || '',
+          description: ev.description || '',
+          completed: Boolean(ev.completed),
+          category: ev.category || 'Event',
+          raw: ev
+        });
+      }
+    });
+
+    return list;
+  }, [examSchedule, tasks, events]);
+
+  // Map of date ISO to event counts/types for calendar grid indicators
+  const monthEventMap = useMemo(() => {
+    const map = {};
+    for (let day = 1; day <= daysInMonth; day++) {
+      const iso = `${currentYear}-${pad(currentMonth + 1)}-${pad(day)}`;
+      const evts = getEventsForDate(iso);
+      if (evts.length > 0) {
+        map[day] = {
+          iso,
+          count: evts.length,
+          hasExam: evts.some(e => e.type === 'exam'),
+          hasTask: evts.some(e => e.type === 'task'),
+          hasEvent: evts.some(e => e.type === 'event'),
+          events: evts
+        };
+      }
+    }
+    return map;
+  }, [currentYear, currentMonth, daysInMonth, getEventsForDate]);
+
+  // Selected date events
+  const selectedEvents = useMemo(() => {
+    if (!selectedDateISO) return [];
+    const all = getEventsForDate(selectedDateISO);
+    if (filterType === 'all') return all;
+    return all.filter(e => e.type === filterType);
+  }, [selectedDateISO, filterType, getEventsForDate]);
+
+  // All upcoming user items (Exams, Quizzes, Tasks, Assignments, Events) sorted chronologically
+  const allUpcomingItems = useMemo(() => {
+    const items = [];
+    const todayStr = toISODate(now);
+
+    // Exams & Quizzes
+    (examSchedule || []).forEach(ex => {
+      const iso = cleanISODate(ex.date);
+      if (iso && iso >= todayStr) {
+        const isQuiz = (ex.type || '').toLowerCase().includes('quiz') || (ex.title || '').toLowerCase().includes('quiz');
+        items.push({
+          id: `up-ex-${ex.id}`,
+          type: 'exam',
+          isQuiz,
+          title: ex.title || `${ex.subject} ${isQuiz ? 'Quiz' : 'Exam'}`,
+          subject: ex.subject,
+          date: iso,
+          time: ex.start ? fmtTime12(ex.start) : 'All Day',
+          venue: ex.room || ex.venue || 'Exam Hall',
+          badge: isQuiz ? 'Quiz / Test' : (ex.weightage || ex.type || 'Exam'),
+          syllabus: ex.syllabus || '',
+          raw: ex
+        });
+      }
+    });
+
+    // Tasks & Assignments
+    (tasks || []).forEach(t => {
+      const iso = cleanISODate(t.dueDate);
+      if (iso && iso >= todayStr) {
+        const isQuiz = (t.category || '').toLowerCase().includes('quiz') || (t.title || '').toLowerCase().includes('quiz');
+        items.push({
+          id: `up-t-${t.id}`,
+          type: 'task',
+          isQuiz,
+          title: t.title,
+          subject: t.subject,
+          date: iso,
+          time: t.dueTime ? fmtTime12(t.dueTime) : 'Due End of Day',
+          priority: t.priority || 'Medium',
+          category: t.category || 'Assignment',
+          badge: t.category || 'Assignment',
+          completed: Boolean(t.completed),
+          raw: t
+        });
+      }
+    });
+
+    // Custom Events
+    (events || []).forEach(ev => {
+      const iso = cleanISODate(ev.date);
+      if (iso && iso >= todayStr) {
+        let timeStr = 'All Day';
+        if (ev.startTime) {
+          timeStr = ev.endTime ? `${fmtTime12(ev.startTime)} - ${fmtTime12(ev.endTime)}` : fmtTime12(ev.startTime);
+        } else if (ev.time) {
+          timeStr = ev.time;
+        }
+
+        items.push({
+          id: `up-ev-${ev.id}`,
+          type: 'event',
+          title: ev.title,
+          subject: ev.venue ? `📍 ${ev.venue}` : (ev.category || 'Event'),
+          date: iso,
+          time: timeStr,
+          badge: ev.category || 'Event',
+          venue: ev.venue || '',
+          description: ev.description || '',
+          completed: Boolean(ev.completed),
+          raw: ev
+        });
+      }
+    });
+
+    return items.sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return (a.time || '').localeCompare(b.time || '');
+    });
+  }, [examSchedule, tasks, events, now]);
+
+  const selectedDateFormatted = useMemo(() => {
+    if (!selectedDateISO) return '';
+    const d = new Date(`${selectedDateISO}T00:00:00`);
+    return d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+  }, [selectedDateISO]);
+
+  const todayISO = toISODate(now);
+
+  const getRelativeDaysLabel = (targetISO) => {
+    if (!targetISO) return '';
+    if (targetISO === todayISO) return 'Today';
+    const dToday = new Date(`${todayISO}T00:00:00`);
+    const dTarget = new Date(`${targetISO}T00:00:00`);
+    const diffDays = Math.round((dTarget - dToday) / (1000 * 60 * 60 * 24));
+    if (diffDays === 1) return 'Tomorrow';
+    if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days`;
+    if (diffDays > 7 && diffDays <= 14) return 'Next week';
+    return fmtDisplayDate(targetISO);
+  };
+
+  return (
+    <div className="bg-[#181A1D] text-white rounded-[34px] p-5 sm:p-6 shadow-xl border border-[#2B2F36] flex flex-col justify-between space-y-4">
+      {/* Calendar Top Header with View Switcher & Add Event */}
+      <div>
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#2A2E35]">
+          <div>
+            <h3 className="font-display font-extrabold text-white text-base flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-[#FACC15]" />
+              Academic Calendar & Events
+            </h3>
+            <p className="text-[11px] text-[#8E95A2]">Exams, quizzes, assignments & custom event schedules</p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Add Event Button */}
+            <button
+              onClick={() => setEventModal({ open: true, editing: null, defaultDate: selectedDateISO || toISODate(now) })}
+              className="px-2.5 py-1 rounded-full bg-[#A855F7] hover:bg-[#9333EA] text-white text-[10px] font-black shadow-xs flex items-center gap-1 transition-all cursor-pointer"
+              title="Add New Event"
+            >
+              <Plus className="w-3 h-3" />
+              <span>Add Event</span>
+            </button>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-[#262A30] rounded-full p-0.5">
+              <button
+                onClick={() => setCalendarViewMode('grid')}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
+                  calendarViewMode === 'grid' ? 'bg-[#FACC15] text-[#181A1D] shadow-xs' : 'text-[#8E95A2] hover:text-white'
+                }`}
+              >
+                Calendar Grid
+              </button>
+              <button
+                onClick={() => setCalendarViewMode('agenda')}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
+                  calendarViewMode === 'agenda' ? 'bg-[#FACC15] text-[#181A1D] shadow-xs' : 'text-[#8E95A2] hover:text-white'
+                }`}
+              >
+                All Upcoming ({allUpcomingItems.length})
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* MONTHLY CALENDAR GRID MODE */}
+        {calendarViewMode === 'grid' && (
+          <div>
+            {/* Month & Jump Controls */}
+            <div className="flex items-center justify-between mt-3 mb-2 px-1">
+              <span className="font-display font-extrabold text-xs text-[#FACC15] tracking-wide">
+                {currentMonthDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+              </span>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleJumpToday}
+                  className="px-2 py-0.5 rounded-full bg-[#262A30] hover:bg-[#323740] text-[9px] font-bold text-white transition-all cursor-pointer"
+                >
+                  Today
+                </button>
+                <button
+                  onClick={handlePrevMonth}
+                  className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#323740] text-[#8E95A2] hover:text-white transition-all cursor-pointer"
+                  title="Previous Month"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={handleNextMonth}
+                  className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#323740] text-[#8E95A2] hover:text-white transition-all cursor-pointer"
+                  title="Next Month"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Days of Week Header */}
+            <div className="grid grid-cols-7 text-center text-[10px] font-extrabold text-[#717885] mb-1">
+              <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+            </div>
+
+            {/* Calendar Day Grid */}
+            <div className="grid grid-cols-7 gap-1 text-center text-xs">
+              {/* Leading empty days */}
+              {Array.from({ length: firstDayDow }).map((_, idx) => (
+                <div key={`empty-${idx}`} className="h-8 sm:h-9 rounded-xl opacity-0" />
+              ))}
+
+              {/* Month days */}
+              {Array.from({ length: daysInMonth }).map((_, idx) => {
+                const dayNum = idx + 1;
+                const iso = `${currentYear}-${pad(currentMonth + 1)}-${pad(dayNum)}`;
+                const isToday = iso === todayISO;
+                const isSelected = iso === selectedDateISO;
+                const dayMeta = monthEventMap[dayNum];
+
+                return (
+                  <button
+                    key={iso}
+                    onClick={() => setSelectedDateISO(iso)}
+                    className={`relative h-8 sm:h-9 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-[#FACC15] text-[#181A1D] font-black shadow-md scale-105 z-10"
+                        : isToday
+                        ? "bg-[#2A2F38] text-[#FACC15] font-black border border-[#FACC15]/40"
+                        : dayMeta
+                        ? "bg-[#22262E] hover:bg-[#2B303A] text-white font-bold"
+                        : "text-[#8E95A2] hover:bg-[#22262E] hover:text-white"
+                    }`}
+                  >
+                    <span className="text-[11px] leading-none">{dayNum}</span>
+                    
+                    {/* Event Indicator Dots */}
+                    {dayMeta && (
+                      <div className="flex items-center gap-0.5 mt-0.5">
+                        {dayMeta.hasExam && (
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#E11D48]" : "bg-[#FB7185]"}`} title="Exam / Quiz" />
+                        )}
+                        {dayMeta.hasTask && (
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#181A1D]" : "bg-[#FACC15]"}`} title="Assignment / Task" />
+                        )}
+                        {dayMeta.hasEvent && (
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#7E22CE]" : "bg-[#C084FC]"}`} title="Event" />
+                        )}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-[#2A2E35] text-[9px] sm:text-[10px] text-[#8E95A2] flex-wrap gap-1.5">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#FB7185]" /> Exams & Quizzes</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#FACC15]" /> Assignments</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#C084FC]" /> Events</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* SELECTED DATE DETAILS (In Grid Mode) */}
+      {calendarViewMode === 'grid' && (
+        <div className="bg-[#22262D] rounded-2xl p-3.5 border border-[#2F343E] space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 className="font-display font-extrabold text-xs text-white flex items-center gap-1.5">
+                <span>{selectedDateFormatted}</span>
+                {selectedDateISO === todayISO && (
+                  <span className="px-1.5 py-0.2 rounded bg-[#FACC15] text-[#181A1D] text-[9px] font-black uppercase">Today</span>
+                )}
+              </h4>
+              <p className="text-[10px] text-[#8E95A2]">
+                {selectedEvents.length} scheduled item{selectedEvents.length === 1 ? '' : 's'}
+              </p>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex items-center gap-1 text-[9px]">
+              {[
+                { id: 'all', label: 'All' },
+                { id: 'exam', label: 'Exams' },
+                { id: 'task', label: 'Tasks' },
+                { id: 'event', label: 'Events' }
+              ].map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setFilterType(f.id)}
+                  className={`px-2 py-0.5 rounded-full font-bold transition-all cursor-pointer ${
+                    filterType === f.id
+                      ? 'bg-[#FACC15] text-[#181A1D]'
+                      : 'bg-[#2D323C] text-[#8E95A2] hover:text-white'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Event Items List */}
+          <div className="space-y-2 max-h-[190px] overflow-y-auto pr-1">
+            {selectedEvents.length === 0 ? (
+              <div className="py-5 px-3 rounded-xl bg-[#1A1D23] border border-dashed border-[#2F343E] text-center flex flex-col items-center justify-center gap-1 text-[#8E95A2]">
+                <CheckCircle2 className="w-5 h-5 text-[#545C6A]" />
+                <p className="text-xs font-bold text-white">No Items on this Date</p>
+                <p className="text-[10px] text-[#8E95A2]">No exams, homework deadlines, or custom events scheduled.</p>
+              </div>
+            ) : (
+              selectedEvents.map(evt => {
+                if (evt.type === 'exam') {
+                  return (
+                    <div key={evt.id} className="p-2.5 rounded-xl bg-[#2D1A20] border border-[#FB7185]/40 flex items-start justify-between gap-2">
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-1.5 py-0.2 rounded bg-[#FB7185] text-white text-[9px] font-black uppercase">
+                            🚨 {evt.weightage}
+                          </span>
+                          <span className="text-xs font-black text-white truncate">{evt.title}</span>
+                        </div>
+                        <p className="text-[10px] text-[#FDA4AF] font-semibold">{evt.subject} · {evt.time}</p>
+                        {evt.venue && <p className="text-[9px] text-[#F43F5E]">📍 {evt.venue}</p>}
+                        {evt.syllabus && <p className="text-[9px] text-[#FDA4AF]/80 italic truncate">Syllabus: {evt.syllabus}</p>}
+                      </div>
+                      <button
+                        onClick={() => setView('exams')}
+                        className="px-2 py-0.5 rounded-lg bg-[#FB7185]/20 hover:bg-[#FB7185]/40 text-[#FDA4AF] text-[9px] font-bold shrink-0 transition-all cursor-pointer"
+                      >
+                        View
+                      </button>
+                    </div>
+                  );
+                }
+
+                if (evt.type === 'task') {
+                  return (
+                    <div key={evt.id} className="p-2.5 rounded-xl bg-[#2B2719] border border-[#FACC15]/30 flex items-center justify-between gap-2">
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase ${
+                            evt.priority === 'High' ? 'bg-[#E11D48] text-white' : evt.priority === 'Medium' ? 'bg-[#CA8A04] text-white' : 'bg-[#16A34A] text-white'
+                          }`}>
+                            {evt.priority}
+                          </span>
+                          <span className={`text-xs font-bold truncate ${evt.completed ? 'line-through text-[#8E95A2]' : 'text-white'}`}>
+                            {evt.title}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[#FDE047] font-medium">{evt.subject} · {evt.time} · {evt.category}</p>
+                      </div>
+                      <button
+                        onClick={() => toggleTask && toggleTask(evt.raw.id)}
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-[#8E95A2] hover:text-[#FACC15] shrink-0 cursor-pointer"
+                        title={evt.completed ? "Mark Incomplete" : "Mark Done"}
+                      >
+                        {evt.completed ? <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" /> : <Circle className="w-4 h-4 text-[#717885]" />}
+                      </button>
+                    </div>
+                  );
+                }
+
+                if (evt.type === 'event') {
+                  return (
+                    <div key={evt.id} className="p-2.5 rounded-xl bg-[#231733] border border-[#A855F7]/35 flex items-start justify-between gap-2 transition-all">
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-1.5 py-0.2 rounded bg-[#9333EA] text-white text-[9px] font-black uppercase">
+                            {evt.categoryLabel}
+                          </span>
+                          <span className={`text-xs font-bold truncate ${evt.completed ? 'line-through text-[#8E95A2]' : 'text-white'}`}>
+                            {evt.title}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[#D8B4FE] font-medium">
+                          {evt.time}{evt.venue ? ` · 📍 ${evt.venue}` : ''}
+                        </p>
+                        {evt.description && (
+                          <p className="text-[9px] text-[#E9D5FF]/80 italic truncate">{evt.description}</p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0 pt-0.5">
+                        <button
+                          onClick={() => setEventModal({ open: true, editing: evt.raw, defaultDate: evt.date })}
+                          className="w-6 h-6 rounded-lg bg-[#3B2256] hover:bg-[#581C87] text-[#D8B4FE] hover:text-white flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                          title="Edit Event"
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => onDeleteEvent && onDeleteEvent(evt.raw.id)}
+                          className="w-6 h-6 rounded-lg bg-[#3B2256] hover:bg-[#E11D48] text-[#D8B4FE] hover:text-white flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                          title="Delete Event"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => onToggleEvent && onToggleEvent(evt.raw.id)}
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-[#8E95A2] hover:text-[#C084FC] cursor-pointer"
+                          title={evt.completed ? "Mark Incomplete" : "Mark Done"}
+                        >
+                          {evt.completed ? <CheckCircle2 className="w-4 h-4 text-[#A855F7]" /> : <Circle className="w-4 h-4 text-[#717885]" />}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return null;
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ALL UPCOMING AGENDA VIEW (When Agenda tab selected) */}
+      {calendarViewMode === 'agenda' && (
+        <div className="bg-[#22262D] rounded-2xl p-4 border border-[#2F343E] space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-display font-extrabold text-xs text-white flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-[#FACC15]" />
+              Chronological Upcoming Deadlines, Milestones & Events
+            </h4>
+            <span className="text-[10px] text-[#8E95A2] font-semibold">{allUpcomingItems.length} Total</span>
+          </div>
+
+          <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+            {allUpcomingItems.length === 0 ? (
+              <div className="py-8 px-4 rounded-xl bg-[#1A1D23] border border-dashed border-[#2F343E] text-center flex flex-col items-center justify-center gap-1.5 text-[#8E95A2]">
+                <CheckCircle2 className="w-6 h-6 text-[#545C6A]" />
+                <p className="text-xs font-bold text-white">No Upcoming Items in Your Planner</p>
+                <p className="text-[11px] text-[#8E95A2]">Add exams, assignments, or events to automatically view them here.</p>
+              </div>
+            ) : (
+              allUpcomingItems.map(item => {
+                const relativeLabel = getRelativeDaysLabel(item.date);
+                const isExam = item.type === 'exam';
+                const isEvent = item.type === 'event';
+
+                return (
+                  <div
+                    key={item.id}
+                    className={`p-3 rounded-xl border transition-all ${
+                      isExam
+                        ? 'bg-[#2D1A20] border-[#FB7185]/40'
+                        : isEvent
+                        ? 'bg-[#231733] border-[#A855F7]/35'
+                        : item.completed
+                        ? 'bg-[#1C2026] border-[#2A2E35] opacity-60'
+                        : 'bg-[#2B2719] border-[#FACC15]/30'
+                    } flex items-center justify-between gap-3`}
+                  >
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
+                          isExam ? 'bg-[#FB7185] text-white' : isEvent ? 'bg-[#9333EA] text-white' : item.isQuiz ? 'bg-[#3B82F6] text-white' : 'bg-[#FACC15] text-[#181A1D]'
+                        }`}>
+                          {isExam ? `🚨 ${item.badge}` : isEvent ? `${item.badge}` : item.isQuiz ? `⚡ ${item.badge}` : `📝 ${item.badge}`}
+                        </span>
+
+                        <span className={`text-xs font-bold truncate ${item.completed ? 'line-through text-[#8E95A2]' : 'text-white'}`}>
+                          {item.title}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-[10px] text-[#A8A29E] flex-wrap">
+                        {item.subject && <span className="font-semibold text-white">{item.subject}</span>}
+                        {item.subject && <span>•</span>}
+                        <span className="text-[#FDE047] font-medium">{fmtDisplayDate(item.date)} ({item.time})</span>
+                        {item.venue && (
+                          <>
+                            <span>•</span>
+                            <span className="text-[#D8B4FE]">📍 {item.venue}</span>
+                          </>
+                        )}
+                        {item.description && (
+                          <>
+                            <span>•</span>
+                            <span className="italic text-[#8E95A2] truncate">{item.description}</span>
+                          </>
+                        )}
+                        {item.syllabus && (
+                          <>
+                            <span>•</span>
+                            <span className="italic text-[#8E95A2] truncate">Syllabus: {item.syllabus}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${
+                        relativeLabel === 'Today' ? 'bg-[#E11D48] text-white animate-pulse' :
+                        relativeLabel === 'Tomorrow' ? 'bg-[#CA8A04] text-white' : 'bg-[#262A30] text-[#8E95A2]'
+                      }`}>
+                        {relativeLabel}
+                      </span>
+
+                      {isEvent && (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setEventModal({ open: true, editing: item.raw, defaultDate: item.date })}
+                            className="w-6 h-6 rounded-lg bg-[#3B2256] hover:bg-[#581C87] text-[#D8B4FE] hover:text-white flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                            title="Edit Event"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => onDeleteEvent && onDeleteEvent(item.raw.id)}
+                            className="w-6 h-6 rounded-lg bg-[#3B2256] hover:bg-[#E11D48] text-[#D8B4FE] hover:text-white flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                            title="Delete Event"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => onToggleEvent && onToggleEvent(item.raw.id)}
+                            className="w-6 h-6 rounded-full flex items-center justify-center text-[#8E95A2] hover:text-[#C084FC] cursor-pointer"
+                            title={item.completed ? "Mark Incomplete" : "Mark Done"}
+                          >
+                            {item.completed ? <CheckCircle2 className="w-4 h-4 text-[#A855F7]" /> : <Circle className="w-4 h-4 text-[#717885]" />}
+                          </button>
+                        </div>
+                      )}
+
+                      {item.type === 'task' && (
+                        <button
+                          onClick={() => toggleTask && toggleTask(item.raw.id)}
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-[#8E95A2] hover:text-[#FACC15] cursor-pointer"
+                          title={item.completed ? "Mark Incomplete" : "Mark Done"}
+                        >
+                          {item.completed ? <CheckCircle2 className="w-5 h-5 text-[#4ADE80]" /> : <Circle className="w-5 h-5 text-[#717885]" />}
+                        </button>
+                      )}
+
+                      {isExam && (
+                        <button
+                          onClick={() => setView('exams')}
+                          className="px-2.5 py-1 rounded-lg bg-[#FB7185]/20 hover:bg-[#FB7185]/40 text-[#FDA4AF] text-[10px] font-bold transition-all cursor-pointer"
+                        >
+                          Exam View
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Event Modal for Adding & Editing Events */}
+      {eventModal.open && (
+        <EventModal
+          editing={eventModal.editing}
+          defaultDate={eventModal.defaultDate}
+          onClose={() => setEventModal({ open: false, editing: null, defaultDate: '' })}
+          onSave={(evData) => {
+            if (onSaveEvent) onSaveEvent(evData);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ============================================================================
    REUSED DASHBOARD VIEW
    ========================================================================== */
 
 function DashboardView({ 
+  view = "dashboard",
   stats, 
   upNext, 
   timetable, 
@@ -1378,194 +2486,128 @@ function DashboardView({
   setView, 
   onAddTask, 
   onEditProfile, 
-  collegeScheduleCount = 0, 
-  examScheduleCount = 0 
+  onSignOut,
+  collegeSchedule = [], 
+  examSchedule = [],
+  events = [],
+  onSaveEvent,
+  onDeleteEvent,
+  onToggleEvent,
+  dashboardTodos = [],
+  onAddDashboardTodo,
+  onToggleDashboardTodo,
+  onDeleteDashboardTodo,
+  onClearCompletedDashboardTodos,
+  dashboardNotes = [],
+  onAddDashboardNote,
+  onUpdateDashboardNote,
+  onDeleteDashboardNote,
+  onPinDashboardNote,
+  dashboardScratchpad = "",
+  onUpdateDashboardScratchpad
 }) {
-  const todayISO = toISODate(now);
-  const completedStudyBlocks = timetable.filter((b) => b.type === "study" && b.completed).length;
-  const hoursStudied = stats.hoursStudied || 2.3;
-  const dailyTarget = student.dailyTargetHours || 4;
   const currentHour = now.getHours();
   const timeGreeting = currentHour < 12 ? 'Good morning' : currentHour < 17 ? 'Good afternoon' : 'Good evening';
   const studentName = student?.name || 'Student';
 
+  // Compute upcoming priority alerts (exams within next 7 days or overdue/due soon tasks)
+  const upcomingAlerts = useMemo(() => {
+    const list = [];
+    const in7days = addDays(now, 7);
+
+    (examSchedule || []).forEach(ex => {
+      const exDate = new Date(`${ex.date}T${ex.start || '00:00'}:00`);
+      if (exDate >= now && exDate <= in7days) {
+        list.push({
+          id: `alert-ex-${ex.id}`,
+          kind: 'exam',
+          title: `Exam: ${ex.subject} (${ex.title || ex.weightage || 'Exam'})`,
+          date: ex.date,
+          time: ex.start ? fmtTime12(ex.start) : '',
+          raw: ex
+        });
+      }
+    });
+
+    tasks.filter(t => !t.completed && t.dueDate).forEach(t => {
+      const dueDate = parseDateTime(t.dueDate, t.dueTime);
+      if (dueDate <= addDays(now, 3)) {
+        list.push({
+          id: `alert-task-${t.id}`,
+          kind: 'task',
+          title: `${t.title} (${t.subject})`,
+          date: t.dueDate,
+          priority: t.priority,
+          time: t.dueTime ? fmtTime12(t.dueTime) : '',
+          raw: t
+        });
+      }
+    });
+
+    return list.slice(0, 3);
+  }, [examSchedule, tasks, now]);
+
   return (
-    <div className="space-y-5">
-      {/* Personalized Welcome Banner at the Top */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8E2D8]/60">
-        <div className="space-y-0.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-display font-black text-xl sm:text-2xl text-[#181A1D] tracking-tight">
-              {timeGreeting}, {studentName}! 👋
-            </h1>
-            {student.summaryTag && (
-              <span className="px-2.5 py-0.5 rounded-full bg-[#181A1D] text-[#FDE047] text-[10px] font-black tracking-wide shadow-2xs">
-                {student.summaryTag}
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-[#78716C] font-medium">
-            {student.courseName ? `Here's your academic plan for ${student.courseName}. ` : student.program ? `Here's your academic overview for ${student.program}. ` : ''}
-            Let's stay focused and achieve your {dailyTarget}h daily study target today!
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <div className="px-3.5 py-1.5 rounded-full bg-white/80 border border-[#ECE6DC] shadow-2xs text-xs font-bold text-[#181A1D] flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5 text-[#EAB308]" />
-            <span>{now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
-          </div>
-          <button
-            onClick={onEditProfile}
-            className="px-3 py-1.5 rounded-full bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] text-xs font-bold text-[#181A1D] shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all"
-            title="Edit Profile"
-          >
-            <Pencil className="w-3 h-3 text-[#78716C]" />
-            <span className="hidden sm:inline">Edit Profile</span>
-          </button>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        
-        {/* Left Hero Taupe Card with Glowing Orbs */}
-        <div className="lg:col-span-7 bg-[#DDD7CC] rounded-[34px] p-6 sm:p-7 relative overflow-hidden shadow-xs border border-[#D0C9BD] flex flex-col justify-between min-h-[290px]">
-          <div className="flex items-start justify-between relative z-10">
-            <div>
-              <h2 className="font-display font-extrabold text-[#1B1C20] text-base sm:text-lg tracking-tight">Your Study Sessions</h2>
-              <p className="text-xs text-[#6B655E] font-medium">Results for Today</p>
+    <div className="space-y-6">
+      {/* Main Dashboard Canvas: Upcoming Alerts & Academic Calendar */}
+      <div className="space-y-4">
+        {upcomingAlerts.length > 0 && (
+          <div className="bg-white rounded-[28px] p-4 sm:p-5 shadow-xs border border-[#ECE6DC] space-y-2.5">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display font-bold text-xs text-[#181A1D] flex items-center gap-1.5">
+                <Bell className="w-3.5 h-3.5 text-[#E11D48]" />
+                Upcoming Next 7 Days
+              </h3>
+              <span className="text-[10px] font-bold text-[#8E8880]">{upcomingAlerts.length} Critical Items</span>
             </div>
-            <button onClick={() => setView("timetable")} className="w-8 h-8 rounded-full bg-[#181A1D] text-white flex items-center justify-center hover:bg-black transition-all cursor-pointer shadow-xs">
-              <CalendarRange className="w-4 h-4 text-[#FACC15]" />
-            </button>
-          </div>
-
-          <div className="relative my-4 flex items-center justify-center">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#181A1D] text-white flex flex-col items-center justify-center shadow-lg -mr-6 z-20">
-              <span className="font-display font-extrabold text-xs sm:text-sm text-white">{hoursStudied.toFixed(2)}</span>
-              <span className="text-[9px] text-[#A6ADB8] uppercase tracking-wider font-semibold">hours</span>
-            </div>
-            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-gradient-to-tr from-[#FACC15] via-[#FDE047] to-[#FEF08A] flex flex-col items-center justify-center shadow-[0_0_40px_rgba(250,204,21,0.5)] z-10">
-              <span className="font-display font-extrabold text-base sm:text-xl text-[#1B1C20]">{Math.round(hoursStudied * 815)}</span>
-              <span className="text-[10px] text-[#524B3D] font-bold">mastery score</span>
-            </div>
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-tr from-[#FB7185] via-[#FDA4AF] to-[#FECDD3] flex flex-col items-center justify-center shadow-[0_0_35px_rgba(251,113,133,0.4)] -ml-7 z-20">
-              <span className="font-display font-extrabold text-sm sm:text-base text-[#1B1C20]">{stats.completedTasks} / {stats.totalTasks}</span>
-              <span className="text-[9px] text-[#6B212D] font-bold uppercase tracking-wider">tasks done</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-[10px] sm:text-[11px] font-semibold text-[#5A554E] flex-wrap relative z-10">
-            <div className="flex items-center gap-1.5"><span className="w-4 h-1.5 rounded-full bg-[#FACC15]" /><span>Study mastery</span></div>
-            <div className="flex items-center gap-1.5"><span className="w-4 h-1.5 rounded-full bg-[#FB7185]" /><span>Tasks completed</span></div>
-            <div className="flex items-center gap-1.5"><span className="w-4 h-1.5 rounded-full bg-[#181A1D]" /><span>Activity time</span></div>
-          </div>
-        </div>
-
-        {/* Right Dark Calendar */}
-        <div className="lg:col-span-5 bg-[#181A1D] text-white rounded-[34px] p-6 sm:p-7 shadow-lg border border-[#2B2F36] flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-bold text-white text-base">Your Training Days</h3>
-            <div className="flex items-center gap-1 text-xs font-semibold text-[#8F96A3] bg-[#262A30] px-3 py-1 rounded-full">
-              <span>{now.toLocaleDateString(undefined, { month: 'long' })}</span>
-              <ChevronDown className="w-3 h-3" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-7 text-center text-[10px] font-bold text-[#6D7482] mb-2">
-            <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
-          </div>
-
-          <div className="grid grid-cols-7 gap-y-2 text-center text-xs font-medium">
-            {Array.from({ length: 28 }).map((_, idx) => {
-              const dayNum = idx + 1;
-              const isToday = dayNum === now.getDate();
-              const isCompleted = [1, 2, 4, 7, 8, 14, 17, 19, 23, 28].includes(dayNum);
-              return (
-                <div key={idx} className="flex items-center justify-center py-0.5">
-                  <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-                    isToday ? "bg-[#FACC15] text-[#181A1D] font-black shadow-md" : isCompleted ? "bg-[#282C33] text-white" : "text-[#8E95A2]"
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {upcomingAlerts.map(alt => (
+                <div key={alt.id} className="p-2.5 rounded-xl bg-[#F8F6F1] border border-[#ECE6DC] flex items-center justify-between gap-2">
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-xs font-bold text-[#181A1D] truncate">{alt.title}</p>
+                    <p className="text-[10px] text-[#8E8880] font-medium">{fmtDisplayDate(alt.date)} {alt.time ? `· ${alt.time}` : ''}</p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase shrink-0 ${
+                    alt.kind === 'exam' ? 'bg-[#FFE4E6] text-[#E11D48]' : 'bg-[#FEF9C3] text-[#CA8A04]'
                   }`}>
-                    {dayNum}
+                    {alt.kind === 'exam' ? 'Exam' : 'Due Soon'}
                   </span>
                 </div>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center justify-between pt-4 mt-3 border-t border-[#2A2E35] text-[10px] text-[#8E95A2]">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#FACC15]" /> Current day</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#282C33]" /> Done</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full border border-slate-500" /> Scheduled</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Habits & Target Gauges */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <div className="lg:col-span-5 space-y-5">
-          <div className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-[#ECE6DC] flex items-center justify-between gap-4">
-            <div>
-              <h3 className="font-display font-extrabold text-[#181A1D] text-sm sm:text-base">Study Target for Today</h3>
-              <p className="text-xs text-[#8E8880] font-medium mt-0.5">Keep your focus consistent</p>
-              <button onClick={onEditProfile} className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#181A1D] text-white text-[11px] font-bold cursor-pointer">
-                <Pencil className="w-3 h-3 text-[#FACC15]" /> Change Goal
-              </button>
-            </div>
-            <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center shrink-0">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#F4F1EB" strokeWidth="9" />
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#FA7268" strokeWidth="9" strokeDasharray="251.2" strokeDashoffset={251.2 - (251.2 * Math.min(100, (hoursStudied / dailyTarget) * 100)) / 100} strokeLinecap="round" />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="text-[9px] font-bold text-[#8E8880] uppercase">Goal</span>
-                <span className="font-display font-black text-base sm:text-lg text-[#181A1D]">{Math.round((hoursStudied / dailyTarget) * 8500) || 8500}</span>
-                <span className="text-[9px] text-[#A8A29A]">pts</span>
-              </div>
+              ))}
             </div>
           </div>
+        )}
 
-          <div className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-[#ECE6DC] space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display font-extrabold text-[#181A1D] text-sm sm:text-base">Syllabus Mastery Plan</h3>
-              <span className="font-display font-black text-xs text-[#181A1D]">{stats.completionRate || 68}% Completed</span>
-            </div>
-            <div className="relative pt-4 pb-1">
-              <div className="w-full bg-[#F4F1EB] h-2.5 rounded-full overflow-hidden">
-                <div className="bg-[#181A1D] h-full rounded-full" style={{ width: `${Math.max(15, stats.completionRate || 68)}%` }} />
-              </div>
-              <div className="absolute top-0 -translate-y-1/2 -translate-x-1/2 bg-[#181A1D] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm" style={{ left: `${Math.max(20, Math.min(80, stats.completionRate || 68))}%` }}>
-                {hoursStudied}h done
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Interactive Daily To-Do List & Quick Notes / Scratchpad Section */}
+        <DashboardNotesAndTodo
+          todos={dashboardTodos}
+          onAddTodo={onAddDashboardTodo}
+          onToggleTodo={onToggleDashboardTodo}
+          onDeleteTodo={onDeleteDashboardTodo}
+          onClearCompletedTodos={onClearCompletedDashboardTodos}
+          notes={dashboardNotes}
+          onAddNote={onAddDashboardNote}
+          onUpdateNote={onUpdateDashboardNote}
+          onDeleteNote={onDeleteDashboardNote}
+          onPinNote={onPinDashboardNote}
+          scratchpad={dashboardScratchpad}
+          onUpdateScratchpad={onUpdateDashboardScratchpad}
+        />
 
-        <div className="lg:col-span-7 bg-white rounded-[34px] p-6 sm:p-7 shadow-xs border border-[#ECE6DC]">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-extrabold text-[#181A1D] text-base">My Habits & Study Tasks</h3>
-            <button onClick={onAddTask} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#181A1D] text-white text-xs font-bold cursor-pointer">
-              <span>Add New</span><span className="w-4 h-4 rounded-full bg-[#FACC15] text-[#181A1D] flex items-center justify-center font-black text-xs">+</span>
-            </button>
-          </div>
-          <div className="space-y-3">
-            {tasks.slice(0, 4).map((t, idx) => (
-              <div key={t.id} className="p-3.5 rounded-2xl bg-[#F8F6F1] flex items-center justify-between gap-3 border border-[#EFE9DF]">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-9 h-9 rounded-full ${idx % 2 === 0 ? "bg-[#DDD7CB]" : "bg-[#181A1D] text-[#FACC15]"} flex items-center justify-center text-xs font-bold shrink-0`}>
-                    <Activity className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className={`text-xs font-bold truncate ${t.completed ? "line-through text-[#9E9890]" : "text-[#181A1D]"}`}>{t.title}</p>
-                    <p className="text-[10px] text-[#8E8880] font-medium truncate">{t.subject} · {t.category || "Assignment"}</p>
-                  </div>
-                </div>
-                <button onClick={() => toggleTask(t.id)} className="w-7 h-7 rounded-full flex items-center justify-center text-[#8E8880] hover:text-[#181A1D] cursor-pointer">
-                  {t.completed ? <CheckCircle2 className="w-5 h-5 text-[#181A1D]" /> : <Circle className="w-5 h-5 text-[#C4BEB4]" />}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+        <AcademicCalendar
+          now={now}
+          tasks={tasks}
+          timetable={timetable}
+          collegeSchedule={collegeSchedule}
+          examSchedule={examSchedule}
+          events={events}
+          onSaveEvent={onSaveEvent}
+          onDeleteEvent={onDeleteEvent}
+          onToggleEvent={onToggleEvent}
+          toggleTask={toggleTask}
+          toggleBlockDone={toggleBlockDone}
+          setView={setView}
+        />
       </div>
     </div>
   );
@@ -1831,7 +2873,7 @@ function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
   );
 }
 
-function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle }) {
+function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availability, toggleSlot, onApplyPreset }) {
   const [form, setForm] = useState({ name: "", subject: "", difficulty: "Medium" });
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -2198,7 +3240,13 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle }) {
 
 function TaskModal({ editing, subjectList, onClose, onSave }) {
   const [form, setForm] = useState(() => editing || {
-    title: "", subject: "", category: "Assignment", dueDate: toISODate(addDays(new Date(), 3)), dueTime: "18:00", priority: "Medium", estHours: 2,
+    title: "", 
+    subject: "", 
+    category: "Assignment", 
+    dueDate: toISODate(addDays(new Date(), 3)), 
+    dueTime: "18:00", 
+    priority: "Medium", 
+    estHours: 2,
   });
   const valid = form.title.trim() && form.subject.trim() && form.dueDate;
 
@@ -2206,35 +3254,58 @@ function TaskModal({ editing, subjectList, onClose, onSave }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
       <div className="w-full max-w-md bg-white rounded-[32px] shadow-2xl p-6 border border-[#ECE6DC] space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-[#F4F1EB]">
-          <h3 className="font-medium text-base text-[#181A1D]">{editing ? "Edit Task" : "Add Event / Task"}</h3>
+          <h3 className="font-medium text-base text-[#181A1D]">
+            {editing ? "Edit Task / Event" : "Add Task, Assignment or Quiz"}
+          </h3>
           <button onClick={onClose} className="text-[#8E8880] hover:text-[#181A1D] transition-colors"><X className="w-5 h-5" /></button>
         </div>
         <div className="space-y-3">
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            placeholder="Event / Task Title"
-            className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
-          />
-          <input
-            value={form.subject}
-            onChange={(e) => setForm({ ...form, subject: e.target.value })}
-            placeholder="Subject / Topic"
-            className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
+            placeholder="Title (e.g. Calculus Quiz 1, Physics Problem Set 4)"
+            className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2.5 text-xs text-[#181A1D] focus:outline-none"
+            autoFocus
           />
           <div className="grid grid-cols-2 gap-2">
             <input
-              type="date"
-              value={form.dueDate}
-              onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+              value={form.subject}
+              onChange={(e) => setForm({ ...form, subject: e.target.value })}
+              placeholder="Subject (e.g. Calculus)"
               className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
             />
-            <input
-              type="time"
-              value={form.dueTime}
-              onChange={(e) => setForm({ ...form, dueTime: e.target.value })}
-              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
-            />
+            <select
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+            >
+              <option value="Assignment">📝 Assignment</option>
+              <option value="Quiz / Test">⚡ Quiz / Test</option>
+              <option value="Exam Prep">🚨 Exam Prep</option>
+              <option value="Project">📊 Project</option>
+              <option value="Homework">📚 Homework</option>
+              <option value="Other Event">🎯 Other Event</option>
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Due Date</label>
+              <input
+                type="date"
+                value={form.dueDate}
+                onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Due Time</label>
+              <input
+                type="time"
+                value={form.dueTime}
+                onChange={(e) => setForm({ ...form, dueTime: e.target.value })}
+                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <select
@@ -2242,9 +3313,9 @@ function TaskModal({ editing, subjectList, onClose, onSave }) {
               onChange={(e) => setForm({ ...form, priority: e.target.value })}
               className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
             >
-              <option value="Low">Low Priority</option>
-              <option value="Medium">Medium Priority</option>
-              <option value="High">High Priority</option>
+              <option value="High">🔴 High Priority</option>
+              <option value="Medium">🟡 Medium Priority</option>
+              <option value="Low">🟢 Low Priority</option>
             </select>
             <input
               type="number"
@@ -2260,6 +3331,147 @@ function TaskModal({ editing, subjectList, onClose, onSave }) {
         <div className="flex justify-end gap-2 pt-3 border-t border-[#F4F1EB]">
           <button onClick={onClose} className="px-4 py-2 text-xs font-medium text-[#8E8880] hover:text-[#181A1D] cursor-pointer">Cancel</button>
           <button disabled={!valid} onClick={() => onSave(form)} className="px-5 py-2 rounded-full bg-[#181A1D] hover:bg-black text-white text-xs font-medium cursor-pointer shadow-sm transition-all disabled:opacity-50">Save</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EventModal({ editing, defaultDate, onClose, onSave }) {
+  const [form, setForm] = useState(() => editing || {
+    title: "",
+    category: "🎯 Hackathon",
+    date: defaultDate || toISODate(new Date()),
+    startTime: "10:00",
+    endTime: "12:00",
+    venue: "",
+    description: "",
+  });
+
+  const valid = form.title.trim() && form.date;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+      <div className="w-full max-w-md bg-white rounded-[32px] shadow-2xl p-6 border border-[#ECE6DC] space-y-4 animate-in fade-in zoom-in duration-150">
+        <div className="flex items-center justify-between pb-3 border-b border-[#F4F1EB]">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center font-bold">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-display font-extrabold text-base text-[#181A1D]">
+                {editing ? "Edit Calendar Event" : "Add Calendar Event"}
+              </h3>
+              <p className="text-[11px] text-[#8E8880]">Hackathons, fests, club meets, workshops & more</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-[#8E8880] hover:text-[#181A1D] transition-colors cursor-pointer">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Event Title *</label>
+            <input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              placeholder="e.g. 24h AI Hackathon, Robotics Club Meet, Cultural Fest"
+              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-4 py-2.5 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7]"
+              autoFocus
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Event Category</label>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] cursor-pointer"
+              >
+                <option value="🎯 Hackathon">🎯 Hackathon</option>
+                <option value="🎪 Fest / Cultural">🎪 Fest / Cultural</option>
+                <option value="👥 Club Meeting">👥 Club Meeting</option>
+                <option value="🎤 Workshop / Seminar">🎤 Workshop / Seminar</option>
+                <option value="💼 Career / Placement">💼 Career / Placement</option>
+                <option value="🏆 Competition">🏆 Competition</option>
+                <option value="📌 General Event">📌 General Event</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Event Date *</label>
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Start Time</label>
+              <input
+                type="time"
+                value={form.startTime || ""}
+                onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] cursor-pointer"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">End Time</label>
+              <input
+                type="time"
+                value={form.endTime || ""}
+                onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Venue / Location</label>
+            <input
+              value={form.venue || ""}
+              onChange={(e) => setForm({ ...form, venue: e.target.value })}
+              placeholder="e.g. Main Auditorium, Lab 402, Online Zoom"
+              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-4 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7]"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Description / Notes (Optional)</label>
+            <textarea
+              rows={2}
+              value={form.description || ""}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="e.g. Bring laptop & ID card, team registration link: ..."
+              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-4 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] resize-none"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#F4F1EB]">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-full text-xs font-bold text-[#78716C] hover:bg-[#F8F6F1] transition-all cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            disabled={!valid}
+            onClick={() => {
+              if (!valid) return;
+              onSave(form);
+              onClose();
+            }}
+            className="px-5 py-2 rounded-full bg-[#A855F7] hover:bg-[#9333EA] disabled:opacity-50 text-white text-xs font-black shadow-md transition-all cursor-pointer"
+          >
+            {editing ? "Save Changes" : "Create Event"}
+          </button>
         </div>
       </div>
     </div>

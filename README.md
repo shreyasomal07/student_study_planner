@@ -1,51 +1,68 @@
-# 🎓 AI Student Study Planner
+# 🎓 AI Student Study Planner & Timetable Engine
 
-A modern, intelligent student study planner and timetable generator with OCR image timetable scanning, college lecture schedule management, exam milestone countdowns, and automated AI study revision scheduling.
-
----
-
-## ✨ Features
-
-- **🔐 Student Authentication & Profiles**:
-  - Username & password security
-  - Customizable profile (Avatar emoji, Name, Age, Level, Course/Degree, Year of study, Daily study target hours)
-  - Quick account switcher & profile deletion
-- **🏫 College & School Class Routine Manager**:
-  - Visual weekly timetable for Lectures, Labs, Tutorials, and Seminars
-  - 📸 **AI OCR Image Scanning**: Upload a photo/screenshot of your class routine directly
-  - CSV & Text bulk importer with downloadable template
-- **🎯 Exam Timetable & Syllabus Tracker**:
-  - Midterms, Finals, Quizzes, and Practical exams with live countdown badges (*🚨 Today, ⏳ In X days*)
-  - 📸 **AI OCR Image Scanning**: Upload a photo/screenshot of your exam schedule
-- **🤖 AI Personalized Timetable Generator**:
-  - Automatically avoids college class hours
-  - Injects high-priority Exam Revision Sprints before exam dates
-  - Fits assignments and difficult study topics into your marked weekly availability grid
-- **⏱️ Focus Pomodoro Timer**:
-  - 25m & 50m study focus modes with audio alerts and session tracking
-- **📊 Academic Analytics & Progress**:
-  - Weekly goal completion meters, task resolution rates, and topic mastery tracking
+A modern, intelligent full-stack student study planner and automated timetable generator with OCR image timetable scanning, college lecture schedule management, exam countdowns, Pomodoro focus timer, and a dedicated **Python + FastAPI + SQLite** backend.
 
 ---
 
-## 🚀 Getting Started
+## ✨ Full-Stack Architecture
 
+### 🖥️ Frontend (React 18 + Vite + Tailwind CSS)
+- **Fast Interactive UI**: Glassmorphic dashboard with live scheduling, calendar grids, task managers, and Pomodoro timers.
+- **Client-Side OCR**: Local document/routine extraction via `tesseract.js`.
+- **Real-Time Sync**: Debounced auto-sync to SQLite database with optimistic state updates and offline fallback.
+
+### 🐍 Backend (Python + FastAPI + SQLite + SQLAlchemy)
+- **High-Performance Async REST API**: Powered by FastAPI and Uvicorn.
+- **Database**: Persistent SQLite database (`backend/planner.db`) managed with SQLAlchemy ORM.
+- **Secure Authentication**: Password hashing with `bcrypt` and JWT bearer token authentication with `pyjwt`.
+- **Interactive Documentation**: Auto-generated Swagger UI at `/docs` and ReDoc at `/redoc`.
+- **Algorithmic Timetable Engine**: Intelligent scheduling avoiding college clashes & prioritizing upcoming exams.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Run Everything (Frontend + Backend)
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
 npm run dev
+```
+- **Frontend App:** [http://localhost:5173/](http://localhost:5173/) (or `http://localhost:5174/`)
+- **FastAPI Backend:** [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+- **Interactive Swagger Docs:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-# Build for production
-npm run build
+### 2. Run Individually
+
+**Backend Only:**
+```bash
+npm run server
+# or directly with python:
+cd backend && ./venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+**Frontend Only:**
+```bash
+npm run dev:frontend
 ```
 
 ---
 
-## 🛠️ Tech Stack
-- **React 18** + **Vite**
-- **Tailwind CSS**
-- **Lucide Icons**
-- **Tesseract.js** (AI OCR Vision Engine)
-- **Canvas Confetti**
+## 📡 API Endpoints Overview
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/health` | Backend status & SQLite connectivity check |
+| `POST` | `/api/auth/register` | Register student profile with initial subjects & availability |
+| `POST` | `/api/auth/login` | Authenticate student credentials & receive JWT token |
+| `GET` | `/api/auth/me` | Fetch active student session & planner state |
+| `GET` | `/api/auth/users` | List registered user profiles for fast switcher |
+| `PUT` | `/api/user/profile` | Update profile settings (name, avatar, level, goals) |
+| `DELETE` | `/api/user/account` | Delete student profile and all associated data |
+| `GET` | `/api/planner` | Fetch tasks, topics, routines, exams, notes & timetable |
+| `PUT` | `/api/planner` | Synchronize and save all planner changes to SQLite |
+| `POST` | `/api/ai/generate-timetable` | Algorithmic study timetable generator endpoint |
+
+---
+
+## 🛠️ Technology Stack
+- **Frontend:** React 18, Vite, Tailwind CSS, Lucide Icons, Canvas Confetti
+- **Backend:** Python 3, FastAPI, Uvicorn, SQLAlchemy 2.0, SQLite, Pydantic v2, Bcrypt, PyJWT

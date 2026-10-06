@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import Tesseract from 'tesseract.js';
 import { 
   School, 
   Plus, 
@@ -19,8 +18,11 @@ import {
   FileSpreadsheet,
   Image as ImageIcon,
   Loader2,
-  Scan
+  Scan,
+  Eye,
+  CalendarRange
 } from 'lucide-react';
+import TimetablePhotoViewer from './TimetablePhotoViewer';
 
 const DAY_KEYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DAY_LABELS = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday", Sun: "Sunday" };
@@ -89,78 +91,28 @@ function normalizeClassType(str) {
   return 'Lecture';
 }
 
-// Extract class schedule items from OCR-scanned text
-function extractClassesFromOCRText(rawText) {
-  const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 2);
-  const detected = [];
-  let currentDay = 'Mon';
-
-  lines.forEach((line) => {
-    // Check if line declares a day
-    const dayFound = DAY_KEYS.find(d => {
-      const full = DAY_LABELS[d].toLowerCase();
-      const short = d.toLowerCase();
-      return line.toLowerCase().includes(full) || line.toLowerCase().startsWith(short);
-    });
-
-    if (dayFound) {
-      currentDay = dayFound;
-    }
-
-    // Check time range in line (e.g. 09:00 - 10:30, 9am to 10:30am)
-    const timeMatch = line.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*(?:-|to|–)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i);
-    if (timeMatch) {
-      const start = normalizeTime(timeMatch[1]);
-      const end = normalizeTime(timeMatch[2]);
-
-      // Subject extraction
-      let subjectCandidate = line
-        .replace(/\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\b/gi, '')
-        .replace(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*(?:-|to|–)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/gi, '')
-        .replace(/\b(lecture|lab|tutorial|seminar|workshop|class|period|room|hall|venue)\b/gi, '')
-        .replace(/[^\w\s]/g, ' ')
-        .trim();
-
-      subjectCandidate = subjectCandidate.replace(/\s+/g, ' ');
-
-      if (subjectCandidate.length >= 3) {
-        detected.push({
-          id: Math.random().toString(36).slice(2, 10),
-          day: currentDay,
-          start,
-          end,
-          subject: subjectCandidate.charAt(0).toUpperCase() + subjectCandidate.slice(1),
-          type: normalizeClassType(line),
-          room: line.toLowerCase().includes('hall') || line.toLowerCase().includes('room') || line.toLowerCase().includes('lab') ? (line.match(/(?:hall|room|lab)\s*[a-z0-9-]+/i)?.[0] || '') : ''
-        });
-      }
-    }
-  });
-
-  return detected;
-}
-
 export default function ClassTimetableManager({ 
   classes = [], 
   onSaveClass, 
   onDeleteClass, 
   onImportBulkClasses, 
-  subjectList = [] 
+  subjectList = [],
+  timetablePhoto = null,
+  onSaveTimetablePhoto,
+  onRemoveTimetablePhoto
 }) {
+  const [activeTab, setActiveTab] = useState(timetablePhoto ? 'photo' : 'classes'); // 'photo' or 'classes'
   const [modalOpen, setModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState(null);
   
   // Upload & Import Modal
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
-  const [uploadTab, setUploadTab] = useState('image_file'); // 'image_file' or 'paste'
+  const [uploadTab, setUploadTab] = useState('photo_direct'); // 'photo_direct' or 'paste'
   const [bulkText, setBulkText] = useState('');
   const [parsedPreview, setParsedPreview] = useState([]);
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
-  const [ocrLoading, setOcrLoading] = useState(false);
-  const [ocrProgress, setOcrProgress] = useState(0);
-  const [ocrStatusText, setOcrStatusText] = useState('');
   const fileInputRef = useRef(null);
 
   const [selectedDayFilter, setSelectedDayFilter] = useState('All');
@@ -273,59 +225,37 @@ export default function ClassTimetableManager({
       }
     });
 
-    if (parsed.length > 0) {
-      setParsedPreview(parsed);
-    } else {
-      const ocrExtracted = extractClassesFromOCRText(raw);
-      setParsedPreview(ocrExtracted);
-    }
+    setParsedPreview(parsed);
   };
 
-  const handleFileUpload = async (file) => {
+  const handleDirectPhotoUpload = (file) => {
     if (!file) return;
-    setUploadedFileName(file.name);
-
     const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|webp|bmp|gif)$/i.test(file.name);
 
     if (isImage) {
-      const objectUrl = URL.createObjectURL(file);
-      setImagePreviewUrl(objectUrl);
-      setOcrLoading(true);
-      setOcrProgress(0);
-      setOcrStatusText('Initializing Optical Character Recognition (OCR)...');
-
-      try {
-        const result = await Tesseract.recognize(
-          file,
-          'eng',
-          {
-            logger: (m) => {
-              if (m.status === 'recognizing text') {
-                setOcrProgress(Math.round(m.progress * 100));
-                setOcrStatusText(`Scanning timetable image... ${Math.round(m.progress * 100)}%`);
-              } else if (m.status === 'loading tesseract core') {
-                setOcrStatusText('Loading AI Vision Engine...');
-              }
-            }
-          }
-        );
-
-        const extractedText = result.data.text || '';
-        setBulkText(extractedText);
-        parseRawSchedule(extractedText);
-      } catch (err) {
-        console.error('OCR Error:', err);
-        alert('Could not scan image text automatically. Please paste or enter the schedule manually.');
-      } finally {
-        setOcrLoading(false);
-      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        const photoData = {
+          url: dataUrl,
+          name: file.name,
+          size: (file.size / 1024).toFixed(1) + ' KB',
+          uploadedAt: new Date().toISOString()
+        };
+        if (onSaveTimetablePhoto) {
+          onSaveTimetablePhoto(photoData);
+        }
+        setActiveTab('photo');
+        setBulkModalOpen(false);
+      };
+      reader.readAsDataURL(file);
     } else {
-      setImagePreviewUrl(null);
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target.result;
         setBulkText(text);
         parseRawSchedule(text);
+        setUploadTab('paste');
       };
       reader.readAsText(file);
     }
@@ -346,13 +276,13 @@ export default function ClassTimetableManager({
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files[0]);
+      handleDirectPhotoUpload(e.dataTransfer.files[0]);
     }
   };
 
   const handleConfirmImport = () => {
     if (parsedPreview.length === 0) {
-      alert('No valid classes detected. Please upload an image, CSV file, or paste your routine.');
+      alert('No valid classes detected. Please enter or paste your schedule.');
       return;
     }
     onImportBulkClasses(parsedPreview);
@@ -375,20 +305,6 @@ export default function ClassTimetableManager({
     document.body.removeChild(a);
   };
 
-  const loadSampleRoutine = () => {
-    const samples = [
-      { id: 'c1', day: 'Mon', start: '09:00', end: '10:30', subject: 'Calculus', type: 'Lecture', room: 'Hall 101' },
-      { id: 'c2', day: 'Mon', start: '11:00', end: '13:00', subject: 'Data Structures', type: 'Lab', room: 'CS Lab 2' },
-      { id: 'c3', day: 'Tue', start: '10:00', end: '11:30', subject: 'Digital Electronics', type: 'Lecture', room: 'ECE Hall A' },
-      { id: 'c4', day: 'Wed', start: '09:00', end: '10:30', subject: 'Data Structures', type: 'Lecture', room: 'Hall 102' },
-      { id: 'c5', day: 'Wed', start: '14:00', end: '16:00', subject: 'Electronics', type: 'Lab', room: 'Circuits Lab' },
-      { id: 'c6', day: 'Thu', start: '10:30', end: '12:00', subject: 'Marketing', type: 'Lecture', room: 'Management B' },
-      { id: 'c7', day: 'Fri', start: '09:00', end: '10:30', subject: 'Calculus', type: 'Tutorial', room: 'Room 204' },
-      { id: 'c8', day: 'Fri', start: '11:00', end: '12:30', subject: 'Physics', type: 'Lecture', room: 'Science Block' }
-    ];
-    onImportBulkClasses(samples);
-  };
-
   const filteredClasses = selectedDayFilter === 'All'
     ? classes
     : classes.filter(c => c.day === selectedDayFilter);
@@ -406,24 +322,53 @@ export default function ClassTimetableManager({
       {/* Header controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-[28px] border border-[#ECE6DC] shadow-2xs">
         <div>
-          <h2 className="font-display font-extrabold text-[#181A1D] text-base sm:text-lg flex items-center gap-2">
-            <School className="w-5 h-5 text-[#181A1D]" />
-            College & School Class Timetable
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="font-display font-extrabold text-[#181A1D] text-base sm:text-lg flex items-center gap-2">
+              <School className="w-5 h-5 text-[#181A1D]" />
+              Class & College Timetable
+            </h2>
+            {timetablePhoto && (
+              <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#047857] text-[10px] font-bold flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-[#10B981]" /> Photo Added
+              </span>
+            )}
+          </div>
           <p className="text-xs text-[#8E8880] mt-0.5">
-            Upload a photo of your routine or enter lectures. The AI scheduler avoids booking study slots during classes.
+            View your original timetable photo directly or manage scheduled lectures.
           </p>
         </div>
 
+        {/* View Switcher Tabs & Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          {classes.length === 0 && (
+          <div className="flex items-center p-1 bg-[#FAF8F5] border border-[#ECE6DC] rounded-full shadow-2xs">
             <button
-              onClick={loadSampleRoutine}
-              className="px-3.5 py-2 rounded-full text-xs font-bold bg-[#F4F1EB] hover:bg-[#EAE4DA] text-[#181A1D] transition-all cursor-pointer flex items-center gap-1.5"
+              type="button"
+              onClick={() => setActiveTab('photo')}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'photo'
+                  ? 'bg-[#181A1D] text-white shadow-2xs'
+                  : 'text-[#78716C] hover:text-[#181A1D]'
+              }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#FACC15]" /> Sample Routine
+              <ImageIcon className="w-3.5 h-3.5 text-[#FACC15]" />
+              <span>Photo Timetable</span>
+              {timetablePhoto && (
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              )}
             </button>
-          )}
+            <button
+              type="button"
+              onClick={() => setActiveTab('classes')}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'classes'
+                  ? 'bg-[#181A1D] text-white shadow-2xs'
+                  : 'text-[#78716C] hover:text-[#181A1D]'
+              }`}
+            >
+              <CalendarRange className="w-3.5 h-3.5" />
+              <span>Classes List ({classes.length})</span>
+            </button>
+          </div>
 
           <button
             onClick={() => {
@@ -435,7 +380,7 @@ export default function ClassTimetableManager({
             }}
             className="px-4 py-2 rounded-full text-xs font-bold bg-[#F4F1EB] hover:bg-[#EAE4DA] text-[#181A1D] border border-[#ECE6DC] transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
-            <Upload className="w-3.5 h-3.5 text-[#181A1D]" /> Upload Photo / Document
+            <Upload className="w-3.5 h-3.5 text-[#181A1D]" /> Upload Photo / File
           </button>
 
           <button
@@ -447,109 +392,137 @@ export default function ClassTimetableManager({
         </div>
       </div>
 
-      {/* Day Filter Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-        <button
-          onClick={() => setSelectedDayFilter('All')}
-          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-            selectedDayFilter === 'All' ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
-          }`}
-        >
-          All Days ({classes.length})
-        </button>
-        {DAY_KEYS.map((d) => {
-          const count = (classesByDay[d] || []).length;
-          const isActive = selectedDayFilter === d;
-          return (
+      {/* Main Tab Content */}
+      {activeTab === 'photo' ? (
+        <TimetablePhotoViewer
+          photo={timetablePhoto}
+          onSavePhoto={onSaveTimetablePhoto}
+          onRemovePhoto={onRemoveTimetablePhoto}
+          title="Class & College Timetable Photo"
+          subtitle="Your uploaded timetable image displayed directly on the screen."
+        />
+      ) : (
+        <div className="space-y-4">
+          {/* If photo is uploaded, show a subtle quick toggle banner */}
+          {timetablePhoto && (
+            <div className="bg-white/80 border border-[#ECE6DC] rounded-2xl p-2.5 px-4 flex items-center justify-between text-xs text-[#181A1D] shadow-2xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <ImageIcon className="w-4 h-4 text-[#D97706] shrink-0" />
+                <span className="font-bold">Original Timetable Photo Attached:</span>
+                <span className="text-[#78716C] truncate max-w-xs">{timetablePhoto.name || 'Uploaded Photo'}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('photo')}
+                className="px-3 py-1 rounded-full bg-[#181A1D] text-white font-bold hover:bg-[#2D3139] text-[11px] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+              >
+                <Eye className="w-3 h-3 text-[#FACC15]" /> View Timetable Photo
+              </button>
+            </div>
+          )}
+
+          {/* Day Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             <button
-              key={d}
-              onClick={() => setSelectedDayFilter(d)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                isActive ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
+              onClick={() => setSelectedDayFilter('All')}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                selectedDayFilter === 'All' ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
               }`}
             >
-              <span>{d}</span>
-              {count > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-[#FACC15] text-[#181A1D]' : 'bg-[#F4F1EB] text-[#8E8880]'}`}>
-                  {count}
-                </span>
-              )}
+              All Days ({classes.length})
             </button>
-          );
-        })}
-      </div>
-
-      {/* Classes Grid View */}
-      {classes.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
-            <School className="w-7 h-7" />
-          </div>
-          <h3 className="font-display font-bold text-slate-800 text-base">No College/School Classes Added</h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-5">
-            Upload a photo / screenshot of your class timetable, CSV, or add individual lectures so the AI can build your study routine around them.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              onClick={() => {
-                setBulkModalOpen(true);
-                setParsedPreview([]);
-                setBulkText('');
-                setUploadedFileName('');
-                setImagePreviewUrl(null);
-              }}
-              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2"
-            >
-              <ImageIcon className="w-4 h-4" /> Upload Timetable Picture / File
-            </button>
-            <button
-              onClick={loadSampleRoutine}
-              className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all cursor-pointer flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4 text-indigo-600" /> Load Sample Routine
-            </button>
-          </div>
-        </div>
-      ) : selectedDayFilter === 'All' ? (
-        /* Week Day Column View */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {DAY_KEYS.map((day) => {
-            const dayList = classesByDay[day] || [];
-            return (
-              <div key={day} className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden flex flex-col">
-                <div className="p-3.5 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
-                  <span className="font-display font-bold text-slate-800 text-sm">{DAY_LABELS[day]}</span>
-                  <span className="text-xs font-bold text-slate-400">{dayList.length} classes</span>
-                </div>
-                <div className="p-3 flex-1 space-y-2.5 min-h-[140px]">
-                  {dayList.length === 0 ? (
-                    <div className="h-full flex items-center justify-center text-center py-6 text-slate-400 text-xs">
-                      No classes scheduled
-                    </div>
-                  ) : (
-                    dayList.map((item) => (
-                      <ClassCard key={item.id} item={item} onEdit={openEditModal} onDelete={onDeleteClass} />
-                    ))
+            {DAY_KEYS.map((d) => {
+              const count = (classesByDay[d] || []).length;
+              const isActive = selectedDayFilter === d;
+              return (
+                <button
+                  key={d}
+                  onClick={() => setSelectedDayFilter(d)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    isActive ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
+                  }`}
+                >
+                  <span>{d}</span>
+                  {count > 0 && (
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-[#FACC15] text-[#181A1D]' : 'bg-[#F4F1EB] text-[#8E8880]'}`}>
+                      {count}
+                    </span>
                   )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        /* Single Day List View */
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs space-y-3">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 className="font-display font-bold text-slate-800">{DAY_LABELS[selectedDayFilter]} Schedule</h3>
-            <span className="text-xs text-slate-500 font-semibold">{filteredClasses.length} sessions</span>
+                </button>
+              );
+            })}
           </div>
-          {filteredClasses.length === 0 ? (
-            <p className="text-xs text-slate-400 py-8 text-center">No classes on {DAY_LABELS[selectedDayFilter]}</p>
+
+          {/* Classes Grid View */}
+          {classes.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto shadow-2xs">
+                <School className="w-7 h-7" />
+              </div>
+              <h3 className="font-display font-bold text-slate-800 text-base">No Structured Lectures Added</h3>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
+                You can upload a photo of your timetable to display directly, or add individual class lectures so the AI can build your study routine around them.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    setBulkModalOpen(true);
+                    setUploadTab('photo_direct');
+                  }}
+                  className="px-4 py-2.5 rounded-full bg-[#181A1D] hover:bg-black text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <ImageIcon className="w-4 h-4 text-[#FACC15]" /> Upload Timetable Photo (Direct View)
+                </button>
+                <button
+                  onClick={openAddModal}
+                  className="px-4 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4 text-indigo-600" /> Add Class Manually
+                </button>
+              </div>
+            </div>
+          ) : selectedDayFilter === 'All' ? (
+            /* Week Day Column View */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {DAY_KEYS.map((day) => {
+                const dayList = classesByDay[day] || [];
+                return (
+                  <div key={day} className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden flex flex-col">
+                    <div className="p-3.5 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
+                      <span className="font-display font-bold text-slate-800 text-sm">{DAY_LABELS[day]}</span>
+                      <span className="text-xs font-bold text-slate-400">{dayList.length} classes</span>
+                    </div>
+                    <div className="p-3 flex-1 space-y-2.5 min-h-[140px]">
+                      {dayList.length === 0 ? (
+                        <div className="h-full flex items-center justify-center text-center py-6 text-slate-400 text-xs">
+                          No classes scheduled
+                        </div>
+                      ) : (
+                        dayList.map((item) => (
+                          <ClassCard key={item.id} item={item} onEdit={openEditModal} onDelete={onDeleteClass} />
+                        ))
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {filteredClasses.map((item) => (
-                <ClassCard key={item.id} item={item} onEdit={openEditModal} onDelete={onDeleteClass} />
-              ))}
+            /* Single Day List View */
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="font-display font-bold text-slate-800">{DAY_LABELS[selectedDayFilter]} Schedule</h3>
+                <span className="text-xs text-slate-500 font-semibold">{filteredClasses.length} sessions</span>
+              </div>
+              {filteredClasses.length === 0 ? (
+                <p className="text-xs text-slate-400 py-8 text-center">No classes on {DAY_LABELS[selectedDayFilter]}</p>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {filteredClasses.map((item) => (
+                    <ClassCard key={item.id} item={item} onEdit={openEditModal} onDelete={onDeleteClass} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -571,75 +544,81 @@ export default function ClassTimetableManager({
 
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Subject / Course Name *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Subject / Course Name *</label>
                 <input
                   type="text"
                   required
+                  placeholder="e.g. Data Structures & Algorithms"
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  placeholder="e.g. Data Structures, Calculus"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-500"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 bg-slate-50 font-medium"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Day of Week</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Day of Week</label>
                   <select
                     value={form.day}
                     onChange={(e) => setForm({ ...form, day: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 bg-slate-50 font-medium cursor-pointer"
                   >
-                    {DAY_KEYS.map(d => <option key={d} value={d}>{DAY_LABELS[d]}</option>)}
+                    {DAY_KEYS.map((d) => (
+                      <option key={d} value={d}>{DAY_LABELS[d]}</option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Session Type</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Class Type</label>
                   <select
                     value={form.type}
                     onChange={(e) => setForm({ ...form, type: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 bg-slate-50 font-medium cursor-pointer"
                   >
-                    {CLASS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    {CLASS_TYPES.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Start Time</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Start Time</label>
                   <input
                     type="time"
+                    required
                     value={form.start}
                     onChange={(e) => setForm({ ...form, start: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-500"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 bg-slate-50 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">End Time</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">End Time</label>
                   <input
                     type="time"
+                    required
                     value={form.end}
                     onChange={(e) => setForm({ ...form, end: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-500"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 bg-slate-50 font-medium"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Classroom / Lab Location (Optional)</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Room / Location (Optional)</label>
                 <input
                   type="text"
+                  placeholder="e.g. Hall 302 / Online Teams"
                   value={form.room}
                   onChange={(e) => setForm({ ...form, room: e.target.value })}
-                  placeholder="e.g. Hall 304, Lab 2"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-500"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 bg-slate-50 font-medium"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
@@ -659,14 +638,14 @@ export default function ClassTimetableManager({
         </div>
       )}
 
-      {/* Upload Picture, Document & Bulk Import Modal */}
+      {/* Upload Timetable Photo & Document Modal */}
       {bulkModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="w-full max-w-xl bg-white rounded-3xl shadow-2xl p-6 relative my-8 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 shrink-0">
               <h3 className="font-display font-bold text-slate-800 flex items-center gap-2 text-base">
-                <Scan className="w-5 h-5 text-indigo-600" />
-                Upload College Timetable (Photo, PDF, or CSV)
+                <ImageIcon className="w-5 h-5 text-indigo-600" />
+                Upload Timetable Photo & Routine
               </h3>
               <button onClick={() => setBulkModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
@@ -677,12 +656,12 @@ export default function ClassTimetableManager({
             <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl mb-4 shrink-0">
               <button
                 type="button"
-                onClick={() => setUploadTab('image_file')}
+                onClick={() => setUploadTab('photo_direct')}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  uploadTab === 'image_file' ? 'bg-white text-indigo-600 shadow-2xs' : 'text-slate-600 hover:text-slate-800'
+                  uploadTab === 'photo_direct' ? 'bg-white text-indigo-600 shadow-2xs' : 'text-slate-600 hover:text-slate-800'
                 }`}
               >
-                <ImageIcon className="w-3.5 h-3.5" /> Upload Photo / CSV / File
+                <ImageIcon className="w-3.5 h-3.5" /> Upload Photo (Direct View)
               </button>
               <button
                 type="button"
@@ -691,12 +670,12 @@ export default function ClassTimetableManager({
                   uploadTab === 'paste' ? 'bg-white text-indigo-600 shadow-2xs' : 'text-slate-600 hover:text-slate-800'
                 }`}
               >
-                <FileText className="w-3.5 h-3.5" /> Paste Raw Schedule
+                <FileText className="w-3.5 h-3.5" /> Paste CSV / Text
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-              {uploadTab === 'image_file' ? (
+              {uploadTab === 'photo_direct' ? (
                 <div className="space-y-3">
                   <div
                     onDragEnter={handleDrag}
@@ -704,7 +683,7 @@ export default function ClassTimetableManager({
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 relative overflow-hidden ${
+                    className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-3 relative overflow-hidden ${
                       dragActive
                         ? 'border-indigo-500 bg-indigo-50/50'
                         : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'
@@ -713,71 +692,35 @@ export default function ClassTimetableManager({
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*, .png, .jpg, .jpeg, .webp, .bmp, .csv, .txt, .tsv, .json"
+                      accept="image/*, .png, .jpg, .jpeg, .webp, .bmp"
                       onChange={(e) => {
-                        if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                        if (e.target.files?.[0]) handleDirectPhotoUpload(e.target.files[0]);
                       }}
                       className="hidden"
                     />
 
-                    {imagePreviewUrl ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <img
-                          src={imagePreviewUrl}
-                          alt="Uploaded Timetable"
-                          className="max-h-36 rounded-xl border border-slate-200 shadow-2xs object-contain"
-                        />
-                        <p className="text-xs font-bold text-slate-700">{uploadedFileName}</p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                          <ImageIcon className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-800">
-                            {uploadedFileName ? uploadedFileName : 'Click to upload a Picture (PNG/JPG) or CSV / Document'}
-                          </p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
-                            AI Optical Character Recognition (OCR) will scan your photo and detect lecture timings & days
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* OCR Progress Loading bar */}
-                  {ocrLoading && (
-                    <div className="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 space-y-2 animate-in fade-in">
-                      <div className="flex items-center justify-between text-xs font-bold text-indigo-800">
-                        <span className="flex items-center gap-2">
-                          <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
-                          {ocrStatusText}
-                        </span>
-                        <span>{ocrProgress}%</span>
-                      </div>
-                      <div className="w-full bg-indigo-200 h-2 rounded-full overflow-hidden">
-                        <div
-                          className="bg-indigo-600 h-full transition-all duration-200"
-                          style={{ width: `${ocrProgress}%` }}
-                        />
-                      </div>
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-2xs">
+                      <ImageIcon className="w-7 h-7" />
                     </div>
-                  )}
+                    <div>
+                      <p className="text-sm font-bold text-slate-800">
+                        Select or Drop Timetable Photo
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                        Displays your original timetable picture directly on the page with instant zoom, pan, and full screen view.
+                      </p>
+                    </div>
 
-                  <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-                    <span>Prefer entering into a spreadsheet?</span>
                     <button
                       type="button"
-                      onClick={downloadCSVTemplate}
-                      className="inline-flex items-center gap-1 text-indigo-600 font-bold hover:underline cursor-pointer"
+                      className="mt-2 px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-bold shadow-xs hover:bg-indigo-700 transition-all pointer-events-none"
                     >
-                      <Download className="w-3.5 h-3.5" /> Download CSV Template
+                      Browse Image File
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <p className="text-xs text-slate-500">
                     Paste your schedule below (Format: <code className="bg-slate-100 px-1 rounded text-indigo-600">Day, StartTime, EndTime, Subject, Type, Room</code>):
                   </p>
@@ -791,58 +734,61 @@ export default function ClassTimetableManager({
                     placeholder={`Mon, 09:00, 10:30, Calculus, Lecture, Room 101\nMon, 11:00, 13:00, Data Structures, Lab, CS Lab\nTue, 10:00, 11:30, Physics, Lecture, Hall A`}
                     className="w-full p-3 font-mono text-xs bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500"
                   />
-                </div>
-              )}
 
-              {/* Detected items preview table */}
-              {parsedPreview.length > 0 && (
-                <div className="border border-indigo-100 bg-indigo-50/30 rounded-2xl p-3.5 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      Detected Classes ({parsedPreview.length} items)
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setParsedPreview([])}
-                      className="text-[11px] text-rose-500 hover:underline cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                  </div>
-
-                  <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-                    {parsedPreview.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="bg-white p-2 rounded-xl border border-slate-200 flex items-center justify-between text-xs gap-2"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md text-[10px]">
-                            {item.day}
-                          </span>
-                          <span className="font-semibold text-slate-800 truncate">{item.subject}</span>
-                          <span className="text-[10px] text-slate-400">
-                            {fmtTime12(item.start)} – {fmtTime12(item.end)}
-                          </span>
-                          {item.type && (
-                            <span className="text-[10px] px-1.5 py-0.2 rounded-full border border-slate-200 bg-slate-50 text-slate-600">
-                              {item.type}
-                            </span>
-                          )}
-                          {item.room && (
-                            <span className="text-[10px] text-slate-400 truncate">📍 {item.room}</span>
-                          )}
-                        </div>
+                  {/* Detected items preview table */}
+                  {parsedPreview.length > 0 && (
+                    <div className="border border-indigo-100 bg-indigo-50/30 rounded-2xl p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          Detected Classes ({parsedPreview.length} items)
+                        </span>
                         <button
                           type="button"
-                          onClick={() => setParsedPreview(parsedPreview.filter((_, i) => i !== idx))}
-                          className="text-slate-400 hover:text-rose-500 p-1 cursor-pointer"
+                          onClick={() => setParsedPreview([])}
+                          className="text-[11px] text-rose-500 hover:underline cursor-pointer"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          Clear
                         </button>
                       </div>
-                    ))}
+
+                      <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                        {parsedPreview.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-white p-2 rounded-xl border border-slate-200 flex items-center justify-between text-xs gap-2"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md text-[10px]">
+                                {item.day}
+                              </span>
+                              <span className="font-semibold text-slate-800 truncate">{item.subject}</span>
+                              <span className="text-[10px] text-slate-400">
+                                {fmtTime12(item.start)} – {fmtTime12(item.end)}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setParsedPreview(parsedPreview.filter((_, i) => i !== idx))}
+                              className="text-slate-400 hover:text-rose-500 p-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between text-xs text-slate-500 px-1 pt-1">
+                    <span>Need template?</span>
+                    <button
+                      type="button"
+                      onClick={downloadCSVTemplate}
+                      className="inline-flex items-center gap-1 text-indigo-600 font-bold hover:underline cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Download CSV Template
+                    </button>
                   </div>
                 </div>
               )}
@@ -856,15 +802,17 @@ export default function ClassTimetableManager({
               >
                 Cancel
               </button>
-              <button
-                type="button"
-                disabled={parsedPreview.length === 0 || ocrLoading}
-                onClick={handleConfirmImport}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 shadow-sm cursor-pointer flex items-center gap-1.5"
-              >
-                {ocrLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                Import {parsedPreview.length > 0 ? `(${parsedPreview.length}) Classes` : ''}
-              </button>
+              {uploadTab === 'paste' && (
+                <button
+                  type="button"
+                  disabled={parsedPreview.length === 0}
+                  onClick={handleConfirmImport}
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 shadow-sm cursor-pointer flex items-center gap-1.5"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Import ({parsedPreview.length}) Classes
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -894,24 +842,26 @@ function ClassCard({ item, onEdit, onDelete }) {
             className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
             title="Delete"
           >
-            <Trash2 className="w-3 h-3" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
       <div>
         <p className="text-xs font-bold text-slate-800 leading-snug">{item.subject}</p>
-        <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1 mt-0.5">
-          <Clock className="w-3 h-3 text-slate-400" />
-          {fmtTime12(item.start)} – {fmtTime12(item.end)}
-        </p>
+        <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+          <span className="flex items-center gap-1">
+            <Clock className="w-3 h-3 text-slate-400" />
+            {fmtTime12(item.start)} – {fmtTime12(item.end)}
+          </span>
+          {item.room && (
+            <span className="flex items-center gap-1 text-slate-400">
+              <MapPin className="w-3 h-3 text-slate-400" />
+              {item.room}
+            </span>
+          )}
+        </div>
       </div>
-
-      {item.room && (
-        <p className="text-[10px] text-slate-400 flex items-center gap-1">
-          <MapPin className="w-2.5 h-2.5" /> {item.room}
-        </p>
-      )}
     </div>
   );
 }

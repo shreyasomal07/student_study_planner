@@ -69,10 +69,12 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [isEditingSettings, setIsEditingSettings] = useState(false);
 
+  const userKey = (student?.username || student?.name || 'user').toLowerCase().replace(/\s+/g, '_');
+
   // Settings: Study Duration and Break Duration in minutes
   const [studyMinutes, setStudyMinutes] = useState(() => {
     try {
-      const saved = localStorage.getItem('study_planner_pomo_study_mins');
+      const saved = localStorage.getItem(`study_planner_pomo_${userKey}_study_mins`);
       return saved ? parseInt(saved, 10) : 25;
     } catch {
       return 25;
@@ -81,7 +83,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
 
   const [breakMinutes, setBreakMinutes] = useState(() => {
     try {
-      const saved = localStorage.getItem('study_planner_pomo_break_mins');
+      const saved = localStorage.getItem(`study_planner_pomo_${userKey}_break_mins`);
       return saved ? parseInt(saved, 10) : 5;
     } catch {
       return 5;
@@ -97,15 +99,15 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
   const [cycleCount, setCycleCount] = useState(1);
   const [totalStudySecondsToday, setTotalStudySecondsToday] = useState(() => {
     try {
-      return parseInt(localStorage.getItem('study_planner_pomo_today_seconds') || '1500', 10);
+      return parseInt(localStorage.getItem(`study_planner_pomo_${userKey}_today_seconds`) || '0', 10);
     } catch {
-      return 1500;
+      return 0;
     }
   });
 
   const [completedSessionsCount, setCompletedSessionsCount] = useState(() => {
     try {
-      return parseInt(localStorage.getItem('study_planner_pomodoro_count') || '0', 10);
+      return parseInt(localStorage.getItem(`study_planner_pomo_${userKey}_pomodoro_count`) || '0', 10);
     } catch {
       return 0;
     }
@@ -113,15 +115,24 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
 
   const [sessionLogs, setSessionLogs] = useState(() => {
     try {
-      const saved = localStorage.getItem('study_planner_pomo_logs');
-      return saved ? JSON.parse(saved) : [
-        { id: '1', type: 'study', duration: 25, task: 'Calculus Problem Set 4', time: '18:30' },
-        { id: '2', type: 'break', duration: 5, task: 'Rest & Coffee', time: '18:55' }
-      ];
+      const saved = localStorage.getItem(`study_planner_pomo_${userKey}_logs`);
+      return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
+
+  // Re-sync state when active user changes
+  useEffect(() => {
+    try {
+      const savedSecs = parseInt(localStorage.getItem(`study_planner_pomo_${userKey}_today_seconds`) || '0', 10);
+      const savedCount = parseInt(localStorage.getItem(`study_planner_pomo_${userKey}_pomodoro_count`) || '0', 10);
+      const savedLogs = localStorage.getItem(`study_planner_pomo_${userKey}_logs`);
+      setTotalStudySecondsToday(savedSecs);
+      setCompletedSessionsCount(savedCount);
+      setSessionLogs(savedLogs ? JSON.parse(savedLogs) : []);
+    } catch (e) {}
+  }, [userKey]);
 
   const intervalRef = useRef(null);
 
@@ -150,7 +161,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
           if (mode === 'study') {
             setTotalStudySecondsToday((sec) => {
               const updated = sec + 1;
-              localStorage.setItem('study_planner_pomo_today_seconds', String(updated));
+              localStorage.setItem(`study_planner_pomo_${userKey}_today_seconds`, String(updated));
               return updated;
             });
           }
@@ -161,7 +172,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
       clearInterval(intervalRef.current);
     }
     return () => clearInterval(intervalRef.current);
-  }, [isRunning, mode, studyMinutes, breakMinutes, cycleCount]);
+  }, [isRunning, mode, studyMinutes, breakMinutes, cycleCount, userKey]);
 
   // Automatic transition between Study and Break
   const handleTimerComplete = useCallback(() => {
@@ -172,7 +183,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
       playChime(true);
       const newCount = completedSessionsCount + 1;
       setCompletedSessionsCount(newCount);
-      localStorage.setItem('study_planner_pomodoro_count', String(newCount));
+      localStorage.setItem(`study_planner_pomo_${userKey}_pomodoro_count`, String(newCount));
 
       // Append log
       const newLog = {
@@ -184,7 +195,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
       };
       setSessionLogs((prev) => {
         const updated = [newLog, ...prev.slice(0, 8)];
-        try { localStorage.setItem('study_planner_pomo_logs', JSON.stringify(updated)); } catch {}
+        try { localStorage.setItem(`study_planner_pomo_${userKey}_logs`, JSON.stringify(updated)); } catch {}
         return updated;
       });
 
@@ -212,7 +223,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
       };
       setSessionLogs((prev) => {
         const updated = [newLog, ...prev.slice(0, 8)];
-        try { localStorage.setItem('study_planner_pomo_logs', JSON.stringify(updated)); } catch {}
+        try { localStorage.setItem(`study_planner_pomo_${userKey}_logs`, JSON.stringify(updated)); } catch {}
         return updated;
       });
 
@@ -221,7 +232,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
       setTimeLeft(studyMinutes * 60);
       setIsRunning(true); // Continuous automatic flow
     }
-  }, [mode, studyMinutes, breakMinutes, completedSessionsCount, selectedTaskTitle, onSessionComplete]);
+  }, [mode, studyMinutes, breakMinutes, completedSessionsCount, selectedTaskTitle, onSessionComplete, userKey]);
 
   // Controls
   const togglePlay = () => setIsRunning(!isRunning);
@@ -247,8 +258,8 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
 
   const handleStartFromSetup = () => {
     try {
-      localStorage.setItem('study_planner_pomo_study_mins', String(studyMinutes));
-      localStorage.setItem('study_planner_pomo_break_mins', String(breakMinutes));
+      localStorage.setItem(`study_planner_pomo_${userKey}_study_mins`, String(studyMinutes));
+      localStorage.setItem(`study_planner_pomo_${userKey}_break_mins`, String(breakMinutes));
     } catch {}
     setIsSessionActive(true);
     setIsEditingSettings(false);

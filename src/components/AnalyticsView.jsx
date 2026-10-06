@@ -13,27 +13,39 @@ import {
   Sparkles
 } from 'lucide-react';
 
-export default function AnalyticsView({ tasks, topics, timetable, student, subjectList }) {
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t) => t.completed).length;
+export default function AnalyticsView({ 
+  tasks = [], 
+  topics = [], 
+  timetable = [], 
+  student = {}, 
+  subjectList = [] 
+}) {
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+  const safeTopics = Array.isArray(topics) ? topics : [];
+  const safeTimetable = Array.isArray(timetable) ? timetable : [];
+  const safeStudent = student || {};
+
+  const totalTasks = safeTasks.length;
+  const completedTasks = safeTasks.filter((t) => t?.completed).length;
   const taskCompletionRate = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const totalTopics = topics.length;
-  const completedTopics = topics.filter((t) => t.completed).length;
+  const totalTopics = safeTopics.length;
+  const completedTopics = safeTopics.filter((t) => t?.completed).length;
   const topicCompletionRate = totalTopics ? Math.round((completedTopics / totalTopics) * 100) : 0;
 
   // Study hours this week from completed blocks + tasks
-  const studyBlocks = timetable.filter((b) => b.type === 'study');
-  const completedStudyBlocks = studyBlocks.filter((b) => b.completed);
+  const studyBlocks = safeTimetable.filter((b) => b?.type === 'study');
+  const completedStudyBlocks = studyBlocks.filter((b) => b?.completed);
   const scheduledHours = Math.round(((studyBlocks.length * 50) / 60) * 10) / 10;
   const completedHours = Math.round(((completedStudyBlocks.length * 50) / 60) * 10) / 10;
-  const weeklyGoalHours = (student.dailyTargetHours || 4) * 7;
-  const goalProgress = Math.min(100, Math.round((completedHours / weeklyGoalHours) * 100));
+  const dailyTarget = Number(safeStudent.dailyTargetHours) || 4;
+  const weeklyGoalHours = dailyTarget * 7;
+  const goalProgress = weeklyGoalHours ? Math.min(100, Math.round((completedHours / weeklyGoalHours) * 100)) : 0;
 
   // Subject breakdown calculations
   const subjectHours = {};
   studyBlocks.forEach((b) => {
-    if (b.assigned && b.assigned.subject) {
+    if (b?.assigned && b.assigned.subject) {
       const s = b.assigned.subject;
       subjectHours[s] = (subjectHours[s] || 0) + 50 / 60;
     }
@@ -46,13 +58,37 @@ export default function AnalyticsView({ tasks, topics, timetable, student, subje
   })).sort((a, b) => b.hours - a.hours);
 
   // Priority distribution
-  const highPriority = tasks.filter(t => t.priority === 'High');
-  const medPriority = tasks.filter(t => t.priority === 'Medium');
-  const lowPriority = tasks.filter(t => t.priority === 'Low');
+  const highPriority = safeTasks.filter((t) => t?.priority === 'High');
+  const medPriority = safeTasks.filter((t) => t?.priority === 'Medium');
+  const lowPriority = safeTasks.filter((t) => t?.priority === 'Low');
 
-  const highDone = highPriority.filter(t => t.completed).length;
-  const medDone = medPriority.filter(t => t.completed).length;
-  const lowDone = lowPriority.filter(t => t.completed).length;
+  const highDone = highPriority.filter((t) => t?.completed).length;
+  const medDone = medPriority.filter((t) => t?.completed).length;
+  const lowDone = lowPriority.filter((t) => t?.completed).length;
+
+  // Calculate real consecutive days streak from completed study blocks and tasks
+  const streakDays = React.useMemo(() => {
+    const completedDates = new Set();
+    safeTimetable.forEach((b) => {
+      if (b?.completed && b?.date) completedDates.add(b.date);
+    });
+    safeTasks.forEach((t) => {
+      if (t?.completed && t?.dueDate) completedDates.add(t.dueDate);
+    });
+    let streak = 0;
+    const checkDate = new Date();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(checkDate);
+      d.setDate(d.getDate() - i);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (completedDates.has(iso)) {
+        streak++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+    return streak;
+  }, [safeTimetable, safeTasks]);
 
   return (
     <div className="space-y-6">
@@ -69,7 +105,7 @@ export default function AnalyticsView({ tasks, topics, timetable, student, subje
 
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181A1D] text-white text-xs font-bold shadow-xs">
           <Flame className="w-4 h-4 text-[#FACC15] fill-[#FACC15]" />
-          <span>5-Day Study Streak Active! 🔥</span>
+          <span>{streakDays > 0 ? `${streakDays}-Day Study Streak Active! 🔥` : '0-Day Streak (Start studying today!) 🔥'}</span>
         </div>
       </div>
 
@@ -224,7 +260,7 @@ export default function AnalyticsView({ tasks, topics, timetable, student, subje
               AI Study Optimization Insights
             </h4>
             <p className="text-xs sm:text-sm text-[#9CA3AF] mt-1 leading-relaxed">
-              Based on your {student.dailyTargetHours || 4}h daily target, your study schedule is distributed evenly with 10-minute rest intervals. You have scheduled <strong>{scheduledHours} hours</strong> of focused study across the week.
+              Based on your {safeStudent.dailyTargetHours || 4}h daily target, your study schedule is distributed evenly with 10-minute rest intervals. You have scheduled <strong>{scheduledHours} hours</strong> of focused study across the week.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold text-white">
               <span className="px-3 py-1 rounded-full bg-[#262A30]">✨ Balanced Routine</span>
