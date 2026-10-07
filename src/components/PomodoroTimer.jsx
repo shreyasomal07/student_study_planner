@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Play, Pause, RotateCcw, Flame, Sparkles, Bell, Coffee, Target, 
-  Settings2, ArrowRight, CheckCircle2, Volume2, VolumeX, FastForward,
+  ArrowRight, ArrowLeft, ChevronLeft, CheckCircle2, Volume2, VolumeX, FastForward,
   BookOpen, Clock, Award, ShieldCheck, ChevronRight, SlidersHorizontal,
   Zap, Compass, Info, Check
 } from 'lucide-react';
@@ -64,10 +64,18 @@ const PRESETS = [
   { label: '30 / 5 Sprint', study: 30, break: 5, tag: 'Quick' },
 ];
 
-export default function PomodoroTimer({ tasks = [], topics = [], student = {}, onSessionComplete }) {
-  // Always default to setup & topics page when opening the Pomodoro tab
-  const [isSessionActive, setIsSessionActive] = useState(false);
+export default function PomodoroTimer({ 
+  tasks = [], 
+  topics = [], 
+  student = {}, 
+  onSessionComplete,
+  activeTopic = null,
+  onFinishStudying = null
+}) {
+  // Always default to setup & topics page when opening the Pomodoro tab unless activeTopic is provided
+  const [isSessionActive, setIsSessionActive] = useState(() => !!activeTopic);
   const [isEditingSettings, setIsEditingSettings] = useState(false);
+  const [finishSuccessMessage, setFinishSuccessMessage] = useState(null);
 
   const userKey = (student?.username || student?.name || 'user').toLowerCase().replace(/\s+/g, '_');
 
@@ -90,12 +98,17 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
     }
   });
 
-  const [selectedTaskTitle, setSelectedTaskTitle] = useState('');
+  const [selectedTaskTitle, setSelectedTaskTitle] = useState(() => {
+    if (activeTopic) {
+      return typeof activeTopic === 'string' ? activeTopic : (activeTopic.title || '');
+    }
+    return '';
+  });
 
   // Active Timer State
   const [mode, setMode] = useState('study'); // 'study' | 'break'
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
-  const [isRunning, setIsRunning] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(() => studyMinutes * 60);
+  const [isRunning, setIsRunning] = useState(() => !!activeTopic);
   const [cycleCount, setCycleCount] = useState(1);
   const [totalStudySecondsToday, setTotalStudySecondsToday] = useState(() => {
     try {
@@ -136,16 +149,29 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
 
   const intervalRef = useRef(null);
 
-  // Sync timer when studyMinutes or breakMinutes changes while stopped
+  // Sync if parent passes new activeTopic
   useEffect(() => {
-    if (!isRunning) {
+    if (activeTopic) {
+      const title = typeof activeTopic === 'string' ? activeTopic : (activeTopic.title || '');
+      setSelectedTaskTitle(title);
+      setIsSessionActive(true);
+      setIsEditingSettings(false);
+      setMode('study');
+      setTimeLeft(studyMinutes * 60);
+      setIsRunning(true);
+    }
+  }, [activeTopic]);
+
+  // Sync timer default duration when studyMinutes or breakMinutes changes while in setup view
+  useEffect(() => {
+    if (!isSessionActive) {
       if (mode === 'study') {
         setTimeLeft(studyMinutes * 60);
       } else {
         setTimeLeft(breakMinutes * 60);
       }
     }
-  }, [studyMinutes, breakMinutes, mode, isRunning]);
+  }, [studyMinutes, breakMinutes, mode, isSessionActive]);
 
   // Main Timer Interval & Automatic Alternation Logic
   useEffect(() => {
@@ -161,7 +187,9 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
           if (mode === 'study') {
             setTotalStudySecondsToday((sec) => {
               const updated = sec + 1;
-              localStorage.setItem(`study_planner_pomo_${userKey}_today_seconds`, String(updated));
+              try {
+                localStorage.setItem(`study_planner_pomo_${userKey}_today_seconds`, String(updated));
+              } catch {}
               return updated;
             });
           }
@@ -173,6 +201,62 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
     }
     return () => clearInterval(intervalRef.current);
   }, [isRunning, mode, studyMinutes, breakMinutes, cycleCount, userKey]);
+
+  // Handle Finished Studying (User manually marks topic finished in Pomodoro)
+  const handleFinishStudying = () => {
+    playChime(true);
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const currentTopicTitle = selectedTaskTitle || (activeTopic && typeof activeTopic === 'object' ? activeTopic.title : activeTopic) || 'Focused Study Session';
+
+    // Increment completed sessions count
+    const newCount = completedSessionsCount + 1;
+    setCompletedSessionsCount(newCount);
+    try {
+      localStorage.setItem(`study_planner_pomo_${userKey}_pomodoro_count`, String(newCount));
+    } catch {}
+
+    // Calculate elapsed or completed study minutes
+    const elapsedSeconds = mode === 'study' ? Math.max(300, (studyMinutes * 60) - timeLeft) : (studyMinutes * 60);
+    const addedStudyMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
+
+    setTotalStudySecondsToday((sec) => {
+      const updated = sec + elapsedSeconds;
+      try {
+        localStorage.setItem(`study_planner_pomo_${userKey}_today_seconds`, String(updated));
+      } catch {}
+      return updated;
+    });
+
+    // Session log
+    const newLog = {
+      id: Math.random().toString(36).slice(2, 9),
+      type: 'study',
+      duration: addedStudyMinutes,
+      task: currentTopicTitle,
+      time: timeNow,
+      status: 'completed'
+    };
+    setSessionLogs((prev) => {
+      const updated = [newLog, ...prev.slice(0, 8)];
+      try { localStorage.setItem(`study_planner_pomo_${userKey}_logs`, JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+
+    if (onFinishStudying) {
+      onFinishStudying(activeTopic || { title: currentTopicTitle }, addedStudyMinutes);
+    }
+    if (onSessionComplete) {
+      onSessionComplete(addedStudyMinutes);
+    }
+
+    setFinishSuccessMessage(`🎉 Finished "${currentTopicTitle}"! Logged ${addedStudyMinutes}m to Study Analytics.`);
+    setTimeout(() => setFinishSuccessMessage(null), 5000);
+
+    // Auto switch to break mode so student can relax
+    setMode('break');
+    setTimeLeft(breakMinutes * 60);
+    setIsRunning(true);
+  };
 
   // Automatic transition between Study and Break
   const handleTimerComplete = useCallback(() => {
@@ -312,12 +396,26 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
               </div>
             </div>
             {isSessionActive && (
-              <button
-                onClick={() => setIsEditingSettings(false)}
-                className="px-4 py-1.5 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-[#181A1D] border border-[#ECE6DC] cursor-pointer shadow-2xs transition-all"
-              >
-                Back to Active Timer
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setIsSessionActive(false);
+                    setIsEditingSettings(false);
+                    setIsRunning(false);
+                    setTimeLeft(studyMinutes * 60);
+                  }}
+                  className="px-3.5 py-1.5 rounded-full bg-white/70 hover:bg-white text-xs font-bold text-[#E11D48] border border-[#FECDD3] cursor-pointer shadow-2xs transition-all"
+                >
+                  End Session
+                </button>
+                <button
+                  onClick={() => setIsEditingSettings(false)}
+                  className="px-4 py-1.5 rounded-full bg-[#181A1D] hover:bg-black text-xs font-bold text-white shadow-2xs transition-all cursor-pointer flex items-center gap-1"
+                >
+                  <span>Return to Timer</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#FACC15]" />
+                </button>
+              </div>
             )}
           </div>
 
@@ -661,13 +759,30 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
 
               <button
                 onClick={() => setIsEditingSettings(true)}
-                className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-[#181A1D] border border-[#D0C9BD] flex items-center justify-center cursor-pointer shadow-2xs transition-all"
-                title="Change Study & Break Timings"
+                className="px-3 py-1.5 rounded-full bg-white/80 hover:bg-white text-[#181A1D] border border-[#D0C9BD] flex items-center gap-1 text-xs font-bold cursor-pointer shadow-2xs transition-all hover:border-[#181A1D]"
+                title="Back to Setup & Timings"
               >
-                <Settings2 className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Back</span>
               </button>
             </div>
           </div>
+
+          {/* Success Banner if Finished */}
+          {finishSuccessMessage && (
+            <div className="my-2 p-3 rounded-2xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs font-bold flex items-center justify-between shadow-xs animate-in fade-in duration-200 relative z-20">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
+                <span>{finishSuccessMessage}</span>
+              </div>
+              <button
+                onClick={() => setFinishSuccessMessage(null)}
+                className="text-[#065F46] hover:text-black text-xs font-black cursor-pointer px-1"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           {/* Central Circular Animated Timer Ring */}
           <div className="relative my-6 flex flex-col items-center justify-center z-10">
@@ -717,7 +832,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
                 </div>
 
                 {/* Subtitle status */}
-                <p className="text-[11px] font-bold text-[#5A554E] mt-1 max-w-[180px] truncate">
+                <p className="text-[11px] font-bold text-[#5A554E] mt-1 max-w-[200px] truncate">
                   {selectedTaskTitle || (mode === 'study' ? `${studyMinutes}m Study Sprint` : `${breakMinutes}m Relaxation`)}
                 </p>
               </div>
@@ -727,12 +842,12 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
           </div>
 
           {/* Bottom Action Controls Row */}
-          <div className="flex flex-wrap items-center justify-center gap-3 relative z-10 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 relative z-10 pt-2">
             
             {/* Start / Pause Main Capsule */}
             <button
               onClick={togglePlay}
-              className={`px-8 py-3 rounded-full font-black text-sm tracking-wide shadow-md flex items-center gap-2.5 transition-all cursor-pointer active:scale-95 ${
+              className={`px-6 sm:px-7 py-3 rounded-full font-black text-xs sm:text-sm tracking-wide shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95 ${
                 isRunning 
                   ? 'bg-white hover:bg-[#F8F6F1] text-[#181A1D] border border-[#D0C9BD]' 
                   : 'bg-[#181A1D] hover:bg-black text-white'
@@ -741,14 +856,24 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
               {isRunning ? (
                 <>
                   <Pause className="w-4 h-4 fill-current text-[#FB7185]" />
-                  <span>Pause Timer</span>
+                  <span>Pause</span>
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4 fill-current text-[#FACC15]" />
-                  <span>{timeLeft === (mode === 'study' ? studyMinutes * 60 : breakMinutes * 60) ? 'Start Session' : 'Resume Session'}</span>
+                  <span>{timeLeft === (mode === 'study' ? studyMinutes * 60 : breakMinutes * 60) ? 'Start Session' : 'Resume'}</span>
                 </>
               )}
+            </button>
+
+            {/* Finished Studying Action Button */}
+            <button
+              onClick={handleFinishStudying}
+              className="px-5 sm:px-6 py-3 rounded-full font-extrabold text-xs sm:text-sm tracking-wide bg-[#10B981] hover:bg-[#059669] text-white shadow-md flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
+              title="Mark this study topic as completed and log to analytics"
+            >
+              <CheckCircle2 className="w-4 h-4 text-white" />
+              <span>Finished Studying</span>
             </button>
 
             {/* Skip Phase */}
@@ -772,7 +897,8 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
             {/* Change Timings Settings */}
             <button
               onClick={() => setIsEditingSettings(true)}
-              className="px-4 py-3 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-[#181A1D] border border-[#D0C9BD] flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all"
+              className="px-3.5 py-3 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-[#181A1D] border border-[#D0C9BD] flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all"
+              title="Configure durations"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-[#8E8880]" />
               <span>{studyMinutes}m / {breakMinutes}m</span>

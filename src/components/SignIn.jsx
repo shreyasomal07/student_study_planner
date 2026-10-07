@@ -114,6 +114,7 @@ export default function SignIn({
         map.set(subName, {
           id: 's_' + idx + '_' + subName.toLowerCase().replace(/[^a-z0-9]/g, '_'),
           name: subName,
+          priority: t.subjectPriority || 'Medium',
           chapters: []
         });
       }
@@ -121,6 +122,7 @@ export default function SignIn({
         id: t.id || ('c_' + idx + '_' + Math.random().toString(36).slice(2, 6)),
         name: t.name,
         difficulty: t.difficulty || 'Medium',
+        priority: t.priority || (t.difficulty === 'Hard' ? 'High' : t.difficulty === 'Medium' ? 'Medium' : 'Low'),
         completed: !!t.completed,
         sessionsDone: t.sessionsDone || 0,
         totalSessions: t.totalSessions || (t.difficulty === 'Hard' ? 6 : t.difficulty === 'Medium' ? 4 : 2)
@@ -130,6 +132,7 @@ export default function SignIn({
   });
 
   const [newSubjectInput, setNewSubjectInput] = useState('');
+  const [newSubjectPriority, setNewSubjectPriority] = useState('Medium');
   const [activeSubjectId, setActiveSubjectId] = useState(() => {
     const existingTopics = initialPlannerData?.topics || [];
     if (existingTopics.length > 0) {
@@ -140,6 +143,7 @@ export default function SignIn({
   });
   const [newChapterInput, setNewChapterInput] = useState('');
   const [newChapterDifficulty, setNewChapterDifficulty] = useState('Medium');
+  const [newChapterPriority, setNewChapterPriority] = useState('Medium');
 
   // Step 3 State: Availability Time Slots (loads from initialPlannerData if editing)
   const [availability, setAvailability] = useState(() => {
@@ -172,10 +176,23 @@ export default function SignIn({
     const trimmed = newSubjectInput.trim();
     if (!trimmed) return;
     const newId = 's_' + Date.now();
-    const newSub = { id: newId, name: trimmed, chapters: [] };
+    const newSub = { id: newId, name: trimmed, priority: newSubjectPriority, chapters: [] };
     setSubjects(prev => [...prev, newSub]);
     setActiveSubjectId(newId);
     setNewSubjectInput('');
+    setNewSubjectPriority('Medium');
+  };
+
+  const handleToggleSubjectPriority = (subjectId) => {
+    const priorityOrder = ['High', 'Medium', 'Low'];
+    setSubjects(prev => prev.map(s => {
+      if (s.id === subjectId) {
+        const currentIdx = priorityOrder.indexOf(s.priority || 'Medium');
+        const nextPriority = priorityOrder[(currentIdx + 1) % priorityOrder.length];
+        return { ...s, priority: nextPriority };
+      }
+      return s;
+    }));
   };
 
   const handleRemoveSubject = (id) => {
@@ -197,6 +214,7 @@ export default function SignIn({
             id: 'c_' + Date.now() + Math.random().toString(36).slice(2, 6),
             name: trimmed,
             difficulty: newChapterDifficulty,
+            priority: newChapterPriority,
             completed: false,
             sessionsDone: 0,
             totalSessions: newChapterDifficulty === 'Hard' ? 6 : newChapterDifficulty === 'Medium' ? 4 : 2
@@ -206,6 +224,38 @@ export default function SignIn({
       return s;
     }));
     setNewChapterInput('');
+    setNewChapterPriority('Medium');
+  };
+
+  const handleToggleChapterPriority = (subjectId, chapterId) => {
+    const priorityOrder = ['High', 'Medium', 'Low'];
+    setSubjects(prev => prev.map(s => {
+      if (s.id === subjectId) {
+        return {
+          ...s,
+          chapters: s.chapters.map(c => {
+            if (c.id === chapterId) {
+              const currentIdx = priorityOrder.indexOf(c.priority || 'Medium');
+              const nextPriority = priorityOrder[(currentIdx + 1) % priorityOrder.length];
+              return { ...c, priority: nextPriority };
+            }
+            return c;
+          })
+        };
+      }
+      return s;
+    }));
+  };
+
+  const handleSortChaptersByPriority = (subjectId) => {
+    const weight = { High: 3, Medium: 2, Low: 1 };
+    setSubjects(prev => prev.map(s => {
+      if (s.id === subjectId) {
+        const sorted = [...s.chapters].sort((a, b) => (weight[b.priority || 'Medium'] || 2) - (weight[a.priority || 'Medium'] || 2));
+        return { ...s, chapters: sorted };
+      }
+      return s;
+    }));
   };
 
   const handleRemoveChapter = (subjectId, chapterId) => {
@@ -401,6 +451,8 @@ export default function SignIn({
           name: ch.name,
           subject: sub.name,
           difficulty: ch.difficulty || 'Medium',
+          priority: ch.priority || sub.priority || 'Medium',
+          subjectPriority: sub.priority || 'Medium',
           completed: false,
           sessionsDone: 0,
           totalSessions: ch.difficulty === 'Hard' ? 6 : ch.difficulty === 'Medium' ? 4 : 2
@@ -490,7 +542,9 @@ export default function SignIn({
           id: ch.id || existing?.id || `topic_${sIdx}_${cIdx}`,
           name: ch.name,
           subject: sub.name,
-          difficulty: ch.difficulty || 'Medium',
+          difficulty: ch.difficulty || existing?.difficulty || 'Medium',
+          priority: ch.priority || existing?.priority || sub.priority || 'Medium',
+          subjectPriority: sub.priority || existing?.subjectPriority || 'Medium',
           completed: existing ? existing.completed : (ch.completed || false),
           sessionsDone: existing ? existing.sessionsDone : (ch.sessionsDone || 0),
           totalSessions: ch.totalSessions || (ch.difficulty === 'Hard' ? 6 : ch.difficulty === 'Medium' ? 4 : 2)
@@ -1297,57 +1351,88 @@ export default function SignIn({
             {/* Subject Tabs & Adder */}
             <div className="space-y-3">
               <label className="block text-xs font-medium text-[#252320]">
-                1. Your Course Subjects
+                1. Your Course Subjects & Priorities
               </label>
 
-              {/* Subject Adder Input */}
-              <div className="flex items-center gap-2">
+              {/* Subject Adder Input with Priority Selector */}
+              <div className="flex flex-col sm:flex-row items-center gap-2">
                 <input
                   type="text"
                   value={newSubjectInput}
                   onChange={(e) => setNewSubjectInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSubject(); } }}
                   placeholder="Type course subject (e.g. Mathematics, Physics, Chemistry, Economics)..."
-                  className="flex-1 bg-[#FAF8F5] border border-[#ECE6DC] rounded-full px-4 py-2.5 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#FB7185]"
+                  className="w-full sm:flex-1 bg-[#FAF8F5] border border-[#ECE6DC] rounded-full px-4 py-2.5 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#FB7185]"
                 />
-                <button
-                  type="button"
-                  onClick={handleAddSubject}
-                  className="px-4 py-2.5 rounded-full bg-[#FB7185] hover:bg-[#F43F5E] text-white text-xs font-medium flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
-                >
-                  <Plus className="w-3.5 h-3.5 text-white" />
-                  <span>Add Subject</span>
-                </button>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <select
+                    value={newSubjectPriority}
+                    onChange={(e) => setNewSubjectPriority(e.target.value)}
+                    className="bg-[#FAF8F5] border border-[#ECE6DC] rounded-full px-3 py-2.5 text-xs font-semibold text-[#181A1D] focus:outline-none cursor-pointer"
+                    title="Subject Priority"
+                  >
+                    <option value="High">🔥 High Priority</option>
+                    <option value="Medium">⚡ Med Priority</option>
+                    <option value="Low">🌱 Low Priority</option>
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={handleAddSubject}
+                    className="px-4 py-2.5 rounded-full bg-[#FB7185] hover:bg-[#F43F5E] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs transition-all active:scale-95"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-white" />
+                    <span>Add Subject</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Subject Selection Pills */}
+              {/* Subject Selection Pills with Clickable Priority Badges */}
               {subjects.length === 0 ? (
                 <div className="p-5 rounded-2xl bg-[#FAF8F5] border border-dashed border-[#ECE6DC] text-center text-xs text-[#8E8880] space-y-1">
-                  <p className="font-medium text-[#181A1D]">No subjects added yet</p>
-                  <p className="text-[11px] text-[#A8A29A]">Type your subject name above (e.g. Physics, Chemistry, Economics) and click "Add Subject".</p>
+                  <p className="font-bold text-[#181A1D]">No subjects added yet</p>
+                  <p className="text-[11px] text-[#A8A29A]">Type your subject name above (e.g. Physics, Chemistry, Economics), pick its priority, and click "Add Subject".</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
                   {subjects.map((s) => {
                     const isActive = activeSubjectId === s.id;
+                    const priorityBadge = s.priority === 'High' 
+                      ? 'bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3]'
+                      : s.priority === 'Low'
+                      ? 'bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0]'
+                      : 'bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]';
+
                     return (
                       <div
                         key={s.id}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 transition-all shrink-0 cursor-pointer border ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 transition-all shrink-0 cursor-pointer border ${
                           isActive
                             ? 'bg-[#181A1D] text-white border-[#181A1D] shadow-xs'
                             : 'bg-[#FAF8F5] text-[#78716C] border border-[#ECE6DC] hover:border-[#FB7185]'
                         }`}
                         onClick={() => setActiveSubjectId(s.id)}
                       >
-                        <span>{s.name}</span>
+                        <span className="font-bold">{s.name}</span>
+                        
+                        {/* Clickable Subject Priority Pill */}
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handleToggleSubjectPriority(s.id); }}
+                          className={`text-[9.5px] px-2 py-0.5 rounded-full font-extrabold cursor-pointer transition-transform active:scale-90 ${priorityBadge}`}
+                          title="Click to cycle subject priority (High ➔ Medium ➔ Low)"
+                        >
+                          {s.priority === 'High' ? '🔥 High' : s.priority === 'Low' ? '🌱 Low' : '⚡ Med'}
+                        </button>
+
                         <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-[#FACC15] text-[#181A1D]' : 'bg-[#E7E1D6] text-[#78716C]'}`}>
                           {s.chapters.length}
                         </span>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handleRemoveSubject(s.id); }}
-                          className="hover:text-[#FB7185]"
+                          className="hover:text-[#FB7185] transition-colors"
                           title={`Delete ${s.name} subject`}
                         >
                           <X className="w-3 h-3" />
@@ -1362,19 +1447,31 @@ export default function SignIn({
             {/* Chapters & Topics for Active Subject */}
             {activeSubjectId && (
               <div className="p-4 rounded-3xl bg-[#FFFDF5] border border-[#FDE894] space-y-3.5 shadow-2xs">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-[#D97706]" />
                     <span className="text-xs font-bold text-[#92400E]">
-                      Chapters & Topics for {subjects.find(s => s.id === activeSubjectId)?.name}
+                      Chapters & Topics for <strong className="text-[#181A1D] font-extrabold">{subjects.find(s => s.id === activeSubjectId)?.name}</strong>
                     </span>
                   </div>
-                  <span className="text-[10px] font-bold text-[#A16207] bg-white px-2 py-0.5 rounded-full border border-[#FDE68A]">
-                    {subjects.find(s => s.id === activeSubjectId)?.chapters.length || 0} chapters
-                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSortChaptersByPriority(activeSubjectId)}
+                      className="text-[10.5px] font-bold text-[#92400E] hover:text-black bg-white hover:bg-[#FEF3C7] px-2.5 py-0.5 rounded-full border border-[#FDE68A] shadow-2xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                      title="Sort chapters by priority (High to Low)"
+                    >
+                      <Zap className="w-3 h-3 text-[#D97706]" />
+                      <span>Sort by Priority</span>
+                    </button>
+                    <span className="text-[10px] font-bold text-[#A16207] bg-white px-2 py-0.5 rounded-full border border-[#FDE68A]">
+                      {subjects.find(s => s.id === activeSubjectId)?.chapters.length || 0} chapters
+                    </span>
+                  </div>
                 </div>
 
-                {/* Chapter Add Row */}
+                {/* Chapter Add Row with Priority and Difficulty Selectors */}
                 <div className="flex flex-col sm:flex-row items-center gap-2">
                   <input
                     type="text"
@@ -1386,6 +1483,19 @@ export default function SignIn({
                   />
 
                   <div className="flex items-center gap-2 w-full sm:w-auto">
+                    {/* Chapter Priority Selector */}
+                    <select
+                      value={newChapterPriority}
+                      onChange={(e) => setNewChapterPriority(e.target.value)}
+                      className="bg-white border border-[#FDE68A] rounded-full px-3 py-2 text-xs font-semibold text-[#181A1D] focus:outline-none cursor-pointer"
+                      title="Topic Priority for Exam & Study Schedule"
+                    >
+                      <option value="High">🔥 High Priority</option>
+                      <option value="Medium">⚡ Med Priority</option>
+                      <option value="Low">🌱 Low Priority</option>
+                    </select>
+
+                    {/* Chapter Difficulty Selector */}
                     <select
                       value={newChapterDifficulty}
                       onChange={(e) => setNewChapterDifficulty(e.target.value)}
@@ -1399,7 +1509,7 @@ export default function SignIn({
                     <button
                       type="button"
                       onClick={handleAddChapter}
-                      className="px-3.5 py-2 rounded-full bg-[#181A1D] hover:bg-[#282B32] text-[#FACC15] text-xs font-medium flex items-center gap-1 cursor-pointer shrink-0 shadow-2xs"
+                      className="px-3.5 py-2 rounded-full bg-[#181A1D] hover:bg-[#282B32] text-[#FACC15] text-xs font-bold flex items-center gap-1 cursor-pointer shrink-0 shadow-2xs transition-all active:scale-95"
                     >
                       <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
                       <span>Add</span>
@@ -1407,36 +1517,57 @@ export default function SignIn({
                   </div>
                 </div>
 
-                {/* Chapters List */}
+                {/* Chapters List with Interactive Priority Badges */}
                 <div className="space-y-1.5 max-h-[190px] overflow-y-auto pr-1">
                   {(subjects.find(s => s.id === activeSubjectId)?.chapters || []).length === 0 ? (
                     <p className="text-xs text-[#8E8880] text-center py-3 font-normal">No chapters added yet for this subject. Type above to add one!</p>
                   ) : (
-                    (subjects.find(s => s.id === activeSubjectId)?.chapters || []).map((ch) => (
-                      <div key={ch.id} className="p-2.5 rounded-2xl bg-white border border-[#FDE68A] flex items-center justify-between text-xs hover:border-[#FACC15] transition-all">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${ch.difficulty === 'Hard' ? 'bg-[#FB7185]' : ch.difficulty === 'Medium' ? 'bg-[#FACC15]' : 'bg-[#10B981]'}`} />
-                          <span className="font-medium text-[#181A1D]">{ch.name}</span>
+                    (subjects.find(s => s.id === activeSubjectId)?.chapters || []).map((ch) => {
+                      const priorityStyle = ch.priority === 'High'
+                        ? 'bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3]'
+                        : ch.priority === 'Low'
+                        ? 'bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0]'
+                        : 'bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]';
+
+                      return (
+                        <div key={ch.id} className="p-2.5 rounded-2xl bg-white border border-[#FDE68A] flex items-center justify-between text-xs hover:border-[#FACC15] transition-all">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${ch.difficulty === 'Hard' ? 'bg-[#FB7185]' : ch.difficulty === 'Medium' ? 'bg-[#FACC15]' : 'bg-[#10B981]'}`} />
+                            <span className="font-bold text-[#181A1D] truncate">{ch.name}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            {/* Clickable Chapter Priority Badge */}
+                            <button
+                              type="button"
+                              onClick={() => handleToggleChapterPriority(activeSubjectId, ch.id)}
+                              className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded-md cursor-pointer transition-transform active:scale-90 ${priorityStyle}`}
+                              title="Click to cycle chapter priority (High ➔ Medium ➔ Low)"
+                            >
+                              {ch.priority === 'High' ? '🔥 High' : ch.priority === 'Low' ? '🌱 Low' : '⚡ Med'}
+                            </button>
+
+                            {/* Difficulty Tag */}
+                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${
+                              ch.difficulty === 'Hard' ? 'bg-[#FFE4E6] text-[#9F1239]' :
+                              ch.difficulty === 'Medium' ? 'bg-[#FEF3C7] text-[#92400E]' :
+                              'bg-[#DCFCE7] text-[#166534]'
+                            }`}>
+                              {ch.difficulty}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveChapter(activeSubjectId, ch.id)}
+                              className="text-[#8E8880] hover:text-[#FB7185] transition-colors cursor-pointer"
+                              title="Delete topic"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${
-                            ch.difficulty === 'Hard' ? 'bg-[#FFE4E6] text-[#9F1239]' :
-                            ch.difficulty === 'Medium' ? 'bg-[#FEF3C7] text-[#92400E]' :
-                            'bg-[#DCFCE7] text-[#166534]'
-                          }`}>
-                            {ch.difficulty}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveChapter(activeSubjectId, ch.id)}
-                            className="text-[#8E8880] hover:text-[#FB7185] cursor-pointer"
-                            title="Delete topic"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>

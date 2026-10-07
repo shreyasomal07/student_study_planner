@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
-  LayoutDashboard, CheckSquare, BookOpenCheck, CalendarRange, Bell, Plus,
+  LayoutDashboard, CheckSquare, BookOpen, BookOpenCheck, CalendarRange, Bell, Plus,
   Sparkles, CheckCircle2, Circle, Clock, Flame, TrendingUp, X, ChevronLeft,
   ChevronRight, ArrowUpDown, GraduationCap, Trash2, Pencil, Loader2,
   AlertTriangle, CalendarClock, Coffee, Target, BarChart3, Edit3, LogOut, User,
   Calendar, Search, Filter, Layers, Sun, Moon, Zap, Tag, Check, Award, School,
   Upload, FileText, MapPin, MoreHorizontal, ChevronDown, RotateCcw, Paperclip,
   Activity, Users, FileSpreadsheet, Settings, MessageSquare, CreditCard, FolderArchive,
-  Image as ImageIcon
+  PieChart, Play, Pause, FastForward, Bot, ArrowRight, ArrowLeft
 } from "lucide-react";
 import PomodoroTimer from "./components/PomodoroTimer";
 import ClassTimetableManager from "./components/ClassTimetableManager";
 import ExamTimetableManager from "./components/ExamTimetableManager";
 import DashboardNotesAndTodo from "./components/DashboardNotesAndTodo";
-import TimetablePhotoViewer from "./components/TimetablePhotoViewer";
+import AIChatScheduleAssistant from "./components/AIChatScheduleAssistant";
 
 /* ============================================================================
    CONSTANTS & THEME TOKENS
@@ -125,89 +125,41 @@ function buildMockData() {
    AI TIMETABLE GENERATION ALGORITHM
    ========================================================================== */
 
-function buildWeekSlots(availability, weekStart, collegeSchedule = [], examSchedule = []) {
+function buildWeekSlots(availability = {}, weekStart, collegeSchedule = [], examSchedule = [], dailyTargetHours = 4) {
   const slots = [];
+  const targetStudySlotsPerDay = Math.max(1, Math.min(8, Math.round(Number(dailyTargetHours) || 4)));
 
   for (let d = 0; d < 7; d++) {
     const date = addDays(weekStart, d);
     const dateISO = toISODate(date);
     const dayKey = DAY_KEYS[d];
 
-    // 1. Overlay College / School Classes
-    const dayClasses = (collegeSchedule || []).filter((c) => c.day === dayKey);
-    dayClasses.forEach((cls) => {
-      slots.push({
-        id: `cls-${cls.id}-${dateISO}`,
-        date: dateISO,
-        day: dayKey,
-        start: cls.start,
-        end: cls.end,
-        type: "class",
-        assigned: {
-          title: `${cls.subject} (${cls.type})`,
-          subject: cls.subject,
-          classType: cls.type,
-          room: cls.room,
-        },
-        completed: true,
-      });
-    });
+    // NOTE: Classes are NOT added into the timetable (per user instruction: pure study timetable)
 
-    // 2. Overlay Scheduled Exams
-    const dayExams = (examSchedule || []).filter((e) => e.date === dateISO);
-    dayExams.forEach((ex) => {
-      slots.push({
-        id: `exam-${ex.id}-${dateISO}`,
-        date: dateISO,
-        day: dayKey,
-        start: ex.start,
-        end: ex.end,
-        type: "exam",
-        assigned: {
-          title: ex.title || `${ex.subject} Exam`,
-          subject: ex.subject,
-          weightage: ex.weightage,
-          room: ex.room,
-          syllabus: ex.syllabus,
-        },
-        completed: false,
-      });
-    });
+    // Extract Study Hours from user availability
+    let userAvail = availability && Array.isArray(availability[dayKey]) ? [...availability[dayKey]] : [];
+    if (userAvail.length === 0) {
+      // Default preferred study windows: evening 17-21 or weekend mornings
+      userAvail = (dayKey === "Sat" || dayKey === "Sun") ? [10, 11, 12, 14, 15, 16] : [17, 18, 19, 20, 21];
+    }
 
-    // 3. Extract Free Hours
-    const hours = [...(availability[dayKey] || [])].sort((a, b) => a - b);
+    const hours = [...new Set(userAvail)].sort((a, b) => a - b);
     if (hours.length === 0) continue;
 
-    const freeHours = hours.filter((h) => {
-      const hStart = h * 60;
-      const hEnd = (h + 1) * 60;
-      const classClash = dayClasses.some((c) => {
-        const [csH, csM] = c.start.split(":").map(Number);
-        const [ceH, ceM] = c.end.split(":").map(Number);
-        return hStart < ceH * 60 + ceM && hEnd > csH * 60 + csM;
-      });
-      const examClash = dayExams.some((e) => {
-        const [esH, esM] = e.start.split(":").map(Number);
-        const [eeH, eeM] = e.end.split(":").map(Number);
-        return hStart < eeH * 60 + eeM && hEnd > esH * 60 + esM;
-      });
-      return !classClash && !examClash;
-    });
-
-    if (freeHours.length === 0) continue;
-
     const runs = [];
-    let run = [freeHours[0]];
-    for (let i = 1; i < freeHours.length; i++) {
-      if (freeHours[i] === freeHours[i - 1] + 1) run.push(freeHours[i]);
-      else { runs.push(run); run = [freeHours[i]]; }
+    let run = [hours[0]];
+    for (let i = 1; i < hours.length; i++) {
+      if (hours[i] === hours[i - 1] + 1) run.push(hours[i]);
+      else { runs.push(run); run = [hours[i]]; }
     }
     runs.push(run);
+
+    let dayStudySlotsCount = 0;
 
     runs.forEach((r) => {
       let cursorMin = r[0] * 60;
       const endMin = (r[r.length - 1] + 1) * 60;
-      while (cursorMin + 50 <= endMin) {
+      while (cursorMin + 50 <= endMin && dayStudySlotsCount < targetStudySlotsPerDay) {
         const startH = Math.floor(cursorMin / 60), startM = cursorMin % 60;
         const blockEndMin = cursorMin + 50;
         const endH = Math.floor(blockEndMin / 60), endM = blockEndMin % 60;
@@ -221,8 +173,9 @@ function buildWeekSlots(availability, weekStart, collegeSchedule = [], examSched
           assigned: null,
           completed: false,
         });
+        dayStudySlotsCount++;
         cursorMin = blockEndMin;
-        if (cursorMin + 10 <= endMin) {
+        if (cursorMin + 10 <= endMin && dayStudySlotsCount < targetStudySlotsPerDay) {
           const bEndMin = cursorMin + 10;
           slots.push({
             id: uid(),
@@ -243,102 +196,169 @@ function buildWeekSlots(availability, weekStart, collegeSchedule = [], examSched
   return slots.sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
 }
 
-function buildWorkQueue(tasks, topics, examSchedule = []) {
-  const examItems = (examSchedule || []).map((ex) => ({
-    key: `exam-prep-${ex.id}`,
-    refId: ex.id,
-    type: "exam_prep",
-    title: `⚡ Exam Revision: ${ex.subject}`,
-    subtitle: ex.title || ex.weightage,
-    subject: ex.subject,
-    priority: "High",
-    category: "Exam Prep",
-    room: ex.room || "Main Auditorium",
-    attachment: "Syllabus.pdf",
-    participants: ["TY", "AB", "MR", "SS", "+3"],
-    remainingMin: 250,
-    deadline: parseDateTime(ex.date, ex.start),
-  }));
-
-  const taskItems = tasks
+function buildWorkQueue(tasks = [], topics = [], examSchedule = []) {
+  // 1. Task & Assignment Items from the Tasks Section
+  const taskItems = (tasks || [])
     .filter((t) => !t.completed)
-    .map((t) => ({
-      key: `task-${t.id}`,
-      refId: t.id,
-      type: "task",
-      title: t.title,
-      subtitle: t.subject,
-      subject: t.subject,
-      priority: t.priority,
-      category: t.category || "Assignment",
-      room: "West camp. Room 312",
-      participants: ["TY"],
-      remainingMin: Math.max(50, Math.round((t.estHours || 2) * 60)),
-      deadline: parseDateTime(t.dueDate, t.dueTime),
-    }));
+    .map((t) => {
+      const estHours = Number(t.estHours) || 2;
+      const category = t.category || "Assignment";
+      return {
+        key: `task-${t.id}`,
+        refId: t.id,
+        type: "task",
+        title: `${category === "Assignment" ? "📝 Assignment" : "📌 " + category}: ${t.title}`,
+        rawTitle: t.title,
+        subtitle: `${t.subject} · ${category}`,
+        subject: t.subject || "General",
+        priority: t.priority || "Medium",
+        category: category,
+        room: "Study Desk / Work Area",
+        participants: ["Self"],
+        remainingMin: Math.max(50, Math.round(estHours * 60)),
+        deadline: parseDateTime(t.dueDate, t.dueTime),
+        dueDate: t.dueDate,
+        dueTime: t.dueTime,
+      };
+    });
 
-  const topicItems = topics
+  // 2. Self Study Topics & Chapters
+  const topicItems = (topics || [])
     .filter((t) => !t.completed)
     .map((t) => ({
       key: `topic-${t.id}`,
       refId: t.id,
       type: "topic",
-      title: `Topic: ${t.name}`,
-      subtitle: t.subject,
-      subject: t.subject,
-      priority: t.difficulty === "Hard" ? "High" : t.difficulty === "Medium" ? "Medium" : "Low",
-      category: "Exam Prep",
-      room: "West camp. Conference",
-      participants: ["TY", "AB", "SS", "+2"],
-      remainingMin: t.difficulty === "Hard" ? 270 : t.difficulty === "Medium" ? 180 : 90,
+      title: `📚 Self Study: ${t.name}`,
+      rawTitle: t.name,
+      subtitle: `${t.subject} · Subject Deep Dive`,
+      subject: t.subject || "General",
+      priority: t.priority || (t.difficulty === "Hard" ? "High" : t.difficulty === "Medium" ? "Medium" : "Low"),
+      difficulty: t.difficulty || "Medium",
+      category: "Self Study",
+      room: "Quiet Study Area",
+      participants: ["Self"],
+      remainingMin: t.totalSessions ? Math.max(50, (t.totalSessions - (t.sessionsDone || 0)) * 50) : (t.difficulty === "Hard" ? 250 : t.difficulty === "Medium" ? 150 : 100),
       deadline: null,
+      dueDate: null,
+      dueTime: null,
     }));
 
-  return [...examItems, ...taskItems, ...topicItems].sort((a, b) => {
-    const ad = a.deadline ? a.deadline.getTime() : Infinity;
-    const bd = b.deadline ? b.deadline.getTime() : Infinity;
-    if (ad !== bd) return ad - bd;
-    return (PRIORITY_WEIGHT[b.priority] || 1) - (PRIORITY_WEIGHT[a.priority] || 1);
-  });
+  return { taskItems, topicItems };
 }
 
-export { buildMockData, startOfWeek, toISODate };
+export { buildMockData, startOfWeek, toISODate, addDays, DAY_KEYS };
 
-export function generateTimetable(tasks, topics, availability, weekStart, collegeSchedule = [], examSchedule = []) {
-  const slots = buildWeekSlots(availability, weekStart, collegeSchedule, examSchedule);
-  const queue = buildWorkQueue(tasks, topics, examSchedule);
-  let qIndex = 0;
+export function generateTimetable(tasks, topics, availability, weekStart, collegeSchedule = [], examSchedule = [], dailyTargetHours = 4) {
+  const slots = buildWeekSlots(availability, weekStart, collegeSchedule, examSchedule, dailyTargetHours);
+  const { taskItems, topicItems } = buildWorkQueue(tasks, topics, examSchedule);
 
-  for (const slot of slots) {
-    if (slot.type !== "study") continue;
-    const slotMoment = parseDateTime(slot.date, slot.start);
+  // Group study slots by date for balanced daily allocation
+  const slotsByDate = {};
+  slots.forEach((s) => {
+    if (s.type !== "study") return;
+    if (!slotsByDate[s.date]) slotsByDate[s.date] = [];
+    slotsByDate[s.date].push(s);
+  });
 
-    while (qIndex < queue.length && queue[qIndex].remainingMin <= 0) qIndex++;
-    let chosen = -1;
-    for (let i = qIndex; i < queue.length; i++) {
-      const item = queue[i];
-      if (item.remainingMin <= 0) continue;
-      if (item.deadline && slotMoment >= item.deadline) continue;
-      chosen = i;
-      break;
-    }
-    if (chosen === -1) continue;
+  const allTaskItems = taskItems.map(item => ({ ...item }));
+  const allTopicItems = topicItems.map(item => ({ ...item }));
 
-    const item = queue[chosen];
-    slot.assigned = {
-      refId: item.refId,
-      itemType: item.type,
-      title: item.title,
-      subtitle: item.subtitle,
-      subject: item.subject,
-      priority: item.priority,
-      category: item.category,
-      room: item.room,
-      attachment: item.attachment,
-      participants: item.participants,
-    };
-    item.remainingMin -= 50;
-  }
+  const PRIORITY_SCORES = { High: 3, Medium: 2, Low: 1 };
+
+  // For each day, guarantee a balanced mix of tasks/assignments and self-study sessions
+  Object.keys(slotsByDate).sort().forEach((dateStr) => {
+    const dayStudySlots = slotsByDate[dateStr];
+    const dayItemUsage = {};
+    let lastScheduledType = null;
+    let lastScheduledItemKey = null;
+
+    dayStudySlots.forEach((slot, slotIndex) => {
+      const slotMoment = parseDateTime(slot.date, slot.start);
+      const candidates = [];
+
+      // 1. Candidate Tasks & Assignments (from Tasks section)
+      allTaskItems.forEach((task) => {
+        if (task.remainingMin <= 0) return;
+        if (task.deadline && slotMoment >= task.deadline) return;
+        let score = 90 + (PRIORITY_SCORES[task.priority] || 2) * 30;
+        if (task.deadline) {
+          const hoursUntil = (task.deadline.getTime() - slotMoment.getTime()) / (1000 * 3600);
+          if (hoursUntil <= 24) score += 220; // Urgent due today / <24h!
+          else if (hoursUntil <= 48) score += 140; // Due in <48h!
+          else if (hoursUntil <= 96) score += 70;
+        }
+        if (task.priority === "High") score += 60;
+        
+        // Balanced rotation: if last slot was already a task, leave room for self study
+        if (lastScheduledType === "task") score -= 45;
+        if (lastScheduledItemKey === task.key) score -= 50;
+        if ((dayItemUsage[task.key] || 0) >= 2) score -= 80;
+
+        candidates.push({ item: task, score, type: "task" });
+      });
+
+      // 2. Candidate Self Study Sessions (Topics & Subject Practice)
+      allTopicItems.forEach((topic) => {
+        if (topic.remainingMin <= 0) return;
+        let score = 70 + (PRIORITY_SCORES[topic.priority] || 2) * 25;
+        if (topic.priority === "High") score += 40;
+        if (topic.difficulty === "Hard") score += 30;
+        
+        // Boost self study if previous slot was task to balance the day
+        if (lastScheduledType === "task") score += 35;
+        if (lastScheduledItemKey === topic.key) score -= 45;
+        if ((dayItemUsage[topic.key] || 0) >= 2) score -= 70;
+
+        candidates.push({ item: topic, score, type: "topic" });
+      });
+
+      if (candidates.length === 0) {
+        // Guaranteed dedicated self-study fallback
+        const generalSubject = topics.length > 0 ? topics[slotIndex % topics.length].subject : "General";
+        slot.assigned = {
+          refId: null,
+          itemType: "topic",
+          title: `📚 Self Study: ${generalSubject} Core Concepts & Practice`,
+          rawTitle: `Self Study: ${generalSubject}`,
+          subtitle: `${generalSubject} · Dedicated Self Study`,
+          subject: generalSubject,
+          priority: "Medium",
+          category: "Self Study",
+          room: "Quiet Study Area",
+        };
+        lastScheduledType = "topic";
+        lastScheduledItemKey = null;
+        return;
+      }
+
+      // Sort candidate items by highest score
+      candidates.sort((a, b) => b.score - a.score);
+      const chosen = candidates[0].item;
+
+      slot.assigned = {
+        refId: chosen.refId,
+        itemType: chosen.type,
+        title: chosen.title,
+        rawTitle: chosen.rawTitle || chosen.title,
+        subtitle: chosen.subtitle,
+        subject: chosen.subject,
+        priority: chosen.priority,
+        category: chosen.category,
+        room: chosen.room,
+        attachment: chosen.attachment,
+        participants: chosen.participants,
+        dueDate: chosen.dueDate,
+        dueTime: chosen.dueTime
+      };
+
+      chosen.remainingMin -= 50;
+      dayItemUsage[chosen.key] = (dayItemUsage[chosen.key] || 0) + 1;
+      lastScheduledType = chosen.type;
+      lastScheduledItemKey = chosen.key;
+    });
+  });
+
   return slots;
 }
 
@@ -452,14 +472,6 @@ export default function StudentPlanner({
     return savedPlannerData?.dashboardScratchpad || "";
   });
 
-  const [timetablePhoto, setTimetablePhoto] = useState(() => {
-    return savedPlannerData?.timetablePhoto || null;
-  });
-
-  const [timetableSubTab, setTimetableSubTab] = useState(() => {
-    return savedPlannerData?.timetablePhoto ? "photo" : "grid";
-  });
-
   const student = useMemo(() => {
     if (userProfile) {
       const course = userProfile.courseName?.trim() || '';
@@ -494,7 +506,11 @@ export default function StudentPlanner({
 
   const [view, setView] = useState("dashboard"); // default landing page as requested
   const [now, setNow] = useState(new Date());
+  const [selectedTimetableDate, setSelectedTimetableDate] = useState(() => toISODate(new Date()));
+  const [activePomodoroSession, setActivePomodoroSession] = useState(null);
+  const [celebrationToast, setCelebrationToast] = useState({ show: false, title: "", duration: 0 });
   const [notifOpen, setNotifOpen] = useState(false);
+  const [aiChatOpen, setAiChatOpen] = useState(false);
   const [taskModal, setTaskModal] = useState({ open: false, editing: null });
   const [generating, setGenerating] = useState(false);
   const [searchGlobal, setSearchGlobal] = useState("");
@@ -527,15 +543,14 @@ export default function StudentPlanner({
           lastGenerated,
           dashboardTodos,
           dashboardNotes,
-          dashboardScratchpad,
-          timetablePhoto
+          dashboardScratchpad
         });
       }
     }, 300);
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
-  }, [tasks, topics, availability, collegeSchedule, examSchedule, events, timetable, lastGenerated, dashboardTodos, dashboardNotes, dashboardScratchpad, timetablePhoto]);
+  }, [tasks, topics, availability, collegeSchedule, examSchedule, events, timetable, lastGenerated, dashboardTodos, dashboardNotes, dashboardScratchpad]);
 
   /* ---- live clock ---- */
   useEffect(() => {
@@ -620,7 +635,29 @@ export default function StudentPlanner({
       clearTimeout(taskRemovalTimers.current[id]);
       delete taskRemovalTimers.current[id];
     }
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+    setTasks((prev) => {
+      const updated = prev.filter((t) => t.id !== id);
+      setTimetable((curr) => curr.map(b => {
+        if (b.assigned?.refId === id && b.assigned?.itemType === "task") {
+          return {
+            ...b,
+            assigned: {
+              refId: null,
+              itemType: "study",
+              title: "Deep Focus & Self Study",
+              rawTitle: "Deep Focus & Self Study",
+              subtitle: "Subject Revision & Problem Practice",
+              subject: "General",
+              priority: "Medium",
+              category: "Revision",
+              room: "Quiet Study Area",
+            }
+          };
+        }
+        return b;
+      }));
+      return updated;
+    });
   }, []);
 
   const toggleTask = useCallback((id) => {
@@ -629,8 +666,15 @@ export default function StudentPlanner({
       if (!target) return prev;
       const willComplete = !target.completed;
 
+      // Sync linked timetable blocks
+      setTimetable((curr) => curr.map(b => {
+        if (b.assigned?.refId === id && b.assigned?.itemType === "task") {
+          return { ...b, completed: willComplete };
+        }
+        return b;
+      }));
+
       if (willComplete) {
-        // Start 15-second removal timer silently
         if (taskRemovalTimers.current[id]) {
           clearTimeout(taskRemovalTimers.current[id]);
         }
@@ -640,7 +684,6 @@ export default function StudentPlanner({
 
         return prev.map((t) => (t.id === id ? { ...t, completed: true } : t));
       } else {
-        // Unchecking: Cancel 15-second removal timer
         if (taskRemovalTimers.current[id]) {
           clearTimeout(taskRemovalTimers.current[id]);
           delete taskRemovalTimers.current[id];
@@ -651,16 +694,52 @@ export default function StudentPlanner({
   }, [deleteTask]);
 
   const saveTask = useCallback((taskData) => {
-    if (taskData.id) {
-      setTasks((prev) => prev.map((t) => (t.id === taskData.id ? { ...t, ...taskData } : t)));
-    } else {
-      setTasks((prev) => [{ ...taskData, id: uid(), completed: false, sessionsDone: 0, totalSessions: taskData.totalSessions || 4 }, ...prev]);
-    }
-  }, []);
+    setTasks((prev) => {
+      let updated;
+      if (taskData.id) {
+        updated = prev.map((t) => (t.id === taskData.id ? { ...t, ...taskData } : t));
+      } else {
+        updated = [{ ...taskData, id: uid(), completed: false, sessionsDone: 0, totalSessions: taskData.totalSessions || 4 }, ...prev];
+      }
+
+      // Automatically re-generate timetable so the new task/assignment is scheduled into the Day Schedule
+      if (availability && Object.keys(availability).length > 0) {
+        const newTimetable = generateTimetable(
+          updated,
+          topics,
+          availability,
+          weekStart,
+          collegeSchedule,
+          examSchedule,
+          student?.dailyTargetHours || 4
+        );
+        setTimetable(newTimetable);
+        setLastGenerated(new Date().toISOString());
+      }
+      return updated;
+    });
+  }, [topics, availability, weekStart, collegeSchedule, examSchedule, student]);
 
   const addTopic = useCallback((topicData) => {
-    setTopics((prev) => [...prev, { ...topicData, id: uid(), completed: false, sessionsDone: 0, totalSessions: topicData.totalSessions || 4 }]);
-  }, []);
+    setTopics((prev) => {
+      const newTopic = { ...topicData, id: uid(), completed: false, sessionsDone: 0, totalSessions: topicData.totalSessions || 4 };
+      const updated = [...prev, newTopic];
+      if (availability && Object.keys(availability).length > 0) {
+        const newTimetable = generateTimetable(
+          tasks,
+          updated,
+          availability,
+          weekStart,
+          collegeSchedule,
+          examSchedule,
+          student?.dailyTargetHours || 4
+        );
+        setTimetable(newTimetable);
+        setLastGenerated(new Date().toISOString());
+      }
+      return updated;
+    });
+  }, [tasks, availability, weekStart, collegeSchedule, examSchedule, student]);
 
   const deleteTopic = useCallback((id) => {
     if (topicRemovalTimers.current[id]) {
@@ -676,8 +755,15 @@ export default function StudentPlanner({
       if (!target) return prev;
       const willComplete = !target.completed;
 
+      // Sync linked timetable blocks
+      setTimetable((curr) => curr.map(b => {
+        if (b.assigned?.refId === id && b.assigned?.itemType === "topic") {
+          return { ...b, completed: willComplete };
+        }
+        return b;
+      }));
+
       if (willComplete) {
-        // Start 15-second removal timer silently
         if (topicRemovalTimers.current[id]) {
           clearTimeout(topicRemovalTimers.current[id]);
         }
@@ -687,7 +773,6 @@ export default function StudentPlanner({
 
         return prev.map((t) => (t.id === id ? { ...t, completed: true } : t));
       } else {
-        // Unchecking: Cancel 15-second removal timer
         if (topicRemovalTimers.current[id]) {
           clearTimeout(topicRemovalTimers.current[id]);
           delete topicRemovalTimers.current[id];
@@ -778,6 +863,15 @@ export default function StudentPlanner({
       if (!target) return prev;
       const willComplete = !target.completed;
 
+      // Sync linked task or topic
+      if (target.assigned?.refId) {
+        if (target.assigned.itemType === "task") {
+          setTasks((curr) => curr.map((t) => (t.id === target.assigned.refId ? { ...t, completed: willComplete } : t)));
+        } else if (target.assigned.itemType === "topic") {
+          setTopics((curr) => curr.map((tp) => (tp.id === target.assigned.refId ? { ...tp, completed: willComplete, status: willComplete ? "Mastered" : "In Progress" } : tp)));
+        }
+      }
+
       if (willComplete) {
         // Start 15-second removal timer silently
         if (blockRemovalTimers.current[blockId]) {
@@ -803,12 +897,90 @@ export default function StudentPlanner({
   const handleGenerate = useCallback(() => {
     setGenerating(true);
     setTimeout(() => {
-      const slots = generateTimetable(tasks, topics, availability, weekStart, collegeSchedule, examSchedule);
+      const slots = generateTimetable(
+        tasks, 
+        topics, 
+        availability, 
+        weekStart, 
+        collegeSchedule, 
+        examSchedule, 
+        student?.dailyTargetHours || 4
+      );
       setTimetable(slots);
       setLastGenerated(new Date().toISOString());
       setGenerating(false);
     }, 600);
-  }, [tasks, topics, availability, weekStart, collegeSchedule, examSchedule]);
+  }, [tasks, topics, availability, weekStart, collegeSchedule, examSchedule, student]);
+
+  /* ---- Pomodoro Integration Handlers ---- */
+  const handleStartPomodoroForSession = useCallback((block) => {
+    const rawTitle = block.assigned?.title || "Study Session";
+    const displayTitle = rawTitle.replace(/^Topic:\s*/i, "");
+    setActivePomodoroSession({
+      blockId: block.id,
+      title: displayTitle,
+      subject: block.assigned?.subject || "General",
+      refId: block.assigned?.refId,
+      itemType: block.assigned?.itemType || "topic"
+    });
+    setView("pomodoro"); // Switch directly to Focus Mode tab
+  }, []);
+
+  const handleFinishStudying = useCallback((sessionData, durationMins = 50) => {
+    if (!sessionData) return;
+    const topicTitle = typeof sessionData === "string" ? sessionData : (sessionData.title || "");
+    const blockId = sessionData.blockId || (activePomodoroSession?.blockId);
+    const refId = sessionData.refId || (activePomodoroSession?.refId);
+    const itemType = sessionData.itemType || (activePomodoroSession?.itemType);
+
+    // 1. Mark matching study block in timetable as completed
+    setTimetable((prev) =>
+      prev.map((b) => {
+        if (blockId && b.id === blockId) {
+          return { ...b, completed: true };
+        }
+        const bTitle = (b.assigned?.title || "").replace(/^Topic:\s*/i, "");
+        if (topicTitle && bTitle.toLowerCase() === topicTitle.toLowerCase()) {
+          return { ...b, completed: true };
+        }
+        return b;
+      })
+    );
+
+    // 2. Mark task / topic as completed in database state
+    if (refId) {
+      if (itemType === "task") {
+        setTasks((prev) => prev.map((t) => (t.id === refId ? { ...t, completed: true } : t)));
+      } else if (itemType === "topic") {
+        setTopics((prev) => prev.map((tp) => (tp.id === refId ? { ...tp, completed: true, status: "Mastered" } : tp)));
+      }
+    } else if (topicTitle) {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.title.toLowerCase() === topicTitle.toLowerCase() || topicTitle.toLowerCase().includes(t.title.toLowerCase())
+            ? { ...t, completed: true }
+            : t
+        )
+      );
+      setTopics((prev) =>
+        prev.map((tp) =>
+          tp.name.toLowerCase() === topicTitle.toLowerCase() || topicTitle.toLowerCase().includes(tp.name.toLowerCase())
+            ? { ...tp, completed: true, status: "Mastered" }
+            : tp
+        )
+      );
+    }
+
+    // 3. Show celebration toast
+    setCelebrationToast({
+      show: true,
+      title: topicTitle || "Study Session",
+      duration: durationMins
+    });
+    setTimeout(() => {
+      setCelebrationToast((prev) => ({ ...prev, show: false }));
+    }, 5000);
+  }, [activePomodoroSession]);
 
   /* ---- Dashboard To-Do Handlers ---- */
   const handleAddDashboardTodo = useCallback((newTodo) => {
@@ -1190,139 +1362,385 @@ export default function StudentPlanner({
       {/* MAIN CONTENT CANVAS */}
       <main className="flex-1 min-w-0 flex flex-col gap-4 overflow-hidden">
         
-        {/* ----------------- SCHEDULE / TIMETABLE VIEW ----------------- */}
-        {view === "timetable" && (
-          <div className="space-y-4 flex-1 flex flex-col min-w-0">
-            
-            {/* Top Toolbar for Schedule */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[#E8E2D8]/60">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-base sm:text-lg text-[#181A1D] tracking-tight">
-                    Weekly Timetable
-                  </span>
-                  <div className="text-xs font-normal text-[#6B655E] bg-white/80 px-3 py-1 rounded-full border border-[#ECE6DC] flex items-center gap-1.5 shadow-2xs">
-                    <Calendar className="w-3.5 h-3.5 text-[#EAB308]" />
-                    <span>{fmtDisplayDate(toISODate(weekStart))} – {fmtDisplayDate(toISODate(weekEnd))}</span>
+        {/* ----------------- SCHEDULE / TIMETABLE VIEW (Single Day + Side-by-Side Pomodoro) ----------------- */}
+        {view === "timetable" && (() => {
+          const activeSelectedDate = selectedTimetableDate || toISODate(now);
+          const selectedDateObj = new Date(`${activeSelectedDate}T00:00:00`);
+          const selectedDayLabel = isNaN(selectedDateObj.getTime())
+            ? "Today"
+            : selectedDateObj.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+          
+          const selectedDayBlocks = timetable.filter(b => b.date === activeSelectedDate);
+          const selectedStudyBlocks = selectedDayBlocks.filter(b => b.type === "study");
+          const selectedTaskBlocks = selectedStudyBlocks.filter(b => b.assigned?.itemType === "task");
+          const selectedSelfStudyBlocks = selectedStudyBlocks.filter(b => b.assigned?.itemType === "topic" || !b.assigned?.itemType);
+          const totalStudyHoursPlanned = (selectedStudyBlocks.length * 50 / 60).toFixed(1);
+
+          return (
+            <div className="space-y-4 flex-1 flex flex-col min-w-0">
+              
+              {/* Celebration Toast Banner */}
+              {celebrationToast.show && (
+                <div className="p-3.5 rounded-2xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs sm:text-sm font-extrabold flex items-center justify-between shadow-md animate-in slide-in-from-top duration-300">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#10B981] text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-[#065F46]">
+                        Topic Mastered & Logged!
+                      </p>
+                      <p className="text-xs font-semibold text-[#047857]">
+                        Finished studying <strong className="text-[#065F46]">"{celebrationToast.title}"</strong> · +{celebrationToast.duration}m logged to Study Analytics.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setCelebrationToast(prev => ({ ...prev, show: false }))}
+                    className="text-[#065F46] hover:text-black font-black text-sm px-2 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {/* Top Toolbar: Week Navigator Tabs & Action Buttons */}
+              <div className="bg-white/80 backdrop-blur-md rounded-[28px] p-3.5 sm:p-4 border border-[#ECE6DC] shadow-xs space-y-3">
+                
+                {/* Header Row */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#181A1D] text-[#FACC15] flex items-center justify-center shadow-xs">
+                      <CalendarRange className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h2 className="font-display font-extrabold text-[#181A1D] text-base sm:text-lg tracking-tight">
+                        AI Daily Study Schedule
+                      </h2>
+                      <p className="text-[11px] text-[#6B655E] font-medium">
+                        Optimized for tasks, assignments & self-study with a {student?.dailyTargetHours || 4}h daily goal
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setAiChatOpen(true)}
+                      className="px-3.5 py-1.5 rounded-full bg-linear-to-r from-[#181A1D] via-[#2A2D35] to-[#181A1D] hover:from-black hover:to-black text-white text-xs font-extrabold shadow-sm flex items-center gap-1.5 cursor-pointer transition-all border border-[#FACC15]/40 group active:scale-95"
+                      title="Ask AI to customize your schedule based on tasks, assignments or self study"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-[#FACC15] group-hover:rotate-12 transition-transform" />
+                      <span>Customize with AI</span>
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedTimetableDate(toISODate(now))}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer shadow-2xs ${
+                        activeSelectedDate === toISODate(now)
+                          ? "bg-[#181A1D] text-[#FACC15] border-[#181A1D]"
+                          : "bg-white hover:bg-[#F8F6F1] text-[#181A1D] border-[#ECE6DC]"
+                      }`}
+                    >
+                      Jump to Today
+                    </button>
+
+                    <button
+                      onClick={handleGenerate}
+                      disabled={generating}
+                      className="px-3.5 py-1.5 rounded-full bg-white border border-[#ECE6DC] hover:bg-[#F8F6F1] text-xs font-bold text-[#181A1D] shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all"
+                      title="Regenerate Plan with AI"
+                    >
+                      <RotateCcw className={`w-3.5 h-3.5 text-[#EAB308] ${generating ? "animate-spin" : ""}`} />
+                      <span>{generating ? "Rebalancing..." : "Regenerate Plan"}</span>
+                    </button>
+
+                    <button
+                      onClick={() => setTaskModal({ open: true, editing: null })}
+                      className="bg-[#181A1D] hover:bg-black text-white px-3.5 py-1.5 rounded-full font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
+                      <span>Add Task</span>
+                    </button>
                   </div>
                 </div>
 
-                {/* Subtle weekly summary chips matching dashboard palette */}
-                <div className="hidden md:flex items-center gap-2">
-                  <span className="text-[11px] font-normal text-[#92400E] bg-[#FEF3C7]/80 border border-[#FDE68A] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
-                    {timetable.filter(b => b.type === "study").length} Study Sessions
-                  </span>
-                  <span className="text-[11px] font-normal text-[#1E40AF] bg-[#DBEAFE]/80 border border-[#BFDBFE] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
-                    {timetable.filter(b => b.type === "class").length} Classes
-                  </span>
-                  {timetable.some(b => b.type === "exam") && (
-                    <span className="text-[11px] font-normal text-[#9F1239] bg-[#FFE4E6]/80 border border-[#FECDD3] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" />
-                      {timetable.filter(b => b.type === "exam").length} Exams
-                    </span>
-                  )}
-                </div>
-              </div>
+                {/* 7-Day Quick Switcher Bar */}
+                <div className="grid grid-cols-7 gap-2 pt-1 border-t border-[#ECE6DC]">
+                  {DAY_KEYS.map((d, i) => {
+                    const colDate = addDays(weekStart, i);
+                    const colDateISO = toISODate(colDate);
+                    const isSelected = colDateISO === activeSelectedDate;
+                    const isToday = colDateISO === toISODate(now);
+                    const dayBlocks = timetable.filter(b => b.date === colDateISO);
+                    const studyCount = dayBlocks.filter(b => b.type === "study").length;
+                    const taskCount = dayBlocks.filter(b => b.type === "study" && b.assigned?.itemType === "task").length;
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleGenerate}
-                  disabled={generating}
-                  className="px-3.5 py-1.5 rounded-full bg-white border border-[#ECE6DC] hover:bg-[#F8F6F1] text-xs font-medium text-[#181A1D] shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all"
-                  title="Regenerate Plan"
-                >
-                  <RotateCcw className={`w-3.5 h-3.5 text-[#EAB308] ${generating ? "animate-spin" : ""}`} />
-                  <span>{generating ? "Building..." : "Regenerate"}</span>
-                </button>
-
-                <button
-                  onClick={() => setTaskModal({ open: true, editing: null })}
-                  className="bg-[#181A1D] hover:bg-[#282C33] text-white px-4 py-1.5 rounded-full font-medium text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
-                  <span>Add Task</span>
-                </button>
-              </div>
-            </div>
-
-            {/* 7 Columns Timetable Grid */}
-            <div className="flex-1 overflow-x-auto pb-3">
-              <div className="grid grid-cols-7 gap-3 min-w-[1020px]">
-                {DAY_KEYS.map((d, i) => {
-                  const colDate = addDays(weekStart, i);
-                  const colDateISO = toISODate(colDate);
-                  const isToday = colDateISO === toISODate(now);
-                  const dayBlocks = timetable.filter(b => b.date === colDateISO);
-                  const activeBlocks = dayBlocks.filter(b => b.type !== "break");
-
-                  return (
-                    <div 
-                      key={d} 
-                      className={`rounded-[24px] p-2.5 space-y-2 flex flex-col transition-all ${
-                        isToday 
-                          ? "bg-[#FFFDF8]/90 border-2 border-[#FDE047]/80 shadow-xs" 
-                          : "bg-white/45 hover:bg-white/60 border border-[#ECE6DC]"
-                      }`}
-                    >
-                      {/* Column Header */}
-                      <div className={`p-2.5 rounded-[18px] transition-all ${
-                        isToday 
-                          ? "bg-[#FFFBEB] border border-[#FDE68A] shadow-2xs" 
-                          : "bg-white/80 border border-[#ECE6DC]"
-                      }`}>
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-xs text-[#252320]">
-                            <span className="hidden sm:inline">{DAY_LABELS[d]}</span>
-                            <span className="sm:hidden">{d}</span>
-                          </span>
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-medium transition-colors ${
-                            isToday 
-                              ? "bg-[#FACC15] text-[#181A1D] shadow-2xs" 
-                              : "bg-[#F0ECE4] text-[#6B655E]"
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setSelectedTimetableDate(colDateISO)}
+                        className={`p-2 sm:p-2.5 rounded-2xl text-center transition-all cursor-pointer border flex flex-col items-center justify-between ${
+                          isSelected
+                            ? "bg-[#181A1D] text-white border-[#181A1D] shadow-md scale-[1.02]"
+                            : "bg-[#F8F6F1] hover:bg-white border-[#ECE6DC] text-[#181A1D]"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider ${
+                            isSelected ? "text-[#FACC15]" : "text-[#78716C]"
                           }`}>
-                            {colDate.getDate()}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between mt-1 text-[10px] font-normal">
-                          <span className="text-[#8E8880]">
-                            {activeBlocks.length === 0 ? "Rest Day" : `${activeBlocks.length} ${activeBlocks.length === 1 ? 'item' : 'items'}`}
+                            {d}
                           </span>
                           {isToday && (
-                            <span className="text-[9px] font-medium text-[#92400E] bg-[#FEF08A] px-1.5 py-0.2 rounded-full">
+                            <span className={`text-[8px] font-bold px-1 rounded-sm ${
+                              isSelected ? "bg-[#FACC15] text-[#181A1D]" : "bg-[#FEF08A] text-[#92400E]"
+                            }`}>
                               Today
                             </span>
                           )}
                         </div>
-                      </div>
 
-                      {/* Day Event Cards */}
-                      <div className="space-y-2 flex-1">
-                        {dayBlocks.length === 0 ? (
-                          <div className="h-36 rounded-[18px] bg-white/30 border border-dashed border-[#E0D8CB] p-4 text-center flex flex-col items-center justify-center gap-1.5 text-[#A8A29E]">
-                            <Coffee className="w-5 h-5 text-[#C4BDB3]" />
-                            <span className="text-[11px] font-normal text-[#8E8880]">Rest Day</span>
-                            <span className="text-[9.5px] text-[#A8A29E]">No sessions scheduled</span>
-                          </div>
-                        ) : (
-                          dayBlocks.map((b) => (
-                            <ScheduleCardItem 
-                              key={b.id} 
-                              block={b} 
-                              onToggle={() => toggleBlockDone(b.id)} 
-                            />
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                        <span className={`text-sm sm:text-base font-black my-0.5 ${
+                          isSelected ? "text-white" : "text-[#181A1D]"
+                        }`}>
+                          {colDate.getDate()}
+                        </span>
+
+                        {/* Micro indicators */}
+                        <div className="flex items-center gap-1 mt-0.5">
+                          {taskCount > 0 && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#FB7185]" title={`${taskCount} tasks/assignments`} />
+                          )}
+                          {studyCount > 0 && (
+                            <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#FACC15]" : "bg-[#10B981]"}`} title={`${studyCount} study sprints`} />
+                          )}
+                          {studyCount === 0 && (
+                            <span className="text-[9px] text-[#A8A29A] font-semibold">Rest</span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
 
-          </div>
-        )}
+              {/* SINGLE DAY STUDY & ASSIGNMENTS TIMELINE (Full-Width Clean Layout) */}
+              <div className="w-full flex-1 flex flex-col space-y-4 min-w-0 overflow-y-auto pr-1">
+                
+                {/* Day Header Banner */}
+                <div className="bg-[#DDD7CC] rounded-[28px] p-4 sm:p-5 border border-[#D0C9BD] shadow-xs flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-[#6B655E]">
+                        Day Schedule
+                      </span>
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/80 text-[#181A1D] border border-[#C8C1B3]">
+                        {activeSelectedDate === toISODate(now) ? "Today" : fmtDisplayDate(activeSelectedDate)}
+                      </span>
+                    </div>
+                    <h3 className="font-display font-extrabold text-base sm:text-xl text-[#181A1D] mt-0.5">
+                      {selectedDayLabel}
+                    </h3>
+                  </div>
+
+                  {/* Quick stats pills */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-extrabold text-[#181A1D] bg-white/80 border border-[#C8C1B3] px-3.5 py-1.5 rounded-full shadow-2xs flex items-center gap-1.5">
+                      <Target className="w-3.5 h-3.5 text-[#CA8A04]" />
+                      <span>{selectedStudyBlocks.length} Focus Sprints ({totalStudyHoursPlanned}h)</span>
+                    </span>
+                    {selectedTaskBlocks.length > 0 && (
+                      <span className="text-xs font-extrabold text-[#9F1239] bg-[#FFE4E6] border border-[#FECDD3] px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>{selectedTaskBlocks.length} {selectedTaskBlocks.length === 1 ? 'Assignment' : 'Assignments / Tasks'}</span>
+                      </span>
+                    )}
+                    {selectedSelfStudyBlocks.length > 0 && (
+                      <span className="text-xs font-extrabold text-[#166534] bg-[#DCFCE7] border border-[#BBF7D0] px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>{selectedSelfStudyBlocks.length} Self Study {selectedSelfStudyBlocks.length === 1 ? 'Session' : 'Sessions'}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Timeline Session Cards */}
+                <div className="space-y-3 flex-1">
+                  {selectedDayBlocks.length === 0 ? (
+                    <div className="bg-white rounded-[28px] p-8 border border-dashed border-[#D0C9BD] text-center flex flex-col items-center justify-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-[#F8F6F1] text-[#8E8880] flex items-center justify-center">
+                        <Coffee className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-display font-extrabold text-[#181A1D] text-sm sm:text-base">
+                          No Sessions Scheduled for this Day
+                        </h4>
+                        <p className="text-xs text-[#78716C] mt-1 max-w-sm">
+                          Enjoy your rest day or generate study sprints balanced for your homework tasks, assignments, and self-study topics.
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleGenerate}
+                        className="px-4 py-2 rounded-full bg-[#181A1D] hover:bg-black text-white text-xs font-extrabold flex items-center gap-2 cursor-pointer shadow-sm transition-all"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-[#FACC15]" />
+                        <span>Generate Study Sprints</span>
+                      </button>
+                    </div>
+                  ) : (
+                    selectedDayBlocks.map((block) => {
+                      const isActivePomo = activePomodoroSession?.blockId === block.id;
+
+                      if (block.type === "break") {
+                        return (
+                          <div key={block.id} className="py-2.5 px-4 rounded-2xl bg-[#FAF8F5] border border-[#E8E2D8] text-xs font-semibold text-[#8A8275] flex items-center justify-between shadow-2xs">
+                            <div className="flex items-center gap-2">
+                              <Coffee className="w-4 h-4 text-[#D97706]" />
+                              <span>Rest & Recharge Break (10m)</span>
+                            </div>
+                            <span className="text-[11px] font-bold text-[#A8A29A]">
+                              {fmtTime12(block.start)} – {fmtTime12(block.end)}
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      // Study / Task / Self Study Block
+                      const isTask = block.type === "task" || block.assigned?.itemType === "task";
+                      const isTopic = block.assigned?.itemType === "topic" || !isTask;
+                      const subject = block.assigned?.subject || "General";
+                      const theme = getSubjectTheme(subject);
+                      const rawTitle = block.assigned?.title || (isTask ? "Assignment Work" : "Self Study Session");
+                      const displayTitle = rawTitle.replace(/^Topic:\s*/i, "").replace(/^📚\s*Self Study:\s*/i, "");
+                      const category = block.assigned?.category || (isTask ? "Assignment" : "Self Study");
+                      const priority = block.assigned?.priority || "Medium";
+                      const dueDate = block.assigned?.dueDate;
+                      const dueTime = block.assigned?.dueTime;
+
+                      return (
+                        <div
+                          key={block.id}
+                          className={`p-4 sm:p-5 rounded-[24px] border transition-all duration-200 relative ${
+                            block.completed
+                              ? "bg-[#FAF8F5]/85 border-[#E8E2D8] opacity-75"
+                              : isActivePomo
+                              ? "bg-white border-2 border-[#FACC15] shadow-md ring-2 ring-[#FEF08A]/60"
+                              : isTask
+                              ? "bg-white hover:bg-[#FFFDFD] border-[#FECDD3]/70 shadow-xs hover:shadow-sm"
+                              : "bg-white hover:bg-[#FAF8F5] border-[#ECE6DC] shadow-xs hover:shadow-sm"
+                          }`}
+                        >
+                          {/* Top Row: Subject Badge + Type Tag + Deadline */}
+                          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${theme.tagBg} ${theme.tagText}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
+                                <span className="truncate max-w-[140px]">{subject}</span>
+                              </span>
+
+                              {isTask ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3] flex items-center gap-1">
+                                  <FileText className="w-3 h-3" />
+                                  <span>{category}</span>
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0] flex items-center gap-1">
+                                  <BookOpen className="w-3 h-3" />
+                                  <span>Self Study</span>
+                                </span>
+                              )}
+
+                              {priority === "High" && (
+                                <span className="text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#FFF1F2] text-[#E11D48]">
+                                  🔥 Urgent
+                                </span>
+                              )}
+
+                              {dueDate && isTask && (
+                                <span className="text-[9.5px] font-medium px-2 py-0.5 rounded-full bg-[#FAF8F5] text-[#78716C] border border-[#E8E2D8] flex items-center gap-1">
+                                  <Clock className="w-2.5 h-2.5 text-[#A8A29A]" />
+                                  <span>Due {fmtDisplayDate(dueDate)} {dueTime ? "@ " + dueTime : ""}</span>
+                                </span>
+                              )}
+                            </div>
+
+                            {isActivePomo && !block.completed && (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#181A1D] text-[#FACC15] shadow-xs">
+                                <span className="w-2 h-2 rounded-full bg-[#FACC15] animate-ping" />
+                                <span>Studying in Focus Mode</span>
+                              </span>
+                            )}
+                            {block.completed && (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669]">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>Completed</span>
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Task / Topic Title with Direct Toggle Checkbox */}
+                          <div className="flex items-start gap-2.5 my-2">
+                            <button
+                              onClick={() => toggleBlockDone(block.id)}
+                              className="mt-0.5 text-[#B5AEA4] hover:text-[#181A1D] transition-colors cursor-pointer shrink-0"
+                              title={block.completed ? "Mark incomplete" : "Mark complete"}
+                            >
+                              {block.completed ? (
+                                <CheckCircle2 className="w-5 h-5 text-[#10B981]" />
+                              ) : (
+                                <Circle className="w-5 h-5 text-[#D1C9BD] hover:text-[#181A1D]" />
+                              )}
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <h4 className={`font-display font-extrabold text-sm sm:text-base leading-snug ${
+                                block.completed ? "line-through text-[#9E988E]" : "text-[#181A1D]"
+                              }`}>
+                                {displayTitle}
+                              </h4>
+                              {block.assigned?.subtitle && block.assigned.subtitle !== subject && (
+                                <p className="text-xs text-[#78716C] mt-0.5 font-medium truncate">
+                                  {block.assigned.subtitle}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Footer: Time + Start Pomodoro Action Button */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 mt-2 border-t border-[#ECE6DC]">
+                            <div className="flex items-center gap-2 text-xs font-bold text-[#6B655E]">
+                              <Clock className="w-3.5 h-3.5 text-[#A8A29A]" />
+                              <span>{fmtTime12(block.start)} – {fmtTime12(block.end)}</span>
+                              <span className="text-[11px] font-medium text-[#A8A29A]">· 50m Focus Sprint</span>
+                            </div>
+
+                            {!block.completed ? (
+                              <button
+                                onClick={() => handleStartPomodoroForSession(block)}
+                                className="px-4 py-1.5 rounded-full text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs bg-[#181A1D] hover:bg-black text-white active:scale-95"
+                                title="Open in Focus Mode Pomodoro Timer"
+                              >
+                                <Play className="w-3.5 h-3.5 fill-current text-[#FACC15]" />
+                                <span>{isTask ? "Work in Focus Mode" : "Start in Focus Mode"}</span>
+                              </button>
+                            ) : (
+                              <span className="text-xs font-extrabold text-[#10B981] flex items-center gap-1">
+                                <Check className="w-3.5 h-3.5" />
+                                <span>Finished</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+              </div>
+
+            </div>
+          );
+        })()}
 
         {/* ----------------- DASHBOARD VIEW ----------------- */}
         {view === "dashboard" && (
@@ -1364,6 +1782,7 @@ export default function StudentPlanner({
             onPinDashboardNote={handlePinDashboardNote}
             dashboardScratchpad={dashboardScratchpad}
             onUpdateDashboardScratchpad={handleUpdateDashboardScratchpad}
+            onOpenAiChat={() => setAiChatOpen(true)}
           />
         )}
 
@@ -1401,9 +1820,6 @@ export default function StudentPlanner({
             onDeleteClass={handleDeleteClass}
             onImportBulkClasses={handleImportBulkClasses}
             subjectList={subjectList}
-            timetablePhoto={timetablePhoto}
-            onSaveTimetablePhoto={setTimetablePhoto}
-            onRemoveTimetablePhoto={() => setTimetablePhoto(null)}
           />
         )}
 
@@ -1425,6 +1841,8 @@ export default function StudentPlanner({
               tasks={tasks}
               topics={topics}
               student={student}
+              activeTopic={activePomodoroSession}
+              onFinishStudying={handleFinishStudying}
               onSessionComplete={(mins) => {
                 console.log(`Focus session of ${mins} mins finished!`);
               }}
@@ -1448,6 +1866,50 @@ export default function StudentPlanner({
       {notifOpen && (
         <NotificationDrawer alerts={alerts} onClose={() => setNotifOpen(false)} setView={setView} />
       )}
+
+      {/* Floating AI Schedule Assistant Launcher Button */}
+      {!aiChatOpen && (
+        <button
+          onClick={() => setAiChatOpen(true)}
+          className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-40 bg-[#181A1D] hover:bg-black text-white p-2.5 sm:px-4 sm:py-3 rounded-full shadow-2xl border-2 border-[#FACC15] flex items-center gap-2.5 transition-all duration-300 hover:scale-105 active:scale-95 group cursor-pointer animate-in fade-in"
+          title="Open AI Schedule Copilot"
+        >
+          <div className="relative">
+            <div className="w-8 h-8 rounded-full bg-[#FACC15] text-[#181A1D] flex items-center justify-center font-black shadow-xs">
+              <Sparkles className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
+            </div>
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#10B981] rounded-full border-2 border-[#181A1D]" />
+          </div>
+          <div className="hidden sm:flex flex-col text-left">
+            <span className="text-xs font-black tracking-tight text-white flex items-center gap-1">
+              <span>AI Copilot</span>
+              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-[#FACC15]/20 text-[#FACC15] font-extrabold uppercase font-display">
+                Plan
+              </span>
+            </span>
+            <span className="text-[10px] text-[#A8A29A]">Customize your schedule</span>
+          </div>
+        </button>
+      )}
+
+      {/* AI Schedule Assistant Modal/Drawer */}
+      <AIChatScheduleAssistant
+        isOpen={aiChatOpen}
+        onClose={() => setAiChatOpen(false)}
+        tasks={tasks}
+        topics={topics}
+        availability={availability}
+        collegeSchedule={collegeSchedule}
+        examSchedule={examSchedule}
+        timetable={timetable}
+        setTimetable={setTimetable}
+        setAvailability={setAvailability}
+        student={student}
+        weekStart={weekStart}
+        subjectList={subjectList}
+        setView={setView}
+        setSelectedTimetableDate={setSelectedTimetableDate}
+      />
 
     </div>
   );
@@ -1675,13 +2137,14 @@ function ScheduleCardItem({ block, onToggle }) {
   }
 
   // Regular Study / Tasks / Topics
+  const isTask = block.type === "task" || block.assigned?.itemType === "task";
   const isExamPrep = block.type === "exam_prep" || block.assigned?.itemType === "exam_prep";
-  const isTopic = block.assigned?.itemType === "topic";
+  const isTopic = block.assigned?.itemType === "topic" || (!isTask && !isExamPrep);
   const subject = block.assigned?.subject || "General";
   const theme = getSubjectTheme(subject);
   
   // Clean up title: remove redundant "Topic: " prefix if present for clean readability
-  const rawTitle = block.assigned?.title || "Study Session";
+  const rawTitle = block.assigned?.title || (isTask ? "Assignment" : "Study Session");
   const displayTitle = rawTitle.replace(/^Topic:\s*/i, "");
 
   return (
@@ -1698,16 +2161,16 @@ function ScheduleCardItem({ block, onToggle }) {
         </span>
 
         {isExamPrep ? (
-          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md bg-[#FEF3C7] text-[#92400E] shrink-0">
+          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] shrink-0">
             ⚡ Prep
           </span>
-        ) : isTopic ? (
-          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-white/80 text-[#6B655E] border border-black/[0.04] shrink-0">
-            Topic
+        ) : isTask ? (
+          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3] shrink-0">
+            📝 Task
           </span>
         ) : (
-          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-white/80 text-[#6B655E] border border-black/[0.04] shrink-0">
-            Task
+          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0] shrink-0">
+            📚 Study
           </span>
         )}
       </div>
@@ -2464,6 +2927,450 @@ function AcademicCalendar({
 }
 
 /* ============================================================================
+   STUDY ANALYTICS & COMPLETED TASKS PANEL (With Study Hours Pie Chart)
+   ========================================================================== */
+
+function StudyAnalyticsPanel({
+  tasks = [],
+  topics = [],
+  timetable = [],
+  student,
+  subjectList = [],
+  toggleTask,
+  onAddTask,
+  setView
+}) {
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'completed' | 'subjects'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [hoveredSlice, setHoveredSlice] = useState(null);
+
+  // Completed items
+  const completedTasks = useMemo(() => tasks.filter(t => t.completed), [tasks]);
+  const pendingTasks = useMemo(() => tasks.filter(t => !t.completed), [tasks]);
+  const completedTopics = useMemo(() => topics.filter(t => t.completed), [topics]);
+  const completedBlocks = useMemo(() => timetable.filter(b => b.type === 'study' && b.completed), [timetable]);
+
+  // Total completed study hours calculation (from completed tasks + study sessions)
+  const completedHoursFromTasks = useMemo(() => {
+    return completedTasks.reduce((acc, t) => acc + (Number(t.estHours) || 2), 0);
+  }, [completedTasks]);
+
+  const completedHoursFromBlocks = useMemo(() => {
+    return completedBlocks.reduce((acc, b) => acc + (b.duration ? b.duration / 60 : 1.5), 0);
+  }, [completedBlocks]);
+
+  // Overall completed study hours (rounded to 1 decimal place)
+  const completedHours = useMemo(() => {
+    const total = Math.max(completedHoursFromTasks, completedHoursFromBlocks);
+    return Math.round(total * 10) / 10;
+  }, [completedHoursFromTasks, completedHoursFromBlocks]);
+
+  // Target hours (weekly goal based on student's daily target)
+  const dailyTarget = student?.dailyTargetHours || 4;
+  const weeklyTarget = dailyTarget * 7;
+  const remainingHours = Math.max(0, Math.round((weeklyTarget - completedHours) * 10) / 10);
+  const goalProgress = weeklyTarget > 0 ? Math.min(100, Math.round((completedHours / weeklyTarget) * 100)) : 0;
+
+  // Subject-wise hours breakdown
+  const SUBJECT_COLORS = [
+    '#FACC15', // Yellow
+    '#34D399', // Emerald
+    '#60A5FA', // Sky Blue
+    '#A78BFA', // Purple
+    '#F472B6', // Pink
+    '#FB923C', // Orange
+    '#38BDF8', // Cyan
+    '#4ADE80', // Green
+  ];
+
+  const subjectBreakdown = useMemo(() => {
+    const map = {};
+    // Aggregate from completed tasks
+    completedTasks.forEach(t => {
+      const s = t.subject || 'General Studies';
+      if (!map[s]) map[s] = { subject: s, hours: 0, count: 0 };
+      map[s].hours += Number(t.estHours) || 2;
+      map[s].count += 1;
+    });
+    // Aggregate from completed timetable blocks
+    completedBlocks.forEach(b => {
+      const s = b.subject || 'General Studies';
+      if (!map[s]) map[s] = { subject: s, hours: 0, count: 0 };
+      map[s].hours += b.duration ? b.duration / 60 : 1.5;
+      map[s].count += 1;
+    });
+
+    const items = Object.values(map).map((item, idx) => ({
+      ...item,
+      hours: Math.round(item.hours * 10) / 10,
+      color: SUBJECT_COLORS[idx % SUBJECT_COLORS.length]
+    }));
+
+    return items.sort((a, b) => b.hours - a.hours);
+  }, [completedTasks, completedBlocks]);
+
+  // SVG Pie/Donut calculations
+  const donutRadius = 65;
+  const circumference = 2 * Math.PI * donutRadius; // ~408.41
+
+  const chartSlices = useMemo(() => {
+    if (completedHours === 0) {
+      return [];
+    }
+
+    const totalBase = Math.max(weeklyTarget, completedHours);
+    let currentOffset = 0;
+
+    const slices = subjectBreakdown.map((item) => {
+      const portion = item.hours / totalBase;
+      const dashLength = portion * circumference;
+      const offset = -currentOffset;
+      currentOffset += dashLength;
+      const pct = Math.round((item.hours / (completedHours || 1)) * 100);
+
+      return {
+        ...item,
+        portion,
+        dashLength,
+        offset,
+        pct
+      };
+    });
+
+    // Add remaining goal slice if target not fully met
+    if (remainingHours > 0) {
+      const portion = remainingHours / totalBase;
+      const dashLength = portion * circumference;
+      const offset = -currentOffset;
+      slices.push({
+        subject: 'Remaining Target',
+        hours: remainingHours,
+        color: '#262A30',
+        isRemaining: true,
+        portion,
+        dashLength,
+        offset,
+        pct: Math.round((remainingHours / totalBase) * 100)
+      });
+    }
+
+    return slices;
+  }, [subjectBreakdown, completedHours, weeklyTarget, remainingHours, circumference]);
+
+  // Filtered completed tasks list
+  const filteredCompletedTasks = useMemo(() => {
+    return completedTasks.filter(t => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (t.title || '').toLowerCase().includes(q) || (t.subject || '').toLowerCase().includes(q) || (t.category || '').toLowerCase().includes(q);
+      }
+      return true;
+    });
+  }, [completedTasks, searchQuery]);
+
+  return (
+    <div className="bg-[#181A1D] text-white rounded-[34px] p-5 sm:p-6 shadow-xl border border-[#2B2F36] flex flex-col justify-between space-y-4 h-full">
+      {/* Header */}
+      <div>
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#2A2E35]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-[#FACC15] text-[#181A1D] flex items-center justify-center font-bold shadow-xs">
+              <PieChart className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-display font-extrabold text-white text-base flex items-center gap-2">
+                Study Analytics
+              </h3>
+              <p className="text-[11px] text-[#8E95A2]">Completed study hours & tasks performance</p>
+            </div>
+          </div>
+
+          {/* View Toggle Tabs */}
+          <div className="flex items-center bg-[#262A30] rounded-full p-0.5">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
+                activeTab === 'overview' ? 'bg-[#FACC15] text-[#181A1D] shadow-xs' : 'text-[#8E95A2] hover:text-white'
+              }`}
+            >
+              Hours Chart
+            </button>
+            <button
+              onClick={() => setActiveTab('completed')}
+              className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
+                activeTab === 'completed' ? 'bg-[#FACC15] text-[#181A1D] shadow-xs' : 'text-[#8E95A2] hover:text-white'
+              }`}
+            >
+              Completed ({completedTasks.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('subjects')}
+              className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
+                activeTab === 'subjects' ? 'bg-[#FACC15] text-[#181A1D] shadow-xs' : 'text-[#8E95A2] hover:text-white'
+              }`}
+            >
+              Subjects
+            </button>
+          </div>
+        </div>
+
+        {/* TAB 1: OVERVIEW & STUDY HOURS PIE CHART */}
+        {activeTab === 'overview' && (
+          <div className="mt-4 space-y-4">
+            {/* Donut Chart Card */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center bg-[#212429] border border-[#2B2F36] rounded-[26px] p-4 shadow-xs">
+              
+              {/* Left Column: Donut Pie Chart */}
+              <div className="sm:col-span-5 flex flex-col items-center justify-center relative py-1">
+                <div className="relative w-40 h-40 flex items-center justify-center">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 180 180">
+                    {/* Background Track Circle */}
+                    <circle
+                      cx="90"
+                      cy="90"
+                      r={donutRadius}
+                      fill="none"
+                      stroke="#2A2E35"
+                      strokeWidth="18"
+                    />
+
+                    {/* Render Donut Slices */}
+                    {chartSlices.map((slice, idx) => (
+                      <circle
+                        key={idx}
+                        cx="90"
+                        cy="90"
+                        r={donutRadius}
+                        fill="none"
+                        stroke={slice.color}
+                        strokeWidth={hoveredSlice === slice.subject ? 22 : 18}
+                        strokeDasharray={`${slice.dashLength} ${circumference}`}
+                        strokeDashoffset={slice.offset}
+                        className="transition-all duration-500 cursor-pointer"
+                        onMouseEnter={() => setHoveredSlice(slice.subject)}
+                        onMouseLeave={() => setHoveredSlice(null)}
+                      />
+                    ))}
+                  </svg>
+
+                  {/* Inner Center Badge */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                    <span className="text-2xl font-black font-display text-white tracking-tight">
+                      {completedHours}
+                      <span className="text-xs font-bold text-[#FACC15] ml-0.5">h</span>
+                    </span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#8E95A2]">
+                      Completed
+                    </span>
+                    <span className="text-[9px] font-semibold text-[#10B981] bg-[#10B981]/15 px-1.5 py-0.2 rounded-full mt-0.5">
+                      {goalProgress}% Goal
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Goal Stats & Legend */}
+              <div className="sm:col-span-7 space-y-3">
+                {/* 3 Metric Pills */}
+                <div className="grid grid-cols-3 gap-1.5">
+                  <div className="bg-[#181A1D] border border-[#2E333D] rounded-xl p-2 text-center">
+                    <p className="text-[9px] font-bold text-[#8E95A2] uppercase">Studied</p>
+                    <p className="text-xs sm:text-sm font-black text-[#FACC15]">{completedHours}h</p>
+                  </div>
+                  <div className="bg-[#181A1D] border border-[#2E333D] rounded-xl p-2 text-center">
+                    <p className="text-[9px] font-bold text-[#8E95A2] uppercase">Goal</p>
+                    <p className="text-xs sm:text-sm font-black text-white">{weeklyTarget}h</p>
+                  </div>
+                  <div className="bg-[#181A1D] border border-[#2E333D] rounded-xl p-2 text-center">
+                    <p className="text-[9px] font-bold text-[#8E95A2] uppercase">Left</p>
+                    <p className="text-xs sm:text-sm font-black text-[#8E95A2]">{remainingHours}h</p>
+                  </div>
+                </div>
+
+                {/* Subject Hours Legend */}
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#8E95A2]">
+                    Hours by Subject
+                  </p>
+                  {subjectBreakdown.length === 0 ? (
+                    <p className="text-[11px] text-[#8E95A2] py-1">
+                      Check off tasks or finish study sessions to see subject distribution.
+                    </p>
+                  ) : (
+                    <div className="max-h-[85px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+                      {subjectBreakdown.map((item) => (
+                        <div
+                          key={item.subject}
+                          onMouseEnter={() => setHoveredSlice(item.subject)}
+                          onMouseLeave={() => setHoveredSlice(null)}
+                          className={`flex items-center justify-between text-xs p-1 rounded-lg transition-all ${
+                            hoveredSlice === item.subject ? 'bg-[#2E333D]' : 'bg-[#181A1D]/60'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: item.color }}
+                            />
+                            <span className="font-bold text-white truncate text-[11px]">{item.subject}</span>
+                          </div>
+                          <span className="text-[10.5px] font-bold text-[#8E95A2] shrink-0">
+                            {item.hours}h ({Math.round((item.hours / (completedHours || 1)) * 100)}%)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: FULL COMPLETED TASKS LIST */}
+        {activeTab === 'completed' && (
+          <div className="space-y-2.5 mt-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-extrabold text-white flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+                All Completed Tasks ({filteredCompletedTasks.length})
+              </span>
+              {completedTasks.length > 0 && (
+                <span className="text-[10px] text-[#8E95A2] font-semibold">
+                  Click checkmark to toggle
+                </span>
+              )}
+            </div>
+
+            {completedTasks.length > 3 && (
+              <div className="relative">
+                <Search className="w-3 h-3 text-[#6B7280] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Filter completed tasks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-[#212429] border border-[#2B2F36] rounded-xl pl-8 pr-3 py-1 text-xs text-white placeholder-[#6B7280] focus:outline-none focus:border-[#FACC15]"
+                />
+              </div>
+            )}
+
+            <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+              {completedTasks.length === 0 ? (
+                <div className="bg-[#212429] border border-dashed border-[#2E333D] rounded-2xl p-6 text-center space-y-2 my-2">
+                  <div className="w-10 h-10 rounded-full bg-[#282C33] text-[#FACC15] flex items-center justify-center mx-auto">
+                    <CheckSquare className="w-5 h-5" />
+                  </div>
+                  <p className="text-xs font-bold text-white">No Completed Tasks Yet</p>
+                  <p className="text-[11px] text-[#8E95A2] max-w-xs mx-auto">
+                    Check off tasks and assignments as you finish them to track completed history.
+                  </p>
+                  {pendingTasks.length > 0 && setView && (
+                    <button
+                      onClick={() => setView('tasks')}
+                      className="mt-2 px-3 py-1 rounded-full bg-[#FACC15] hover:bg-[#EAB308] text-[#181A1D] text-xs font-black transition-all cursor-pointer"
+                    >
+                      View {pendingTasks.length} Pending Tasks
+                    </button>
+                  )}
+                </div>
+              ) : filteredCompletedTasks.length === 0 ? (
+                <div className="py-6 text-center text-xs text-[#8E95A2]">
+                  No completed tasks match "{searchQuery}"
+                </div>
+              ) : (
+                filteredCompletedTasks.map((t) => (
+                  <div
+                    key={t.id}
+                    className="p-2.5 rounded-2xl bg-[#212429] hover:bg-[#262A30] border border-[#2B2F36] flex items-center justify-between gap-2.5 transition-all group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <button
+                        onClick={() => toggleTask && toggleTask(t.id)}
+                        className="text-[#10B981] hover:text-[#EF4444] transition-colors shrink-0 cursor-pointer"
+                        title="Mark as pending / undo"
+                      >
+                        <CheckCircle2 className="w-4 h-4 fill-[#10B981]/20" />
+                      </button>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-white line-through opacity-85 truncate">
+                          {t.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5 text-[10px] text-[#8E95A2]">
+                          <span className="font-semibold text-[#FACC15]">{t.subject}</span>
+                          {t.category && <span>· {t.category}</span>}
+                          {t.dueDate && <span>· Due {fmtShortDate(t.dueDate)}</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {t.priority && (
+                        <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-bold ${
+                          t.priority === 'High' ? 'bg-[#EF4444]/20 text-[#F87171]' :
+                          t.priority === 'Medium' ? 'bg-[#F59E0B]/20 text-[#FBBF24]' :
+                          'bg-[#10B981]/20 text-[#34D399]'
+                        }`}>
+                          {t.priority}
+                        </span>
+                      )}
+                      {t.estHours && (
+                        <span className="text-[10px] text-[#8E95A2] font-medium bg-[#181A1D] px-2 py-0.5 rounded-md border border-[#2B2F36]">
+                          {t.estHours}h
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: SUBJECT BREAKDOWN */}
+        {activeTab === 'subjects' && (
+          <div className="space-y-3 mt-4 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
+            <span className="text-xs font-extrabold text-white flex items-center gap-1.5 mb-1">
+              <BookOpenCheck className="w-3.5 h-3.5 text-[#FACC15]" />
+              Subject Hours & Tasks Completion
+            </span>
+
+            {subjectBreakdown.length === 0 ? (
+              <p className="text-xs text-[#8E95A2] py-8 text-center">No study hours recorded across subjects yet.</p>
+            ) : (
+              subjectBreakdown.map((item) => {
+                const pct = completedHours > 0 ? Math.round((item.hours / completedHours) * 100) : 0;
+                return (
+                  <div key={item.subject} className="bg-[#212429] p-3 rounded-2xl border border-[#2B2F36] space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-white flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                        {item.subject}
+                      </span>
+                      <span className="text-[#8E95A2] font-semibold text-[11px]">
+                        {item.hours} hours ({pct}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-[#2E333D] rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="h-1.5 rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%`, backgroundColor: item.color }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
    REUSED DASHBOARD VIEW
    ========================================================================== */
 
@@ -2504,7 +3411,8 @@ function DashboardView({
   onDeleteDashboardNote,
   onPinDashboardNote,
   dashboardScratchpad = "",
-  onUpdateDashboardScratchpad
+  onUpdateDashboardScratchpad,
+  onOpenAiChat
 }) {
   const currentHour = now.getHours();
   const timeGreeting = currentHour < 12 ? 'Good morning' : currentHour < 17 ? 'Good afternoon' : 'Good evening';
@@ -2594,20 +3502,39 @@ function DashboardView({
           onUpdateScratchpad={onUpdateDashboardScratchpad}
         />
 
-        <AcademicCalendar
-          now={now}
-          tasks={tasks}
-          timetable={timetable}
-          collegeSchedule={collegeSchedule}
-          examSchedule={examSchedule}
-          events={events}
-          onSaveEvent={onSaveEvent}
-          onDeleteEvent={onDeleteEvent}
-          onToggleEvent={onToggleEvent}
-          toggleTask={toggleTask}
-          toggleBlockDone={toggleBlockDone}
-          setView={setView}
-        />
+        {/* Responsive Grid: Academic Calendar (left) & Study Analytics (right) */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
+          <div className="xl:col-span-7 flex flex-col">
+            <AcademicCalendar
+              now={now}
+              tasks={tasks}
+              timetable={timetable}
+              collegeSchedule={collegeSchedule}
+              examSchedule={examSchedule}
+              events={events}
+              onSaveEvent={onSaveEvent}
+              onDeleteEvent={onDeleteEvent}
+              onToggleEvent={onToggleEvent}
+              toggleTask={toggleTask}
+              toggleBlockDone={toggleBlockDone}
+              onAddTask={onAddTask}
+              setView={setView}
+            />
+          </div>
+
+          <div className="xl:col-span-5 flex flex-col">
+            <StudyAnalyticsPanel
+              tasks={tasks}
+              topics={topics}
+              timetable={timetable}
+              student={student}
+              subjectList={subjectList}
+              toggleTask={toggleTask}
+              onAddTask={onAddTask}
+              setView={setView}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -2874,10 +3801,11 @@ function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
 }
 
 function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availability, toggleSlot, onApplyPreset }) {
-  const [form, setForm] = useState({ name: "", subject: "", difficulty: "Medium" });
+  const [form, setForm] = useState({ name: "", subject: "", difficulty: "Medium", priority: "Medium" });
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
   const [activeSubjectFilter, setActiveSubjectFilter] = useState("all");
 
   const distinctSubjects = useMemo(() => {
@@ -2892,9 +3820,10 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
     const total = topics.length;
     const completed = topics.filter((t) => t.completed).length;
     const hard = topics.filter((t) => t.difficulty === "Hard" && !t.completed).length;
+    const highPriority = topics.filter((t) => (t.priority === "High" || t.difficulty === "Hard") && !t.completed).length;
     const inProgress = total - completed;
     const masteryRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-    return { total, completed, hard, inProgress, masteryRate };
+    return { total, completed, hard, highPriority, inProgress, masteryRate };
   }, [topics]);
 
   // Group topics by subject
@@ -2911,6 +3840,11 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
       if (difficultyFilter !== "all" && t.difficulty !== difficultyFilter) {
         return;
       }
+      // Filter by priority
+      if (priorityFilter !== "all") {
+        const p = t.priority || (t.difficulty === "Hard" ? "High" : "Medium");
+        if (p !== priorityFilter) return;
+      }
       // Filter by subject
       if (activeSubjectFilter !== "all" && t.subject !== activeSubjectFilter) {
         return;
@@ -2922,18 +3856,18 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
     });
 
     return groups;
-  }, [topics, searchQuery, difficultyFilter, activeSubjectFilter]);
+  }, [topics, searchQuery, difficultyFilter, priorityFilter, activeSubjectFilter]);
 
   const submit = (e) => {
     e?.preventDefault();
     if (!form.name.trim() || !form.subject.trim()) return;
     onAdd(form);
-    setForm({ name: "", subject: "", difficulty: "Medium" });
+    setForm({ name: "", subject: "", difficulty: "Medium", priority: "Medium" });
     setShowAddForm(false);
   };
 
   const openAddForSubject = (subj) => {
-    setForm({ name: "", subject: subj, difficulty: "Medium" });
+    setForm({ name: "", subject: subj, difficulty: "Medium", priority: "Medium" });
     setShowAddForm(true);
   };
 
@@ -2943,13 +3877,13 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#E8E2D8]/60">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2.5">
-            <h2 className="font-medium text-lg sm:text-xl text-[#181A1D] tracking-tight">Study Topics & Mastery</h2>
+            <h2 className="font-medium text-lg sm:text-xl text-[#181A1D] tracking-tight">Study Topics & Priorities</h2>
             <span className="text-xs font-normal text-[#6B655E] bg-white/80 px-2.5 py-0.5 rounded-full border border-[#ECE6DC] shadow-2xs">
               {stats.completed} of {stats.total} Mastered ({stats.masteryRate}%)
             </span>
           </div>
           <p className="text-xs text-[#78716C] font-normal">
-            Syllabus breakdown, concept difficulty ratings, and automated revision scheduling
+            Syllabus breakdown, study priority ratings, concept difficulty, and automated AI revision scheduling
           </p>
         </div>
 
@@ -2958,7 +3892,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
           className="bg-[#181A1D] hover:bg-[#282C33] text-white px-4 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm transition-all cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
-          <span>{showAddForm ? "Close Form" : "Add Concept"}</span>
+          <span>{showAddForm ? "Close Form" : "Add Topic"}</span>
         </button>
       </div>
 
@@ -2979,8 +3913,8 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
             <Zap className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-normal text-[#9F1239] uppercase tracking-wider">Hard Topics</p>
-            <p className="text-sm font-medium text-[#181A1D]">{stats.hard} high focus</p>
+            <p className="text-[10px] font-normal text-[#9F1239] uppercase tracking-wider">High Priority</p>
+            <p className="text-sm font-medium text-[#181A1D]">{stats.highPriority} core topics</p>
           </div>
         </div>
 
@@ -3010,11 +3944,11 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
         <form onSubmit={submit} className="p-4 sm:p-5 rounded-[24px] bg-white border border-[#E2DDD3] shadow-xs space-y-3 transition-all animate-fadeIn">
           <div className="flex items-center justify-between pb-2 border-b border-[#F4F0E8]">
             <span className="font-medium text-xs text-[#181A1D]">New Concept / Syllabus Topic</span>
-            <span className="text-[11px] text-[#8E8880]">Will automatically queue into your weekly study plan</span>
+            <span className="text-[11px] text-[#8E8880]">Will automatically queue into your weekly study plan by priority</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
-            <div className="sm:col-span-5">
+            <div className="sm:col-span-4">
               <input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -3041,12 +3975,26 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
 
             <div className="sm:col-span-2">
               <select
+                value={form.priority}
+                onChange={(e) => setForm({ ...form, priority: e.target.value })}
+                className="w-full bg-[#FAF8F5] border border-[#E5DFD4] rounded-full px-3 py-2 text-xs font-semibold text-[#181A1D] focus:outline-none cursor-pointer"
+                title="Study Priority"
+              >
+                <option value="High">🔥 High Priority</option>
+                <option value="Medium">⚡ Med Priority</option>
+                <option value="Low">🌱 Low Priority</option>
+              </select>
+            </div>
+
+            <div className="sm:col-span-1">
+              <select
                 value={form.difficulty}
                 onChange={(e) => setForm({ ...form, difficulty: e.target.value })}
-                className="w-full bg-[#FAF8F5] border border-[#E5DFD4] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+                className="w-full bg-[#FAF8F5] border border-[#E5DFD4] rounded-full px-2.5 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+                title="Difficulty Level"
               >
                 <option value="Easy">Easy (1h)</option>
-                <option value="Medium">Medium (2h)</option>
+                <option value="Medium">Med (2h)</option>
                 <option value="Hard">Hard (3h)</option>
               </select>
             </div>
@@ -3055,7 +4003,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
               <button
                 type="submit"
                 disabled={!form.name.trim() || !form.subject.trim()}
-                className="w-full bg-[#181A1D] hover:bg-[#282C33] text-white py-2 rounded-full text-xs font-medium cursor-pointer shadow-sm transition-all disabled:opacity-40"
+                className="w-full bg-[#181A1D] hover:bg-[#282C33] text-white py-2 rounded-full text-xs font-bold cursor-pointer shadow-sm transition-all disabled:opacity-40 active:scale-95"
               >
                 Save
               </button>
@@ -3101,6 +4049,17 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
             ))}
           </select>
 
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] text-[#6B655E] rounded-full px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none"
+          >
+            <option value="all">All Priorities</option>
+            <option value="High">🔥 High Priority</option>
+            <option value="Medium">⚡ Med Priority</option>
+            <option value="Low">🌱 Low Priority</option>
+          </select>
+
           {[
             { id: "all", label: "All Difficulties" },
             { id: "Hard", label: "⚡ Hard" },
@@ -3127,7 +4086,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
         <div className="py-12 px-4 rounded-[26px] bg-white/40 border border-dashed border-[#E0D8CB] text-center flex flex-col items-center justify-center gap-2 text-[#A8A29E]">
           <BookOpenCheck className="w-8 h-8 text-[#C4BDB3]" />
           <p className="text-xs font-medium text-[#78716C]">No syllabus topics found</p>
-          <p className="text-[11px] text-[#A8A29A]">Click "Add Concept" above to begin structuring your revision topics.</p>
+          <p className="text-[11px] text-[#A8A29A]">Click "Add Topic" above to begin structuring your revision topics.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -3163,7 +4122,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
                       className="text-[11px] font-medium text-[#181A1D] hover:text-black bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
                     >
                       <Plus className="w-3 h-3 text-[#EAB308]" />
-                      <span>Add Concept</span>
+                      <span>Add Topic</span>
                     </button>
                   </div>
                 </div>
@@ -3175,6 +4134,12 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
                       t.difficulty === "Hard" ? "bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3]" :
                       t.difficulty === "Medium" ? "bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]" :
                       "bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0]";
+
+                    const topicPriority = t.priority || (t.difficulty === "Hard" ? "High" : "Medium");
+                    const priorityBadge = 
+                      topicPriority === "High" ? "bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3]" :
+                      topicPriority === "Low" ? "bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0]" :
+                      "bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]";
 
                     const estTime = t.difficulty === "Hard" ? "3.0h" : t.difficulty === "Medium" ? "2.0h" : "1.0h";
 
@@ -3201,18 +4166,21 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
                           </button>
 
                           <div className="min-w-0 flex-1">
-                            <p className={`text-xs font-medium leading-snug truncate ${
+                            <p className={`text-xs font-bold leading-snug truncate ${
                               t.completed ? "line-through text-[#9E988E]" : "text-[#1E2024]"
                             }`}>
                               {t.name}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                              <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded-md ${priorityBadge}`}>
+                                {topicPriority === "High" ? "🔥 High" : topicPriority === "Low" ? "🌱 Low" : "⚡ Med"}
+                              </span>
                               <span className={`text-[9px] font-medium px-1.5 py-0.2 rounded-md ${difficultyBadge}`}>
                                 {t.difficulty}
                               </span>
                               <span className="text-[10px] font-normal text-[#8A847C] flex items-center gap-1">
                                 <Clock className="w-2.5 h-2.5 text-[#A8A29A]" />
-                                <span>~{estTime} revision</span>
+                                <span>~{estTime}</span>
                               </span>
                             </div>
                           </div>
@@ -3221,7 +4189,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
                         <button
                           onClick={() => onDelete(t.id)}
                           className="p-1.5 rounded-full text-[#8E8880] hover:text-[#E11D48] hover:bg-[#FFE4E6]/60 transition-colors cursor-pointer shrink-0"
-                          title="Delete concept"
+                          title="Delete topic"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

@@ -61,58 +61,110 @@ def generate_smart_timetable(
     for task in tasks:
         if not task.get("completed"):
             weight = PRIORITY_WEIGHT.get(task.get("priority", "Medium"), 2)
-            est_hours = max(1, int(task.get("estHours") or 1))
+            est_hours = max(1, int(float(task.get("estHours") or 1)))
+            category = task.get("category", "Assignment")
+            due_date = task.get("dueDate") or task.get("deadline") or "9999-12-31"
             study_items.append({
                 "id": task.get("id"),
                 "type": "task",
-                "title": task.get("title", "Untitled Task"),
+                "title": f"📝 {category}: {task.get('title', 'Assignment')}" if category == "Assignment" else f"📌 {category}: {task.get('title', 'Task')}",
+                "rawTitle": task.get("title", "Untitled Task"),
                 "subject": task.get("subject", "General"),
                 "priority": task.get("priority", "Medium"),
-                "weight": weight + 2, # Tasks get slight boost
-                "deadline": task.get("deadline", "9999-12-31"),
-                "needed_slots": est_hours
+                "category": category,
+                "weight": weight + 2, # Tasks get precedence
+                "deadline": due_date,
+                "needed_slots": est_hours,
+                "remaining_slots": est_hours
             })
 
     for topic in topics:
         if not topic.get("completed"):
             weight = PRIORITY_WEIGHT.get(topic.get("priority", "Medium"), 2)
-            est_hours = max(1, int(topic.get("estHours") or 1))
+            est_hours = max(1, int(float(topic.get("estHours") or 2)))
             study_items.append({
                 "id": topic.get("id"),
                 "type": "topic",
-                "title": topic.get("name", "Study Chapter"),
+                "title": f"Topic: {topic.get('name', 'Study Chapter')}",
+                "rawTitle": topic.get("name", "Study Chapter"),
                 "subject": topic.get("subject", "General"),
                 "priority": topic.get("priority", "Medium"),
+                "category": "Study Session",
                 "weight": weight,
                 "deadline": "9999-12-31",
-                "needed_slots": est_hours
+                "needed_slots": est_hours,
+                "remaining_slots": est_hours
             })
 
-    # Sort items by priority weight descending and deadline ascending
-    study_items.sort(key=lambda x: (-x["weight"], x["deadline"]))
+    # Group available slots by date for balanced day scheduling
+    slots_by_date = {}
+    for slot in available_slots:
+        d = slot["date"]
+        if d not in slots_by_date:
+            slots_by_date[d] = []
+        slots_by_date[d].append(slot)
 
     timetable = []
-    slot_idx = 0
-    total_slots = len(available_slots)
 
-    for item in study_items:
-        slots_allocated = 0
-        while slots_allocated < item["needed_slots"] and slot_idx < total_slots:
-            slot = available_slots[slot_idx]
+    for d_str in sorted(slots_by_date.keys()):
+        day_slots = slots_by_date[d_str]
+        last_item_id = None
+        day_usage = {}
+
+        for slot in day_slots:
+            candidates = []
+            for item in study_items:
+                if item["remaining_slots"] <= 0:
+                    continue
+                # Score candidate
+                score = item["weight"] * 20
+                if item["type"] == "task":
+                    score += 25
+                    if item["deadline"] <= d_str:
+                        score += 100 # Due today or overdue!
+                if last_item_id == item["id"]:
+                    score -= 30 # Rotate items
+                if day_usage.get(item["id"], 0) >= 2:
+                    score -= 50
+
+                candidates.append((score, item))
+
+            if not candidates:
+                timetable.append({
+                    "id": f"slot-{slot['date']}-{slot['hour']}-general",
+                    "taskId": None,
+                    "topicId": None,
+                    "type": "study",
+                    "subject": "General",
+                    "title": "Deep Focus & Self Study",
+                    "day": slot["day"],
+                    "date": slot["date"],
+                    "hour": slot["hour"],
+                    "time": slot["time"],
+                    "completed": False
+                })
+                last_item_id = None
+                continue
+
+            candidates.sort(key=lambda x: -x[0])
+            chosen = candidates[0][1]
+
             timetable.append({
-                "id": f"slot-{slot['date']}-{slot['hour']}-{item['id']}",
-                "taskId": item["id"] if item["type"] == "task" else None,
-                "topicId": item["id"] if item["type"] == "topic" else None,
-                "type": item["type"],
-                "subject": item["subject"],
-                "title": item["title"],
+                "id": f"slot-{slot['date']}-{slot['hour']}-{chosen['id']}",
+                "taskId": chosen["id"] if chosen["type"] == "task" else None,
+                "topicId": chosen["id"] if chosen["type"] == "topic" else None,
+                "type": chosen["type"],
+                "subject": chosen["subject"],
+                "title": chosen["title"],
                 "day": slot["day"],
                 "date": slot["date"],
                 "hour": slot["hour"],
                 "time": slot["time"],
                 "completed": False
             })
-            slots_allocated += 1
-            slot_idx += 1
+
+            chosen["remaining_slots"] -= 1
+            day_usage[chosen["id"]] = day_usage.get(chosen["id"], 0) + 1
+            last_item_id = chosen["id"]
 
     return timetable

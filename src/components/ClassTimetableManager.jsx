@@ -16,13 +16,8 @@ import {
   Download,
   AlertCircle,
   FileSpreadsheet,
-  Image as ImageIcon,
-  Loader2,
-  Scan,
-  Eye,
   CalendarRange
 } from 'lucide-react';
-import TimetablePhotoViewer from './TimetablePhotoViewer';
 
 const DAY_KEYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DAY_LABELS = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday", Sun: "Sunday" };
@@ -96,23 +91,16 @@ export default function ClassTimetableManager({
   onSaveClass, 
   onDeleteClass, 
   onImportBulkClasses, 
-  subjectList = [],
-  timetablePhoto = null,
-  onSaveTimetablePhoto,
-  onRemoveTimetablePhoto
+  subjectList = []
 }) {
-  const [activeTab, setActiveTab] = useState(timetablePhoto ? 'photo' : 'classes'); // 'photo' or 'classes'
   const [modalOpen, setModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState(null);
   
   // Upload & Import Modal
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
-  const [uploadTab, setUploadTab] = useState('photo_direct'); // 'photo_direct' or 'paste'
   const [bulkText, setBulkText] = useState('');
   const [parsedPreview, setParsedPreview] = useState([]);
   const [dragActive, setDragActive] = useState(false);
-  const [uploadedFileName, setUploadedFileName] = useState('');
-  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
   const [selectedDayFilter, setSelectedDayFilter] = useState('All');
@@ -228,37 +216,15 @@ export default function ClassTimetableManager({
     setParsedPreview(parsed);
   };
 
-  const handleDirectPhotoUpload = (file) => {
+  const handleFileUpload = (file) => {
     if (!file) return;
-    const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|webp|bmp|gif)$/i.test(file.name);
-
-    if (isImage) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataUrl = e.target.result;
-        const photoData = {
-          url: dataUrl,
-          name: file.name,
-          size: (file.size / 1024).toFixed(1) + ' KB',
-          uploadedAt: new Date().toISOString()
-        };
-        if (onSaveTimetablePhoto) {
-          onSaveTimetablePhoto(photoData);
-        }
-        setActiveTab('photo');
-        setBulkModalOpen(false);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target.result;
-        setBulkText(text);
-        parseRawSchedule(text);
-        setUploadTab('paste');
-      };
-      reader.readAsText(file);
-    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      setBulkText(text);
+      parseRawSchedule(text);
+    };
+    reader.readAsText(file);
   };
 
   const handleDrag = (e) => {
@@ -276,7 +242,7 @@ export default function ClassTimetableManager({
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleDirectPhotoUpload(e.dataTransfer.files[0]);
+      handleFileUpload(e.dataTransfer.files[0]);
     }
   };
 
@@ -289,8 +255,6 @@ export default function ClassTimetableManager({
     setBulkModalOpen(false);
     setBulkText('');
     setParsedPreview([]);
-    setUploadedFileName('');
-    setImagePreviewUrl(null);
   };
 
   const downloadCSVTemplate = () => {
@@ -322,65 +286,26 @@ export default function ClassTimetableManager({
       {/* Header controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-[28px] border border-[#ECE6DC] shadow-2xs">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="font-display font-extrabold text-[#181A1D] text-base sm:text-lg flex items-center gap-2">
-              <School className="w-5 h-5 text-[#181A1D]" />
-              Class & College Timetable
-            </h2>
-            {timetablePhoto && (
-              <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#047857] text-[10px] font-bold flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-[#10B981]" /> Photo Added
-              </span>
-            )}
-          </div>
+          <h2 className="font-display font-extrabold text-[#181A1D] text-base sm:text-lg flex items-center gap-2">
+            <School className="w-5 h-5 text-[#181A1D]" />
+            Class & College Timetable
+          </h2>
           <p className="text-xs text-[#8E8880] mt-0.5">
-            View your original timetable photo directly or manage scheduled lectures.
+            Manage your weekly college and university schedule and lectures.
           </p>
         </div>
 
-        {/* View Switcher Tabs & Action Buttons */}
+        {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center p-1 bg-[#FAF8F5] border border-[#ECE6DC] rounded-full shadow-2xs">
-            <button
-              type="button"
-              onClick={() => setActiveTab('photo')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'photo'
-                  ? 'bg-[#181A1D] text-white shadow-2xs'
-                  : 'text-[#78716C] hover:text-[#181A1D]'
-              }`}
-            >
-              <ImageIcon className="w-3.5 h-3.5 text-[#FACC15]" />
-              <span>Photo Timetable</span>
-              {timetablePhoto && (
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('classes')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'classes'
-                  ? 'bg-[#181A1D] text-white shadow-2xs'
-                  : 'text-[#78716C] hover:text-[#181A1D]'
-              }`}
-            >
-              <CalendarRange className="w-3.5 h-3.5" />
-              <span>Classes List ({classes.length})</span>
-            </button>
-          </div>
-
           <button
             onClick={() => {
               setBulkModalOpen(true);
               setParsedPreview([]);
               setBulkText('');
-              setUploadedFileName('');
-              setImagePreviewUrl(null);
             }}
             className="px-4 py-2 rounded-full text-xs font-bold bg-[#F4F1EB] hover:bg-[#EAE4DA] text-[#181A1D] border border-[#ECE6DC] transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
-            <Upload className="w-3.5 h-3.5 text-[#181A1D]" /> Upload Photo / File
+            <Upload className="w-3.5 h-3.5 text-[#181A1D]" /> Import Schedule
           </button>
 
           <button
@@ -392,150 +317,136 @@ export default function ClassTimetableManager({
         </div>
       </div>
 
-      {/* Main Tab Content */}
-      {activeTab === 'photo' ? (
-        <TimetablePhotoViewer
-          photo={timetablePhoto}
-          onSavePhoto={onSaveTimetablePhoto}
-          onRemovePhoto={onRemoveTimetablePhoto}
-          title="Class & College Timetable Photo"
-          subtitle="Your uploaded timetable image displayed directly on the screen."
-        />
-      ) : (
-        <div className="space-y-4">
-          {/* If photo is uploaded, show a subtle quick toggle banner */}
-          {timetablePhoto && (
-            <div className="bg-white/80 border border-[#ECE6DC] rounded-2xl p-2.5 px-4 flex items-center justify-between text-xs text-[#181A1D] shadow-2xs">
-              <div className="flex items-center gap-2 min-w-0">
-                <ImageIcon className="w-4 h-4 text-[#D97706] shrink-0" />
-                <span className="font-bold">Original Timetable Photo Attached:</span>
-                <span className="text-[#78716C] truncate max-w-xs">{timetablePhoto.name || 'Uploaded Photo'}</span>
-              </div>
+      {/* Main Content */}
+      <div className="space-y-4">
+        {/* Day Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          <button
+            onClick={() => setSelectedDayFilter('All')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              selectedDayFilter === 'All' ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
+            }`}
+          >
+            All Days ({classes.length})
+          </button>
+          {DAY_KEYS.map((d) => {
+            const count = (classesByDay[d] || []).length;
+            const isActive = selectedDayFilter === d;
+            return (
               <button
-                type="button"
-                onClick={() => setActiveTab('photo')}
-                className="px-3 py-1 rounded-full bg-[#181A1D] text-white font-bold hover:bg-[#2D3139] text-[11px] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                key={d}
+                onClick={() => setSelectedDayFilter(d)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  isActive ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
+                }`}
               >
-                <Eye className="w-3 h-3 text-[#FACC15]" /> View Timetable Photo
+                <span>{d}</span>
+                {count > 0 && (
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-[#FACC15] text-[#181A1D]' : 'bg-[#F4F1EB] text-[#8E8880]'}`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Classes Grid View */}
+        {classes.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto shadow-2xs">
+              <School className="w-7 h-7" />
+            </div>
+            <h3 className="font-display font-bold text-slate-800 text-base">No Structured Lectures Added</h3>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              Add your individual class lectures and routines so the AI can automatically build your study routine around them.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => {
+                  setBulkModalOpen(true);
+                  setParsedPreview([]);
+                  setBulkText('');
+                }}
+                className="px-4 py-2.5 rounded-full bg-[#181A1D] hover:bg-black text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4 text-[#FACC15]" /> Import Schedule
+              </button>
+              <button
+                onClick={openAddModal}
+                className="px-4 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all cursor-pointer flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4 text-indigo-600" /> Add Class Manually
               </button>
             </div>
-          )}
-
-          {/* Day Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            <button
-              onClick={() => setSelectedDayFilter('All')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                selectedDayFilter === 'All' ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
-              }`}
-            >
-              All Days ({classes.length})
-            </button>
-            {DAY_KEYS.map((d) => {
-              const count = (classesByDay[d] || []).length;
-              const isActive = selectedDayFilter === d;
+          </div>
+        ) : selectedDayFilter === 'All' ? (
+          /* Week Day Column View */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {DAY_KEYS.map((day) => {
+              const dayList = classesByDay[day] || [];
               return (
-                <button
-                  key={d}
-                  onClick={() => setSelectedDayFilter(d)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                    isActive ? 'bg-[#181A1D] text-white shadow-xs' : 'bg-white border border-[#ECE6DC] text-[#8E8880] hover:text-[#181A1D]'
-                  }`}
-                >
-                  <span>{d}</span>
-                  {count > 0 && (
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-[#FACC15] text-[#181A1D]' : 'bg-[#F4F1EB] text-[#8E8880]'}`}>
-                      {count}
-                    </span>
-                  )}
-                </button>
+                <div key={day} className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden flex flex-col">
+                  <div className="p-3.5 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
+                    <span className="font-display font-bold text-slate-800 text-sm">{DAY_LABELS[day]}</span>
+                    <span className="text-xs font-bold text-slate-400">{dayList.length} classes</span>
+                  </div>
+                  <div className="p-3 flex-1 space-y-2.5 min-h-[140px]">
+                    {dayList.length === 0 ? (
+                      <div className="h-full flex items-center justify-center text-center py-6 text-slate-400 text-xs">
+                        No classes scheduled
+                      </div>
+                    ) : (
+                      dayList.map((item) => (
+                        <ClassCard
+                          key={item.id}
+                          item={item}
+                          onEdit={openEditModal}
+                          onDelete={onDeleteClass}
+                        />
+                      ))
+                    )}
+                  </div>
+                </div>
               );
             })}
           </div>
+        ) : (
+          /* Single Day Filtered View */
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs space-y-4">
+            <h3 className="font-display font-bold text-slate-800 text-base flex items-center justify-between border-b border-slate-100 pb-3">
+              <span>{DAY_LABELS[selectedDayFilter]} Classes</span>
+              <span className="text-xs font-medium text-slate-500">{filteredClasses.length} sessions</span>
+            </h3>
 
-          {/* Classes Grid View */}
-          {classes.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto shadow-2xs">
-                <School className="w-7 h-7" />
+            {filteredClasses.length === 0 ? (
+              <div className="text-center py-12 text-slate-400 text-sm">
+                No classes scheduled for {DAY_LABELS[selectedDayFilter]}.
               </div>
-              <h3 className="font-display font-bold text-slate-800 text-base">No Structured Lectures Added</h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                You can upload a photo of your timetable to display directly, or add individual class lectures so the AI can build your study routine around them.
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    setBulkModalOpen(true);
-                    setUploadTab('photo_direct');
-                  }}
-                  className="px-4 py-2.5 rounded-full bg-[#181A1D] hover:bg-black text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2"
-                >
-                  <ImageIcon className="w-4 h-4 text-[#FACC15]" /> Upload Timetable Photo (Direct View)
-                </button>
-                <button
-                  onClick={openAddModal}
-                  className="px-4 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all cursor-pointer flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4 text-indigo-600" /> Add Class Manually
-                </button>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {filteredClasses.map((item) => (
+                  <ClassCard
+                    key={item.id}
+                    item={item}
+                    onEdit={openEditModal}
+                    onDelete={onDeleteClass}
+                  />
+                ))}
               </div>
-            </div>
-          ) : selectedDayFilter === 'All' ? (
-            /* Week Day Column View */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {DAY_KEYS.map((day) => {
-                const dayList = classesByDay[day] || [];
-                return (
-                  <div key={day} className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden flex flex-col">
-                    <div className="p-3.5 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
-                      <span className="font-display font-bold text-slate-800 text-sm">{DAY_LABELS[day]}</span>
-                      <span className="text-xs font-bold text-slate-400">{dayList.length} classes</span>
-                    </div>
-                    <div className="p-3 flex-1 space-y-2.5 min-h-[140px]">
-                      {dayList.length === 0 ? (
-                        <div className="h-full flex items-center justify-center text-center py-6 text-slate-400 text-xs">
-                          No classes scheduled
-                        </div>
-                      ) : (
-                        dayList.map((item) => (
-                          <ClassCard key={item.id} item={item} onEdit={openEditModal} onDelete={onDeleteClass} />
-                        ))
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            /* Single Day List View */
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 className="font-display font-bold text-slate-800">{DAY_LABELS[selectedDayFilter]} Schedule</h3>
-                <span className="text-xs text-slate-500 font-semibold">{filteredClasses.length} sessions</span>
-              </div>
-              {filteredClasses.length === 0 ? (
-                <p className="text-xs text-slate-400 py-8 text-center">No classes on {DAY_LABELS[selectedDayFilter]}</p>
-              ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {filteredClasses.map((item) => (
-                    <ClassCard key={item.id} item={item} onEdit={openEditModal} onDelete={onDeleteClass} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+      </div>
 
-      {/* Add / Edit Single Class Modal */}
+      {/* Add / Edit Class Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 relative animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <h3 className="font-display font-bold text-slate-800 flex items-center gap-2">
-                <School className="w-4 h-4 text-indigo-600" />
-                {editingClass ? 'Edit Class' : 'Add Class / Lecture'}
+              <h3 className="font-display font-bold text-slate-800 flex items-center gap-2 text-base">
+                <School className="w-5 h-5 text-indigo-600" />
+                {editingClass ? 'Edit Class Lecture' : 'Add Class Lecture'}
               </h3>
               <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
@@ -548,11 +459,25 @@ export default function ClassTimetableManager({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Data Structures & Algorithms"
+                  placeholder="e.g. Data Structures, Calculus II, Organic Chemistry"
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
                   className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 bg-slate-50 font-medium"
                 />
+                {subjectList.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {subjectList.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setForm({ ...form, subject: s })}
+                        className="text-[10px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 px-2 py-0.5 rounded-md text-slate-600 transition-colors cursor-pointer"
+                      >
+                        + {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -570,7 +495,7 @@ export default function ClassTimetableManager({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Class Type</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Session Type</label>
                   <select
                     value={form.type}
                     onChange={(e) => setForm({ ...form, type: e.target.value })}
@@ -638,160 +563,120 @@ export default function ClassTimetableManager({
         </div>
       )}
 
-      {/* Upload Timetable Photo & Document Modal */}
+      {/* Bulk Import Modal */}
       {bulkModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="w-full max-w-xl bg-white rounded-3xl shadow-2xl p-6 relative my-8 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 shrink-0">
               <h3 className="font-display font-bold text-slate-800 flex items-center gap-2 text-base">
-                <ImageIcon className="w-5 h-5 text-indigo-600" />
-                Upload Timetable Photo & Routine
+                <Upload className="w-5 h-5 text-indigo-600" />
+                Import Class Schedule
               </h3>
               <button onClick={() => setBulkModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Mode switch */}
-            <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl mb-4 shrink-0">
-              <button
-                type="button"
-                onClick={() => setUploadTab('photo_direct')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  uploadTab === 'photo_direct' ? 'bg-white text-indigo-600 shadow-2xs' : 'text-slate-600 hover:text-slate-800'
-                }`}
-              >
-                <ImageIcon className="w-3.5 h-3.5" /> Upload Photo (Direct View)
-              </button>
-              <button
-                type="button"
-                onClick={() => setUploadTab('paste')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  uploadTab === 'paste' ? 'bg-white text-indigo-600 shadow-2xs' : 'text-slate-600 hover:text-slate-800'
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5" /> Paste CSV / Text
-              </button>
-            </div>
-
             <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-              {uploadTab === 'photo_direct' ? (
-                <div className="space-y-3">
-                  <div
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-3 relative overflow-hidden ${
-                      dragActive
-                        ? 'border-indigo-500 bg-indigo-50/50'
-                        : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'
-                    }`}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*, .png, .jpg, .jpeg, .webp, .bmp"
-                      onChange={(e) => {
-                        if (e.target.files?.[0]) handleDirectPhotoUpload(e.target.files[0]);
-                      }}
-                      className="hidden"
-                    />
+              {/* File upload drag & drop */}
+              <div
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-2xl p-4 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 relative ${
+                  dragActive
+                    ? 'border-indigo-500 bg-indigo-50/50'
+                    : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv, .txt, text/plain, text/csv"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                  }}
+                  className="hidden"
+                />
+                <FileSpreadsheet className="w-6 h-6 text-indigo-600" />
+                <p className="text-xs font-semibold text-slate-700">
+                  Drop CSV/Text file here or click to browse
+                </p>
+              </div>
 
-                    <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-2xs">
-                      <ImageIcon className="w-7 h-7" />
+              <div className="space-y-3">
+                <p className="text-xs text-slate-500">
+                  Or paste your schedule below (Format: <code className="bg-slate-100 px-1 rounded text-indigo-600">Day, StartTime, EndTime, Subject, Type, Room</code>):
+                </p>
+                <textarea
+                  rows={5}
+                  value={bulkText}
+                  onChange={(e) => {
+                    setBulkText(e.target.value);
+                    parseRawSchedule(e.target.value);
+                  }}
+                  placeholder={`Mon, 09:00, 10:30, Calculus, Lecture, Room 101\nMon, 11:00, 13:00, Data Structures, Lab, CS Lab\nTue, 10:00, 11:30, Physics, Lecture, Hall A`}
+                  className="w-full p-3 font-mono text-xs bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500"
+                />
+
+                {/* Detected items preview table */}
+                {parsedPreview.length > 0 && (
+                  <div className="border border-indigo-100 bg-indigo-50/30 rounded-2xl p-3.5 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        Detected Classes ({parsedPreview.length} items)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setParsedPreview([])}
+                        className="text-[11px] text-rose-500 hover:underline cursor-pointer"
+                      >
+                        Clear
+                      </button>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-800">
-                        Select or Drop Timetable Photo
-                      </p>
-                      <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                        Displays your original timetable picture directly on the page with instant zoom, pan, and full screen view.
-                      </p>
-                    </div>
 
-                    <button
-                      type="button"
-                      className="mt-2 px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-bold shadow-xs hover:bg-indigo-700 transition-all pointer-events-none"
-                    >
-                      Browse Image File
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-xs text-slate-500">
-                    Paste your schedule below (Format: <code className="bg-slate-100 px-1 rounded text-indigo-600">Day, StartTime, EndTime, Subject, Type, Room</code>):
-                  </p>
-                  <textarea
-                    rows={5}
-                    value={bulkText}
-                    onChange={(e) => {
-                      setBulkText(e.target.value);
-                      parseRawSchedule(e.target.value);
-                    }}
-                    placeholder={`Mon, 09:00, 10:30, Calculus, Lecture, Room 101\nMon, 11:00, 13:00, Data Structures, Lab, CS Lab\nTue, 10:00, 11:30, Physics, Lecture, Hall A`}
-                    className="w-full p-3 font-mono text-xs bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500"
-                  />
-
-                  {/* Detected items preview table */}
-                  {parsedPreview.length > 0 && (
-                    <div className="border border-indigo-100 bg-indigo-50/30 rounded-2xl p-3.5 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          Detected Classes ({parsedPreview.length} items)
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setParsedPreview([])}
-                          className="text-[11px] text-rose-500 hover:underline cursor-pointer"
+                    <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                      {parsedPreview.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-white p-2 rounded-xl border border-slate-200 flex items-center justify-between text-xs gap-2"
                         >
-                          Clear
-                        </button>
-                      </div>
-
-                      <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-                        {parsedPreview.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="bg-white p-2 rounded-xl border border-slate-200 flex items-center justify-between text-xs gap-2"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md text-[10px]">
-                                {item.day}
-                              </span>
-                              <span className="font-semibold text-slate-800 truncate">{item.subject}</span>
-                              <span className="text-[10px] text-slate-400">
-                                {fmtTime12(item.start)} – {fmtTime12(item.end)}
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => setParsedPreview(parsedPreview.filter((_, i) => i !== idx))}
-                              className="text-slate-400 hover:text-rose-500 p-1 cursor-pointer"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md text-[10px]">
+                              {item.day}
+                            </span>
+                            <span className="font-semibold text-slate-800 truncate">{item.subject}</span>
+                            <span className="text-[10px] text-slate-400">
+                              {fmtTime12(item.start)} – {fmtTime12(item.end)}
+                            </span>
                           </div>
-                        ))}
-                      </div>
+                          <button
+                            type="button"
+                            onClick={() => setParsedPreview(parsedPreview.filter((_, i) => i !== idx))}
+                            className="text-slate-400 hover:text-rose-500 p-1 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  )}
-
-                  <div className="flex items-center justify-between text-xs text-slate-500 px-1 pt-1">
-                    <span>Need template?</span>
-                    <button
-                      type="button"
-                      onClick={downloadCSVTemplate}
-                      className="inline-flex items-center gap-1 text-indigo-600 font-bold hover:underline cursor-pointer"
-                    >
-                      <Download className="w-3.5 h-3.5" /> Download CSV Template
-                    </button>
                   </div>
+                )}
+
+                <div className="flex items-center justify-between text-xs text-slate-500 px-1 pt-1">
+                  <span>Need template?</span>
+                  <button
+                    type="button"
+                    onClick={downloadCSVTemplate}
+                    className="inline-flex items-center gap-1 text-indigo-600 font-bold hover:underline cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download CSV Template
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-3 shrink-0">
@@ -802,17 +687,15 @@ export default function ClassTimetableManager({
               >
                 Cancel
               </button>
-              {uploadTab === 'paste' && (
-                <button
-                  type="button"
-                  disabled={parsedPreview.length === 0}
-                  onClick={handleConfirmImport}
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 shadow-sm cursor-pointer flex items-center gap-1.5"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  Import ({parsedPreview.length}) Classes
-                </button>
-              )}
+              <button
+                type="button"
+                disabled={parsedPreview.length === 0}
+                onClick={handleConfirmImport}
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 shadow-sm cursor-pointer flex items-center gap-1.5"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Import ({parsedPreview.length}) Classes
+              </button>
             </div>
           </div>
         </div>
