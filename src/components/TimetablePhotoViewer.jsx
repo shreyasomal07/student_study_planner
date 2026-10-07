@@ -95,7 +95,7 @@ export default function TimetablePhotoViewer({
   // No photo uploaded yet -> Show modern upload dropzone
   if (!photo || !photo.url) {
     return (
-      <div className="bg-white rounded-[28px] border border-[#ECE6DC] p-6 sm:p-8 shadow-xs text-center space-y-4">
+      <div className="bg-theme-card rounded-[28px] border border-theme-border p-6 sm:p-8 shadow-xs text-center space-y-4">
         <input
           ref={fileInputRef}
           type="file"
@@ -113,19 +113,19 @@ export default function TimetablePhotoViewer({
           onClick={() => fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-[24px] p-8 sm:p-12 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 ${
             isDragOver 
-              ? 'border-[#FACC15] bg-[#FFFBEB]' 
-              : 'border-[#E2DCStory] hover:border-[#181A1D] bg-[#FAF8F5] hover:bg-[#F4F0E8]'
+              ? 'border-theme-accent-green bg-theme-bg' 
+              : 'border-[#E2DCStory] hover:border-[#B4C6A6] bg-theme-bg hover:bg-theme-bg'
           }`}
         >
-          <div className="w-16 h-16 rounded-2xl bg-[#181A1D] text-[#FACC15] flex items-center justify-center shadow-xs">
+          <div className="w-16 h-16 rounded-2xl bg-[#B4C6A6] text-theme-accent-green flex items-center justify-center shadow-xs">
             <ImageIcon className="w-8 h-8" />
           </div>
 
           <div className="space-y-1 max-w-md">
-            <h3 className="font-display font-black text-[#181A1D] text-base sm:text-lg">
+            <h3 className="font-display font-black text-theme-text text-base sm:text-lg">
               Upload Your Timetable Photo
             </h3>
-            <p className="text-xs text-[#78716C] leading-relaxed">
+            <p className="text-xs text-theme-text leading-relaxed">
               Drag and drop an image of your class or exam timetable here, or click to browse. It will be displayed directly on this page for quick viewing anytime.
             </p>
           </div>
@@ -133,14 +133,14 @@ export default function TimetablePhotoViewer({
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
             <button
               type="button"
-              className="px-5 py-2.5 rounded-full bg-[#181A1D] hover:bg-[#2D3139] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 rounded-full bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
             >
-              <Upload className="w-3.5 h-3.5 text-[#FACC15]" />
+              <Upload className="w-3.5 h-3.5 text-theme-accent-green" />
               Select Photo from Device
             </button>
           </div>
 
-          <p className="text-[11px] text-[#A8A29A]">
+          <p className="text-[11px] text-theme-muted">
             Supports JPG, PNG, WEBP, Screenshots (No scanning delays — displays immediately)
           </p>
         </div>
@@ -161,25 +161,25 @@ export default function TimetablePhotoViewer({
       />
 
       {/* Main Photo Card */}
-      <div className="bg-white rounded-[28px] border border-[#ECE6DC] p-4 sm:p-6 shadow-xs space-y-4">
+      <div className="bg-theme-card rounded-[28px] border border-theme-border p-4 sm:p-6 shadow-xs space-y-4">
         
         {/* Photo Header & Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#F4F1EB]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-theme-border">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] flex items-center justify-center shrink-0 shadow-2xs">
-              <FileImage className="w-5 h-5 text-[#D97706]" />
+            <div className="w-10 h-10 rounded-2xl bg-theme-accent-green-light text-theme-text border border-theme-accent-green-light flex items-center justify-center shrink-0 shadow-2xs">
+              <FileImage className="w-5 h-5 text-theme-accent-blue" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="font-display font-black text-[#181A1D] text-sm sm:text-base truncate">
+                <h3 className="font-display font-black text-theme-text text-sm sm:text-base truncate">
                   {photo.name || title}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#047857] text-[10px] font-bold flex items-center gap-1 shrink-0">
-                  <CheckCircle2 className="w-3 h-3 text-[#10B981]" />
+                <span className="px-2 py-0.5 rounded-full bg-theme-bg border border-theme-accent-green-light text-theme-text text-[10px] font-bold flex items-center gap-1 shrink-0">
+                  <CheckCircle2 className="w-3 h-3 text-theme-accent-blue" />
                   Active Timetable Photo
                 </span>
               </div>
-              <p className="text-[11px] text-[#78716C] truncate">
+              <p className="text-[11px] text-theme-text truncate">
                 {photo.uploadedAt ? `Uploaded on ${fmtDate(photo.uploadedAt)}` : subtitle} {photo.size ? `· ${photo.size}` : ''}
               </p>
             </div>
@@ -188,13 +188,13 @@ export default function TimetablePhotoViewer({
           {/* Action Toolbar */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {/* Zoom Controls */}
-            <div className="flex items-center bg-[#FAF8F5] border border-[#ECE6DC] rounded-full p-0.5 shadow-2xs">
+            <div className="flex items-center bg-theme-bg border border-theme-border rounded-full p-0.5 shadow-2xs">
               <button
                 type="button"
                 onClick={handleZoomOut}
                 disabled={zoom <= 0.5}
                 title="Zoom Out"
-                className="p-1.5 rounded-full text-[#78716C] hover:text-[#181A1D] hover:bg-white disabled:opacity-40 transition-all cursor-pointer"
+                className="p-1.5 rounded-full text-theme-text hover:text-theme-text hover:bg-theme-card disabled:opacity-40 transition-all cursor-pointer"
               >
                 <ZoomOut className="w-3.5 h-3.5" />
               </button>
@@ -202,7 +202,7 @@ export default function TimetablePhotoViewer({
                 type="button"
                 onClick={handleResetZoom}
                 title="Reset Zoom"
-                className="px-2 py-0.5 text-[10px] font-bold text-[#181A1D] hover:bg-white rounded-md transition-all cursor-pointer"
+                className="px-2 py-0.5 text-[10px] font-bold text-theme-text hover:bg-theme-card rounded-md transition-all cursor-pointer"
               >
                 {Math.round(zoom * 100)}%
               </button>
@@ -211,7 +211,7 @@ export default function TimetablePhotoViewer({
                 onClick={handleZoomIn}
                 disabled={zoom >= 3}
                 title="Zoom In"
-                className="p-1.5 rounded-full text-[#78716C] hover:text-[#181A1D] hover:bg-white disabled:opacity-40 transition-all cursor-pointer"
+                className="p-1.5 rounded-full text-theme-text hover:text-theme-text hover:bg-theme-card disabled:opacity-40 transition-all cursor-pointer"
               >
                 <ZoomIn className="w-3.5 h-3.5" />
               </button>
@@ -222,7 +222,7 @@ export default function TimetablePhotoViewer({
               type="button"
               onClick={handleRotate}
               title="Rotate 90°"
-              className="p-2 rounded-full bg-[#FAF8F5] hover:bg-[#F4F1EB] border border-[#ECE6DC] text-[#78716C] hover:text-[#181A1D] shadow-2xs transition-all cursor-pointer"
+              className="p-2 rounded-full bg-theme-bg hover:bg-theme-bg border border-theme-border text-theme-text hover:text-theme-text shadow-2xs transition-all cursor-pointer"
             >
               <RotateCw className="w-3.5 h-3.5" />
             </button>
@@ -232,7 +232,7 @@ export default function TimetablePhotoViewer({
               type="button"
               onClick={() => setIsFullscreen(true)}
               title="Full Screen View"
-              className="p-2 rounded-full bg-[#FAF8F5] hover:bg-[#F4F1EB] border border-[#ECE6DC] text-[#78716C] hover:text-[#181A1D] shadow-2xs transition-all cursor-pointer"
+              className="p-2 rounded-full bg-theme-bg hover:bg-theme-bg border border-theme-border text-theme-text hover:text-theme-text shadow-2xs transition-all cursor-pointer"
             >
               <Maximize2 className="w-3.5 h-3.5" />
             </button>
@@ -242,7 +242,7 @@ export default function TimetablePhotoViewer({
               type="button"
               onClick={handleDownload}
               title="Download Photo"
-              className="p-2 rounded-full bg-[#FAF8F5] hover:bg-[#F4F1EB] border border-[#ECE6DC] text-[#78716C] hover:text-[#181A1D] shadow-2xs transition-all cursor-pointer"
+              className="p-2 rounded-full bg-theme-bg hover:bg-theme-bg border border-theme-border text-theme-text hover:text-theme-text shadow-2xs transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
             </button>
@@ -253,9 +253,9 @@ export default function TimetablePhotoViewer({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 title="Replace with new photo"
-                className="px-3 py-1.5 rounded-full bg-[#181A1D] hover:bg-[#2D3139] text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 rounded-full bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <RefreshCw className="w-3 h-3 text-[#FACC15]" />
+                <RefreshCw className="w-3 h-3 text-theme-accent-green" />
                 <span className="hidden sm:inline">Replace</span>
               </button>
             )}
@@ -270,7 +270,7 @@ export default function TimetablePhotoViewer({
                   }
                 }}
                 title="Remove photo"
-                className="p-2 rounded-full bg-rose-50 hover:bg-rose-100 border border-rose-200 text-[#E11D48] shadow-2xs transition-all cursor-pointer"
+                className="p-2 rounded-full bg-theme-card hover:bg-theme-accent-green-light border border-theme-accent-green-light text-theme-text shadow-2xs transition-all cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -279,7 +279,7 @@ export default function TimetablePhotoViewer({
         </div>
 
         {/* Interactive Image Display Area */}
-        <div className="relative overflow-hidden rounded-[22px] bg-[#181A1D]/5 border border-[#ECE6DC] min-h-[360px] sm:min-h-[500px] flex items-center justify-center p-4">
+        <div className="relative overflow-hidden rounded-[22px] bg-[#B4C6A6]/5 border border-theme-border min-h-[360px] sm:min-h-[500px] flex items-center justify-center p-4">
           <div 
             className="transition-transform duration-200 ease-out flex items-center justify-center max-w-full"
             style={{
@@ -295,8 +295,8 @@ export default function TimetablePhotoViewer({
             />
           </div>
 
-          <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold text-[#181A1D] border border-[#ECE6DC] shadow-xs flex items-center gap-2 pointer-events-none">
-            <Eye className="w-3 h-3 text-[#FACC15]" />
+          <div className="absolute bottom-3 left-3 bg-theme-card/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold text-theme-text border border-theme-border shadow-xs flex items-center gap-2 pointer-events-none">
+            <Eye className="w-3 h-3 text-theme-accent-green" />
             <span>Click photo to view fullscreen · Double tap to inspect</span>
           </div>
         </div>
@@ -305,7 +305,7 @@ export default function TimetablePhotoViewer({
       {/* Fullscreen Lightbox Modal */}
       {isFullscreen && (
         <div 
-          className="fixed inset-0 z-50 bg-[#181A1D]/90 backdrop-blur-md flex flex-col p-4 sm:p-6 transition-all"
+          className="fixed inset-0 z-50 bg-[#B4C6A6]/90 backdrop-blur-md flex flex-col p-4 sm:p-6 transition-all"
           onClick={() => setIsFullscreen(false)}
         >
           {/* Top Floating Controls */}
@@ -313,16 +313,16 @@ export default function TimetablePhotoViewer({
             className="flex items-center justify-between gap-4 pb-4 px-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="text-white">
-              <h4 className="font-display font-bold text-sm sm:text-base text-white truncate">{photo.name || 'Timetable Photo'}</h4>
-              <p className="text-xs text-white/60">Use controls below or scroll to inspect times and rooms</p>
+            <div className="text-theme-text">
+              <h4 className="font-display font-bold text-sm sm:text-base text-theme-text truncate">{photo.name || 'Timetable Photo'}</h4>
+              <p className="text-xs text-theme-text/60">Use controls below or scroll to inspect times and rooms</p>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleZoomOut}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+                className="p-2 rounded-full bg-theme-card/10 hover:bg-theme-card/20 text-theme-text transition-all cursor-pointer"
                 title="Zoom Out"
               >
                 <ZoomOut className="w-4 h-4" />
@@ -330,14 +330,14 @@ export default function TimetablePhotoViewer({
               <button
                 type="button"
                 onClick={handleResetZoom}
-                className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all cursor-pointer"
+                className="px-3 py-1 rounded-full bg-theme-card/10 hover:bg-theme-card/20 text-xs font-bold text-theme-text transition-all cursor-pointer"
               >
                 {Math.round(zoom * 100)}%
               </button>
               <button
                 type="button"
                 onClick={handleZoomIn}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+                className="p-2 rounded-full bg-theme-card/10 hover:bg-theme-card/20 text-theme-text transition-all cursor-pointer"
                 title="Zoom In"
               >
                 <ZoomIn className="w-4 h-4" />
@@ -345,7 +345,7 @@ export default function TimetablePhotoViewer({
               <button
                 type="button"
                 onClick={handleRotate}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+                className="p-2 rounded-full bg-theme-card/10 hover:bg-theme-card/20 text-theme-text transition-all cursor-pointer"
                 title="Rotate"
               >
                 <RotateCw className="w-4 h-4" />
@@ -353,7 +353,7 @@ export default function TimetablePhotoViewer({
               <button
                 type="button"
                 onClick={handleDownload}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+                className="p-2 rounded-full bg-theme-card/10 hover:bg-theme-card/20 text-theme-text transition-all cursor-pointer"
                 title="Download"
               >
                 <Download className="w-4 h-4" />
@@ -361,7 +361,7 @@ export default function TimetablePhotoViewer({
               <button
                 type="button"
                 onClick={() => setIsFullscreen(false)}
-                className="p-2 rounded-full bg-rose-500 hover:bg-rose-600 text-white transition-all cursor-pointer ml-2"
+                className="p-2 rounded-full bg-theme-accent-green hover:bg-theme-accent-green text-theme-text transition-all cursor-pointer ml-2"
                 title="Close"
               >
                 <X className="w-5 h-5" />

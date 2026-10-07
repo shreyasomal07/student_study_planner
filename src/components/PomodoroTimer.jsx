@@ -296,17 +296,17 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
       <div className="w-full space-y-5 py-1 animate-in fade-in duration-300">
         
         {/* Full-Width Top Hero Card */}
-        <div className="w-full bg-[#DDD7CC] rounded-[34px] p-6 sm:p-7 relative overflow-hidden shadow-xs border border-[#D0C9BD] flex flex-col justify-between">
+        <div className="w-full bg-theme-muted rounded-[34px] p-6 sm:p-7 relative overflow-hidden shadow-xs border border-theme-border flex flex-col justify-between">
           <div className="flex items-center justify-between relative z-10 mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#181A1D] text-[#FACC15] flex items-center justify-center shadow-md">
+              <div className="w-10 h-10 rounded-2xl bg-[#B4C6A6] text-theme-accent-green flex items-center justify-center shadow-md">
                 <Target className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="font-display font-extrabold text-[#181A1D] text-lg sm:text-xl tracking-tight">
+                <h2 className="font-display font-extrabold text-theme-text text-lg sm:text-xl tracking-tight">
                   Pomodoro Focus Setup
                 </h2>
-                <p className="text-xs text-[#6B655E] font-medium">
+                <p className="text-xs text-theme-text font-medium">
                   Set your study sprint, break intervals, and select your study topic
                 </p>
               </div>
@@ -314,21 +314,21 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
             {isSessionActive && (
               <button
                 onClick={() => setIsEditingSettings(false)}
-                className="px-4 py-1.5 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-[#181A1D] border border-[#ECE6DC] cursor-pointer shadow-2xs transition-all"
+                className="px-4 py-1.5 rounded-full bg-theme-card/80 hover:bg-theme-card text-xs font-bold text-theme-text border border-theme-border cursor-pointer shadow-2xs transition-all"
               >
                 Back to Active Timer
               </button>
             )}
           </div>
 
-          <p className="text-xs text-[#5A554E] font-medium leading-relaxed max-w-2xl relative z-10">
+          <p className="text-xs text-theme-text font-medium leading-relaxed max-w-2xl relative z-10">
             Customize your study intervals. Once started, the timer will automatically transition between 
-            <strong className="text-[#181A1D]"> Study ({studyMinutes}m) ➔ Break ({breakMinutes}m) ➔ Study ({studyMinutes}m)</strong> with zero clicks required.
+            <strong className="text-theme-text"> Study ({studyMinutes}m)  Break ({breakMinutes}m)  Study ({studyMinutes}m)</strong> with zero clicks required.
           </p>
 
           {/* Quick Presets Row */}
-          <div className="mt-5 pt-4 border-t border-[#C8C1B3] relative z-10">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#6B655E] mb-2.5">
+          <div className="mt-5 pt-4 border-t border-theme-border relative z-10">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-theme-text mb-2.5">
               Popular Presets
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -341,13 +341,13 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
                     onClick={() => applyPreset(p)}
                     className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-[#181A1D] text-white border-[#181A1D] shadow-md scale-[1.01]'
-                        : 'bg-white/80 hover:bg-white border-[#D0C9BD] text-[#181A1D]'
+                        ? 'bg-[#B4C6A6] text-theme-text border-[#B4C6A6] shadow-md scale-[1.01]'
+                        : 'bg-theme-card/80 hover:bg-theme-card border-theme-border text-theme-text'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-semibold opacity-70 block">{p.tag}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-[#FACC15]" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 text-theme-accent-green" />}
                     </div>
                     <span className="text-xs font-black block mt-0.5">{p.label}</span>
                   </button>
@@ -367,21 +367,21 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               
               {/* 1. Study Duration Picker */}
-              <div className="bg-white p-5 rounded-[28px] border border-[#ECE6DC] shadow-xs space-y-3">
+              <div className="bg-theme-card p-5 rounded-[28px] border border-theme-border shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-[#181A1D] text-[#FACC15] flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-[#B4C6A6] text-theme-accent-green flex items-center justify-center">
                       <Target className="w-3.5 h-3.5" />
                     </div>
-                    <label className="text-xs font-extrabold text-[#181A1D]">
+                    <label className="text-xs font-extrabold text-theme-text">
                       Study Duration
                     </label>
                   </div>
-                  <span className="text-sm font-black text-[#181A1D] bg-[#F8F6F1] px-3 py-0.5 rounded-full border border-[#ECE6DC]">
+                  <span className="text-sm font-black text-theme-text bg-theme-bg px-3 py-0.5 rounded-full border border-theme-border">
                     {studyMinutes} min
                   </span>
                 </div>
-                <p className="text-[11px] text-[#8E8880]">
+                <p className="text-[11px] text-theme-muted">
                   Focus duration before break
                 </p>
                 <input
@@ -393,7 +393,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
                   onChange={(e) => setStudyMinutes(Number(e.target.value))}
                   className="w-full accent-[#181A1D] cursor-pointer"
                 />
-                <div className="flex items-center justify-between text-[10px] font-bold text-[#A8A29E]">
+                <div className="flex items-center justify-between text-[10px] font-bold text-theme-muted">
                   <span>5m</span>
                   <span>25m (Std)</span>
                   <span>50m (Deep)</span>
@@ -402,21 +402,21 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
               </div>
 
               {/* 2. Break Duration Picker */}
-              <div className="bg-white p-5 rounded-[28px] border border-[#ECE6DC] shadow-xs space-y-3">
+              <div className="bg-theme-card p-5 rounded-[28px] border border-theme-border shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-[#FB7185] text-white flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-theme-accent-blue text-theme-text flex items-center justify-center">
                       <Coffee className="w-3.5 h-3.5" />
                     </div>
-                    <label className="text-xs font-extrabold text-[#181A1D]">
+                    <label className="text-xs font-extrabold text-theme-text">
                       Break Duration
                     </label>
                   </div>
-                  <span className="text-sm font-black text-[#181A1D] bg-[#F8F6F1] px-3 py-0.5 rounded-full border border-[#ECE6DC]">
+                  <span className="text-sm font-black text-theme-text bg-theme-bg px-3 py-0.5 rounded-full border border-theme-border">
                     {breakMinutes} min
                   </span>
                 </div>
-                <p className="text-[11px] text-[#8E8880]">
+                <p className="text-[11px] text-theme-muted">
                   Rest duration between study cycles
                 </p>
                 <input
@@ -428,7 +428,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
                   onChange={(e) => setBreakMinutes(Number(e.target.value))}
                   className="w-full accent-[#FB7185] cursor-pointer"
                 />
-                <div className="flex items-center justify-between text-[10px] font-bold text-[#A8A29E]">
+                <div className="flex items-center justify-between text-[10px] font-bold text-theme-muted">
                   <span>1m</span>
                   <span>5m (Std)</span>
                   <span>15m</span>
@@ -439,16 +439,16 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
             </div>
 
             {/* Interactive Topic / Chapter Linker */}
-            <div className="bg-white p-5 rounded-[28px] border border-[#ECE6DC] shadow-xs space-y-3">
+            <div className="bg-theme-card p-5 rounded-[28px] border border-theme-border shadow-xs space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-extrabold text-[#181A1D] flex items-center gap-2">
-                  <BookOpen className="w-3.5 h-3.5 text-[#EAB308]" />
+                <label className="text-xs font-extrabold text-theme-text flex items-center gap-2">
+                  <BookOpen className="w-3.5 h-3.5 text-theme-accent-blue" />
                   What topic are you studying?
                 </label>
                 {selectedTaskTitle && (
                   <button
                     onClick={() => setSelectedTaskTitle('')}
-                    className="text-[10px] font-bold text-[#FB7185] hover:underline cursor-pointer"
+                    className="text-[10px] font-bold text-theme-accent-blue hover:underline cursor-pointer"
                   >
                     Clear selection
                   </button>
@@ -458,7 +458,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
               {/* Quick Select Chips from Student Topics & Tasks */}
               {(topics.length > 0 || tasks.length > 0) && (
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#A8A29E] block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-theme-muted block">
                     Quick Pick From Your Courses & Tasks:
                   </span>
                   <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pr-1">
@@ -472,13 +472,13 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
                           onClick={() => setSelectedTaskTitle(topicLabel)}
                           className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                             isSelected
-                              ? 'bg-[#181A1D] text-[#FACC15] shadow-sm'
-                              : 'bg-[#F8F6F1] hover:bg-[#EBE6DF] text-[#181A1D] border border-[#ECE6DC]'
+                              ? 'bg-[#B4C6A6] text-theme-accent-green shadow-sm'
+                              : 'bg-theme-bg hover:bg-theme-bg text-theme-text border border-theme-border'
                           }`}
                         >
                           <span>{tp.name}</span>
                           <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-black ${
-                            isSelected ? 'bg-[#2B2F36] text-[#FACC15]' : 'bg-[#E5DFD5] text-[#6B655E]'
+                            isSelected ? 'bg-[#B4C6A6] text-theme-accent-green' : 'bg-theme-muted text-theme-text'
                           }`}>
                             {tp.subject}
                           </span>
@@ -495,12 +495,12 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
                           onClick={() => setSelectedTaskTitle(t.title)}
                           className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                             isSelected
-                              ? 'bg-[#181A1D] text-[#FACC15] shadow-sm'
-                              : 'bg-[#F8F6F1] hover:bg-[#EBE6DF] text-[#181A1D] border border-[#ECE6DC]'
+                              ? 'bg-[#B4C6A6] text-theme-accent-green shadow-sm'
+                              : 'bg-theme-bg hover:bg-theme-bg text-theme-text border border-theme-border'
                           }`}
                         >
                           <span>{t.title}</span>
-                          <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-[#FECDD3] text-[#E11D48] font-bold">
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-theme-accent-green text-theme-text font-bold">
                             Task
                           </span>
                         </button>
@@ -515,7 +515,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
                 <select
                   value={selectedTaskTitle}
                   onChange={(e) => setSelectedTaskTitle(e.target.value)}
-                  className="w-full sm:w-1/2 bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3.5 py-2.5 text-xs text-[#181A1D] font-semibold focus:outline-none cursor-pointer"
+                  className="w-full sm:w-1/2 bg-theme-bg border border-theme-border rounded-2xl px-3.5 py-2.5 text-xs text-theme-text font-semibold focus:outline-none cursor-pointer"
                 >
                   <option value="">-- Or choose from list --</option>
                   {topics.map(tp => (
@@ -531,17 +531,17 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
                   placeholder="Or type custom topic / chapter..."
                   value={selectedTaskTitle}
                   onChange={(e) => setSelectedTaskTitle(e.target.value)}
-                  className="w-full sm:w-1/2 bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3.5 py-2.5 text-xs text-[#181A1D] font-medium focus:outline-none"
+                  className="w-full sm:w-1/2 bg-theme-bg border border-theme-border rounded-2xl px-3.5 py-2.5 text-xs text-theme-text font-medium focus:outline-none"
                 />
               </div>
 
               {selectedTaskTitle && (
-                <div className="p-2.5 rounded-xl bg-[#FEFCE8] border border-[#FEF08A] flex items-center justify-between">
+                <div className="p-2.5 rounded-xl bg-theme-bg border border-theme-accent-green-light flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="font-extrabold text-[#CA8A04]">Selected Topic:</span>
-                    <span className="font-bold text-[#181A1D]">{selectedTaskTitle}</span>
+                    <span className="font-extrabold text-theme-accent-blue">Selected Topic:</span>
+                    <span className="font-bold text-theme-text">{selectedTaskTitle}</span>
                   </div>
-                  <Check className="w-4 h-4 text-[#CA8A04]" />
+                  <Check className="w-4 h-4 text-theme-accent-blue" />
                 </div>
               )}
             </div>
@@ -551,45 +551,45 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
           {/* Right Column: Workflow Summary Card & Action Button */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
             
-            <div className="bg-[#181A1D] text-white rounded-[28px] p-6 shadow-md border border-[#2B2F36] space-y-4">
+            <div className="bg-[#B4C6A6] text-theme-text rounded-[28px] p-6 shadow-md border border-[#B4C6A6] space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#A6ADB8]">
+                <span className="text-xs font-bold uppercase tracking-wider text-theme-muted">
                   Continuous Cycle Plan
                 </span>
-                <span className="text-xs font-black text-[#FACC15] bg-[#262A30] px-2.5 py-0.5 rounded-full">
+                <span className="text-xs font-black text-theme-accent-green bg-[#B4C6A6] px-2.5 py-0.5 rounded-full">
                   Looping
                 </span>
               </div>
 
               {/* Visual Flow diagram */}
               <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#242830] border border-[#313640]">
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#B4C6A6] border border-[#B4C6A6]">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#FACC15]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-theme-accent-green" />
                     <span className="font-bold">1. Study Sprint</span>
                   </div>
-                  <span className="font-extrabold text-[#FACC15]">{studyMinutes} mins</span>
+                  <span className="font-extrabold text-theme-accent-green">{studyMinutes} mins</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#242830] border border-[#313640]">
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#B4C6A6] border border-[#B4C6A6]">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#FB7185]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-theme-accent-blue" />
                     <span className="font-bold">2. Rest & Recharge</span>
                   </div>
-                  <span className="font-extrabold text-[#FB7185]">{breakMinutes} mins</span>
+                  <span className="font-extrabold text-theme-accent-blue">{breakMinutes} mins</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#242830] border border-[#313640]">
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#B4C6A6] border border-[#B4C6A6]">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#FACC15]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-theme-accent-green" />
                     <span className="font-bold">3. Next Study Sprint</span>
                   </div>
-                  <span className="font-extrabold text-[#FACC15]">{studyMinutes} mins</span>
+                  <span className="font-extrabold text-theme-accent-green">{studyMinutes} mins</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-[11px] text-[#8E95A2] pt-1">
-                <Zap className="w-3.5 h-3.5 text-[#FACC15] shrink-0" />
+              <div className="flex items-center gap-2 text-[11px] text-theme-muted pt-1">
+                <Zap className="w-3.5 h-3.5 text-theme-accent-green shrink-0" />
                 <span>Audio chimes will alert you on every phase switch.</span>
               </div>
             </div>
@@ -597,10 +597,10 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
             {/* Start CTA Button */}
             <button
               onClick={handleStartFromSetup}
-              className="w-full bg-[#181A1D] hover:bg-black text-white p-4 rounded-[24px] font-extrabold text-sm tracking-wide shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all"
+              className="w-full bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text p-4 rounded-[24px] font-extrabold text-sm tracking-wide shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all"
             >
               <span>Start Pomodoro Session ({studyMinutes}m / {breakMinutes}m)</span>
-              <ArrowRight className="w-4 h-4 text-[#FACC15]" />
+              <ArrowRight className="w-4 h-4 text-theme-accent-green" />
             </button>
 
           </div>
@@ -621,19 +621,19 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
         {/* Left Column: Big Glowing Focus Timer Card */}
-        <div className="lg:col-span-7 bg-[#DDD7CC] rounded-[36px] p-6 sm:p-8 relative overflow-hidden shadow-xs border border-[#D0C9BD] flex flex-col justify-between min-h-[460px]">
+        <div className="lg:col-span-7 bg-theme-muted rounded-[36px] p-6 sm:p-8 relative overflow-hidden shadow-xs border border-theme-border flex flex-col justify-between min-h-[460px]">
           
           {/* Top Bar inside Card */}
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-[#181A1D] text-[#FACC15] flex items-center justify-center shadow-sm">
+              <div className="w-9 h-9 rounded-full bg-[#B4C6A6] text-theme-accent-green flex items-center justify-center shadow-sm">
                 <Target className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="font-display font-extrabold text-[#181A1D] text-base sm:text-lg tracking-tight">
+                <h2 className="font-display font-extrabold text-theme-text text-base sm:text-lg tracking-tight">
                   Focus Pomodoro
                 </h2>
-                <p className="text-[11px] text-[#6B655E] font-medium">
+                <p className="text-[11px] text-theme-text font-medium">
                   Continuous alternating study cycle
                 </p>
               </div>
@@ -643,17 +643,17 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
             <div className="flex items-center gap-2">
               <div className={`px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 shadow-2xs ${
                 mode === 'study' 
-                  ? 'bg-[#181A1D] text-[#FACC15]' 
-                  : 'bg-[#FB7185] text-white'
+                  ? 'bg-[#B4C6A6] text-theme-accent-green' 
+                  : 'bg-theme-accent-blue text-theme-text'
               }`}>
                 {mode === 'study' ? (
                   <>
-                    <span className="w-2 h-2 rounded-full bg-[#FACC15] animate-ping" />
+                    <span className="w-2 h-2 rounded-full bg-theme-accent-green animate-ping" />
                     <span>STUDY MODE · Cycle #{cycleCount}</span>
                   </>
                 ) : (
                   <>
-                    <Coffee className="w-3.5 h-3.5 text-white" />
+                    <Coffee className="w-3.5 h-3.5 text-theme-text" />
                     <span>BREAK TIME · Recharge</span>
                   </>
                 )}
@@ -661,7 +661,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
 
               <button
                 onClick={() => setIsEditingSettings(true)}
-                className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-[#181A1D] border border-[#D0C9BD] flex items-center justify-center cursor-pointer shadow-2xs transition-all"
+                className="w-8 h-8 rounded-full bg-theme-card/80 hover:bg-theme-card text-theme-text border border-theme-border flex items-center justify-center cursor-pointer shadow-2xs transition-all"
                 title="Change Study & Break Timings"
               >
                 <Settings2 className="w-4 h-4" />
@@ -676,7 +676,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
               
               {/* Glowing Background Glow Filter */}
               <div className={`absolute inset-4 rounded-full filter blur-2xl opacity-40 transition-all duration-700 ${
-                mode === 'study' ? 'bg-[#FACC15]' : 'bg-[#FB7185]'
+                mode === 'study' ? 'bg-theme-accent-green' : 'bg-theme-accent-blue'
               }`} />
 
               <svg className="w-full h-full -rotate-90 relative z-10" viewBox="0 0 250 250">
@@ -707,17 +707,17 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
 
               {/* Inner Center Display */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-20">
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#6B655E] mb-1">
-                  {mode === 'study' ? '🎯 FOCUS TIME' : '☕ BREAK TIME'}
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-theme-text mb-1">
+                  {mode === 'study' ? '🎯 FOCUS TIME' : ' BREAK TIME'}
                 </span>
                 
                 {/* Big numbers */}
-                <div className="text-5xl sm:text-6xl font-black font-display text-[#181A1D] tracking-tight tabular-nums drop-shadow-xs">
+                <div className="text-5xl sm:text-6xl font-black font-display text-theme-text tracking-tight tabular-nums drop-shadow-xs">
                   {formattedMinutes}:{formattedSeconds}
                 </div>
 
                 {/* Subtitle status */}
-                <p className="text-[11px] font-bold text-[#5A554E] mt-1 max-w-[180px] truncate">
+                <p className="text-[11px] font-bold text-theme-text mt-1 max-w-[180px] truncate">
                   {selectedTaskTitle || (mode === 'study' ? `${studyMinutes}m Study Sprint` : `${breakMinutes}m Relaxation`)}
                 </p>
               </div>
@@ -734,18 +734,18 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
               onClick={togglePlay}
               className={`px-8 py-3 rounded-full font-black text-sm tracking-wide shadow-md flex items-center gap-2.5 transition-all cursor-pointer active:scale-95 ${
                 isRunning 
-                  ? 'bg-white hover:bg-[#F8F6F1] text-[#181A1D] border border-[#D0C9BD]' 
-                  : 'bg-[#181A1D] hover:bg-black text-white'
+                  ? 'bg-theme-card hover:bg-theme-bg text-theme-text border border-theme-border' 
+                  : 'bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text'
               }`}
             >
               {isRunning ? (
                 <>
-                  <Pause className="w-4 h-4 fill-current text-[#FB7185]" />
+                  <Pause className="w-4 h-4 fill-current text-theme-accent-blue" />
                   <span>Pause Timer</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 fill-current text-[#FACC15]" />
+                  <Play className="w-4 h-4 fill-current text-theme-accent-green" />
                   <span>{timeLeft === (mode === 'study' ? studyMinutes * 60 : breakMinutes * 60) ? 'Start Session' : 'Resume Session'}</span>
                 </>
               )}
@@ -754,7 +754,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
             {/* Skip Phase */}
             <button
               onClick={skipCurrentPhase}
-              className="p-3 rounded-full bg-white/80 hover:bg-white text-[#181A1D] border border-[#D0C9BD] cursor-pointer shadow-2xs transition-all"
+              className="p-3 rounded-full bg-theme-card/80 hover:bg-theme-card text-theme-text border border-theme-border cursor-pointer shadow-2xs transition-all"
               title="Skip to next phase"
             >
               <FastForward className="w-4 h-4" />
@@ -763,7 +763,7 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
             {/* Reset / Stop */}
             <button
               onClick={resetSession}
-              className="p-3 rounded-full bg-white/80 hover:bg-white text-[#181A1D] border border-[#D0C9BD] cursor-pointer shadow-2xs transition-all"
+              className="p-3 rounded-full bg-theme-card/80 hover:bg-theme-card text-theme-text border border-theme-border cursor-pointer shadow-2xs transition-all"
               title="Reset timer to beginning"
             >
               <RotateCcw className="w-4 h-4" />
@@ -772,9 +772,9 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
             {/* Change Timings Settings */}
             <button
               onClick={() => setIsEditingSettings(true)}
-              className="px-4 py-3 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-[#181A1D] border border-[#D0C9BD] flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all"
+              className="px-4 py-3 rounded-full bg-theme-card/80 hover:bg-theme-card text-xs font-bold text-theme-text border border-theme-border flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-[#8E8880]" />
+              <SlidersHorizontal className="w-3.5 h-3.5 text-theme-muted" />
               <span>{studyMinutes}m / {breakMinutes}m</span>
             </button>
 
@@ -786,44 +786,44 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
         <div className="lg:col-span-5 space-y-5 flex flex-col justify-between">
           
           {/* Dark Overview Card */}
-          <div className="bg-[#181A1D] text-white rounded-[34px] p-6 sm:p-7 shadow-lg border border-[#2B2F36] space-y-4">
+          <div className="bg-[#B4C6A6] text-theme-text rounded-[34px] p-6 sm:p-7 shadow-lg border border-[#B4C6A6] space-y-4">
             
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-white text-base">
+              <h3 className="font-display font-bold text-theme-text text-base">
                 Today's Focus Streak
               </h3>
-              <span className="text-xs font-bold text-[#FACC15] bg-[#282C33] px-3 py-1 rounded-full flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 fill-[#FACC15]" />
+              <span className="text-xs font-bold text-theme-accent-green bg-[#B4C6A6] px-3 py-1 rounded-full flex items-center gap-1">
+                <Flame className="w-3.5 h-3.5 fill-theme-accent-green" />
                 {completedSessionsCount} Sessions
               </span>
             </div>
 
             {/* Meter circles */}
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="bg-[#242830] p-4 rounded-2xl border border-[#313640]">
-                <span className="text-[10px] text-[#8E95A2] font-semibold uppercase">Focus Time Today</span>
-                <p className="font-display font-black text-xl text-white mt-1">
-                  {totalHoursToday} <span className="text-xs font-normal text-[#8E95A2]">hrs</span>
+              <div className="bg-[#B4C6A6] p-4 rounded-2xl border border-[#B4C6A6]">
+                <span className="text-[10px] text-theme-muted font-semibold uppercase">Focus Time Today</span>
+                <p className="font-display font-black text-xl text-theme-text mt-1">
+                  {totalHoursToday} <span className="text-xs font-normal text-theme-muted">hrs</span>
                 </p>
-                <div className="w-full bg-[#181A1D] h-1.5 rounded-full mt-2 overflow-hidden">
-                  <div className="bg-[#FACC15] h-full rounded-full" style={{ width: `${targetPercent}%` }} />
+                <div className="w-full bg-[#B4C6A6] h-1.5 rounded-full mt-2 overflow-hidden">
+                  <div className="bg-theme-accent-green h-full rounded-full" style={{ width: `${targetPercent}%` }} />
                 </div>
               </div>
 
-              <div className="bg-[#242830] p-4 rounded-2xl border border-[#313640]">
-                <span className="text-[10px] text-[#8E95A2] font-semibold uppercase">Daily Goal</span>
-                <p className="font-display font-black text-xl text-[#FB7185] mt-1">
-                  {targetPercent}% <span className="text-xs font-normal text-[#8E95A2]">of {dailyTarget}h</span>
+              <div className="bg-[#B4C6A6] p-4 rounded-2xl border border-[#B4C6A6]">
+                <span className="text-[10px] text-theme-muted font-semibold uppercase">Daily Goal</span>
+                <p className="font-display font-black text-xl text-theme-accent-blue mt-1">
+                  {targetPercent}% <span className="text-xs font-normal text-theme-muted">of {dailyTarget}h</span>
                 </p>
-                <div className="w-full bg-[#181A1D] h-1.5 rounded-full mt-2 overflow-hidden">
-                  <div className="bg-[#FB7185] h-full rounded-full" style={{ width: `${targetPercent}%` }} />
+                <div className="w-full bg-[#B4C6A6] h-1.5 rounded-full mt-2 overflow-hidden">
+                  <div className="bg-theme-accent-blue h-full rounded-full" style={{ width: `${targetPercent}%` }} />
                 </div>
               </div>
             </div>
 
             {/* Auto-Cycling Notice */}
-            <div className="bg-[#242830]/80 p-3.5 rounded-2xl border border-[#313640] flex items-center gap-3 text-xs text-[#A6ADB8]">
-              <div className="w-6 h-6 rounded-full bg-[#FACC15]/20 text-[#FACC15] flex items-center justify-center shrink-0">
+            <div className="bg-[#B4C6A6]/80 p-3.5 rounded-2xl border border-[#B4C6A6] flex items-center gap-3 text-xs text-theme-muted">
+              <div className="w-6 h-6 rounded-full bg-theme-accent-green/20 text-theme-accent-green flex items-center justify-center shrink-0">
                 <Zap className="w-3.5 h-3.5" />
               </div>
               <span>
@@ -834,25 +834,25 @@ export default function PomodoroTimer({ tasks = [], topics = [], student = {}, o
           </div>
 
           {/* Quick Tasks & Focus Log Card */}
-          <div className="bg-white rounded-[32px] p-5 sm:p-6 shadow-xs border border-[#ECE6DC] space-y-3">
+          <div className="bg-theme-card rounded-[32px] p-5 sm:p-6 shadow-xs border border-theme-border space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="font-display font-extrabold text-sm text-[#181A1D]">
+              <h4 className="font-display font-extrabold text-sm text-theme-text">
                 Focus Session Log
               </h4>
-              <span className="text-[10px] font-bold text-[#8E8880]">Today</span>
+              <span className="text-[10px] font-bold text-theme-muted">Today</span>
             </div>
 
             <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1">
               {sessionLogs.length === 0 ? (
-                <p className="text-xs text-[#A8A29E] text-center py-4">No completed sprints yet today.</p>
+                <p className="text-xs text-theme-muted text-center py-4">No completed sprints yet today.</p>
               ) : (
                 sessionLogs.map((log) => (
-                  <div key={log.id} className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#ECE6DC] flex items-center justify-between text-xs">
+                  <div key={log.id} className="p-2.5 rounded-xl bg-theme-bg border border-theme-border flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${log.type === 'study' ? 'bg-[#EAB308]' : 'bg-[#FB7185]'}`} />
-                      <span className="font-bold text-[#181A1D] truncate max-w-[160px]">{log.task}</span>
+                      <span className={`w-2 h-2 rounded-full ${log.type === 'study' ? 'bg-theme-accent-blue' : 'bg-theme-accent-blue'}`} />
+                      <span className="font-bold text-theme-text truncate max-w-[160px]">{log.task}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-[#8E8880] font-semibold">
+                    <div className="flex items-center gap-2 text-[10px] text-theme-muted font-semibold">
                       <span>{log.duration}m</span>
                       <span>·</span>
                       <span>{log.time}</span>

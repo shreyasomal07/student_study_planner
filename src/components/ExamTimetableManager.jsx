@@ -24,11 +24,11 @@ import {
 
 const EXAM_TYPES = ["Midterm", "Final Exam", "Quiz / Test", "Practical / Lab Exam", "Viva / Oral"];
 const EXAM_TYPE_BADGES = {
-  Midterm: "bg-amber-50 text-amber-700 border-amber-200",
-  "Final Exam": "bg-rose-50 text-rose-700 border-rose-200 font-bold",
-  "Quiz / Test": "bg-blue-50 text-blue-700 border-blue-200",
-  "Practical / Lab Exam": "bg-purple-50 text-purple-700 border-purple-200",
-  "Viva / Oral": "bg-emerald-50 text-emerald-700 border-emerald-200"
+  Midterm: "bg-theme-card text-theme-accent-green border-theme-accent-green-light",
+  "Final Exam": "bg-theme-card text-theme-accent-green border-theme-accent-green-light font-bold",
+  "Quiz / Test": "bg-theme-card text-theme-accent-green border-theme-accent-green-light",
+  "Practical / Lab Exam": "bg-theme-card text-theme-accent-green border-theme-accent-green-light",
+  "Viva / Oral": "bg-theme-card text-theme-accent-green border-theme-accent-green-light"
 };
 
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -105,7 +105,7 @@ function normalizeTime(str) {
 }
 
 function getExamCountdown(dateStr, timeStr) {
-  if (!dateStr) return { label: 'Upcoming', color: 'bg-slate-100 text-slate-600 border-slate-200' };
+  if (!dateStr) return { label: 'Upcoming', color: 'bg-theme-bg text-theme-muted border-theme-bg' };
   const now = new Date();
   const examDate = new Date(`${dateStr}T${timeStr || '09:00'}:00`);
   const diffMs = examDate.getTime() - now.getTime();
@@ -113,18 +113,18 @@ function getExamCountdown(dateStr, timeStr) {
   const diffHours = Math.round(diffMs / (1000 * 60 * 60));
 
   if (diffMs < 0) {
-    return { label: 'Completed Exam', color: 'bg-slate-100 text-slate-500 border-slate-200 line-through' };
+    return { label: 'Completed Exam', color: 'bg-theme-bg text-theme-muted border-theme-bg line-through' };
   }
   if (diffHours <= 24) {
-    return { label: '🚨 Exam Today / Tomorrow!', color: 'bg-rose-500 text-white font-bold animate-pulse' };
+    return { label: '🚨 Exam Today / Tomorrow!', color: 'bg-theme-accent-green text-theme-text font-bold animate-pulse' };
   }
   if (diffDays <= 3) {
-    return { label: `⏳ In ${diffDays} Days`, color: 'bg-rose-50 text-rose-700 border-rose-300 font-bold' };
+    return { label: ` In ${diffDays} Days`, color: 'bg-theme-card text-theme-accent-green border-theme-border font-bold' };
   }
   if (diffDays <= 7) {
-    return { label: `🗓️ In ${diffDays} Days`, color: 'bg-amber-50 text-amber-700 border-amber-200 font-semibold' };
+    return { label: `🗓️ In ${diffDays} Days`, color: 'bg-theme-card text-theme-accent-green border-theme-accent-green-light font-semibold' };
   }
-  return { label: `🗓️ In ${diffDays} Days`, color: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
+  return { label: `🗓️ In ${diffDays} Days`, color: 'bg-theme-card text-theme-accent-green border-theme-accent-green-light' };
 }
 
 // Extract exam timetable items from OCR-scanned text or document images
@@ -487,13 +487,13 @@ export default function ExamTimetableManager({
   return (
     <div className="space-y-6">
       {/* Header controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-[28px] border border-[#ECE6DC] shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-theme-card p-4 sm:p-5 rounded-[28px] border border-theme-border shadow-2xs">
         <div>
-          <h2 className="font-display font-extrabold text-[#181A1D] text-base sm:text-lg flex items-center gap-2">
-            <Award className="w-5 h-5 text-[#FB7185]" />
+          <h2 className="font-display font-extrabold text-theme-text text-base sm:text-lg flex items-center gap-2">
+            <Award className="w-5 h-5 text-theme-accent-blue" />
             Exam Timetable & Syllabus Tracker
           </h2>
-          <p className="text-xs text-[#8E8880] mt-0.5">
+          <p className="text-xs text-theme-muted mt-0.5">
             Upload an image of your exam schedule or enter dates. The AI automatically schedules high-priority revision sprints before each exam.
           </p>
         </div>
@@ -507,28 +507,28 @@ export default function ExamTimetableManager({
               setUploadedFileName('');
               setImagePreviewUrl(null);
             }}
-            className="px-4 py-2 rounded-full text-xs font-bold bg-[#F4F1EB] hover:bg-[#EAE4DA] text-[#181A1D] border border-[#ECE6DC] transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            className="px-4 py-2 rounded-full text-xs font-bold bg-theme-bg hover:bg-theme-bg text-theme-text border border-theme-border transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
-            <Upload className="w-3.5 h-3.5 text-[#FB7185]" /> Upload Image / Document
+            <Upload className="w-3.5 h-3.5 text-theme-accent-blue" /> Upload Image / Document
           </button>
 
           <button
             onClick={openAddModal}
-            className="px-4 py-2 rounded-full text-xs font-bold bg-[#181A1D] hover:bg-black text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+            className="px-4 py-2 rounded-full text-xs font-bold bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
-            <Plus className="w-4 h-4 text-[#FACC15]" /> Add Exam
+            <Plus className="w-4 h-4 text-theme-accent-green" /> Add Exam
           </button>
         </div>
       </div>
 
       {/* Exam List Cards */}
       {sortedExams.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
+        <div className="rounded-3xl border border-dashed border-theme-border bg-theme-card p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-theme-card text-theme-accent-green flex items-center justify-center mx-auto mb-3">
             <Award className="w-7 h-7" />
           </div>
-          <h3 className="font-display font-bold text-slate-800 text-base">No Upcoming Exams Added</h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-5">
+          <h3 className="font-display font-bold text-theme-text text-base">No Upcoming Exams Added</h3>
+          <p className="text-xs text-theme-muted max-w-md mx-auto mt-1 mb-5">
             Upload a photo / screenshot of your exam timetable or add upcoming Midterms and Finals so the AI creates dedicated revision blocks.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -540,15 +540,15 @@ export default function ExamTimetableManager({
                 setUploadedFileName('');
                 setImagePreviewUrl(null);
               }}
-              className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl bg-theme-accent-green hover:bg-theme-accent-green text-theme-text text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2"
             >
               <ImageIcon className="w-4 h-4" /> Upload Exam Picture / File
             </button>
             <button
               onClick={openAddModal}
-              className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all cursor-pointer flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl bg-theme-bg hover:bg-theme-bg text-theme-muted text-xs font-semibold transition-all cursor-pointer flex items-center gap-2"
             >
-              <Plus className="w-4 h-4 text-rose-600" /> Add Exam Manually
+              <Plus className="w-4 h-4 text-theme-accent-green" /> Add Exam Manually
             </button>
           </div>
         </div>
@@ -560,7 +560,7 @@ export default function ExamTimetableManager({
             return (
               <div
                 key={exam.id}
-                className="p-5 rounded-2xl border border-slate-200 bg-white shadow-2xs hover:border-rose-300 hover:shadow-md transition-all flex flex-col justify-between space-y-3.5 relative overflow-hidden group"
+                className="p-5 rounded-2xl border border-theme-bg bg-theme-card shadow-2xs hover:border-theme-border hover:shadow-md transition-all flex flex-col justify-between space-y-3.5 relative overflow-hidden group"
               >
                 <div className="space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -573,48 +573,48 @@ export default function ExamTimetableManager({
                   </div>
 
                   <div>
-                    <h3 className="font-display font-bold text-slate-800 text-base leading-snug">{exam.subject}</h3>
+                    <h3 className="font-display font-bold text-theme-text text-base leading-snug">{exam.subject}</h3>
                     {exam.title && (
-                      <p className="text-xs text-slate-500 font-medium mt-0.5">{exam.title}</p>
+                      <p className="text-xs text-theme-muted font-medium mt-0.5">{exam.title}</p>
                     )}
                   </div>
 
-                  <div className="space-y-1 text-xs text-slate-600 pt-1">
-                    <p className="flex items-center gap-1.5 font-semibold text-slate-700">
-                      <Calendar className="w-3.5 h-3.5 text-rose-500" />
+                  <div className="space-y-1 text-xs text-theme-muted pt-1">
+                    <p className="flex items-center gap-1.5 font-semibold text-theme-muted">
+                      <Calendar className="w-3.5 h-3.5 text-theme-accent-green" />
                       {fmtDisplayDate(exam.date)}
                     </p>
-                    <p className="flex items-center gap-1.5 text-slate-500">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <p className="flex items-center gap-1.5 text-theme-muted">
+                      <Clock className="w-3.5 h-3.5 text-theme-border" />
                       {fmtTime12(exam.start)} – {fmtTime12(exam.end)}
                     </p>
                     {exam.room && (
-                      <p className="flex items-center gap-1.5 text-slate-500">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                      <p className="flex items-center gap-1.5 text-theme-muted">
+                        <MapPin className="w-3.5 h-3.5 text-theme-border" />
                         {exam.room}
                       </p>
                     )}
                   </div>
 
                   {exam.syllabus && (
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-[11px] text-slate-600">
-                      <span className="font-bold text-slate-700 block mb-0.5">Syllabus Scope:</span>
+                    <div className="p-2.5 bg-theme-card rounded-xl border border-theme-bg text-[11px] text-theme-muted">
+                      <span className="font-bold text-theme-muted block mb-0.5">Syllabus Scope:</span>
                       <p className="line-clamp-2">{exam.syllabus}</p>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-end gap-1 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-end gap-1 pt-2 border-t border-theme-bg">
                   <button
                     onClick={() => openEditModal(exam)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg text-theme-border hover:text-theme-accent-green hover:bg-theme-card transition-colors cursor-pointer"
                     title="Edit"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => onDeleteExam(exam.id)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg text-theme-border hover:text-theme-accent-green hover:bg-theme-card transition-colors cursor-pointer"
                     title="Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -628,110 +628,110 @@ export default function ExamTimetableManager({
 
       {/* Add / Edit Single Exam Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 relative">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <h3 className="font-display font-bold text-slate-800 flex items-center gap-2">
-                <Award className="w-4 h-4 text-rose-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#B4C6A6]/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-theme-card rounded-3xl shadow-2xl p-6 relative">
+            <div className="flex items-center justify-between pb-3 border-b border-theme-bg mb-4">
+              <h3 className="font-display font-bold text-theme-text flex items-center gap-2">
+                <Award className="w-4 h-4 text-theme-accent-green" />
                 {editingExam ? 'Edit Exam' : 'Add Exam Schedule'}
               </h3>
-              <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+              <button onClick={() => setModalOpen(false)} className="text-theme-border hover:text-theme-muted cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Subject Name *</label>
+                <label className="block text-xs font-semibold text-theme-muted mb-1">Subject Name *</label>
                 <input
                   type="text"
                   required
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
                   placeholder="e.g. Data Structures, Physics"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500"
+                  className="w-full bg-theme-card border border-theme-bg rounded-xl px-3 py-2 text-xs text-theme-text focus:outline-none focus:border-theme-accent-green"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Exam Type</label>
+                  <label className="block text-xs font-semibold text-theme-muted mb-1">Exam Type</label>
                   <select
                     value={form.weightage}
                     onChange={(e) => setForm({ ...form, weightage: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500 cursor-pointer"
+                    className="w-full bg-theme-card border border-theme-bg rounded-xl px-3 py-2 text-xs text-theme-text focus:outline-none focus:border-theme-accent-green cursor-pointer"
                   >
                     {EXAM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Date</label>
+                  <label className="block text-xs font-semibold text-theme-muted mb-1">Date</label>
                   <input
                     type="date"
                     required
                     value={form.date}
                     onChange={(e) => setForm({ ...form, date: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500"
+                    className="w-full bg-theme-card border border-theme-bg rounded-xl px-3 py-2 text-xs text-theme-text focus:outline-none focus:border-theme-accent-green"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Start Time</label>
+                  <label className="block text-xs font-semibold text-theme-muted mb-1">Start Time</label>
                   <input
                     type="time"
                     value={form.start}
                     onChange={(e) => setForm({ ...form, start: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500"
+                    className="w-full bg-theme-card border border-theme-bg rounded-xl px-3 py-2 text-xs text-theme-text focus:outline-none focus:border-theme-accent-green"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">End Time</label>
+                  <label className="block text-xs font-semibold text-theme-muted mb-1">End Time</label>
                   <input
                     type="time"
                     value={form.end}
                     onChange={(e) => setForm({ ...form, end: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500"
+                    className="w-full bg-theme-card border border-theme-bg rounded-xl px-3 py-2 text-xs text-theme-text focus:outline-none focus:border-theme-accent-green"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Exam Hall / Venue (Optional)</label>
+                <label className="block text-xs font-semibold text-theme-muted mb-1">Exam Hall / Venue (Optional)</label>
                 <input
                   type="text"
                   value={form.room}
                   onChange={(e) => setForm({ ...form, room: e.target.value })}
                   placeholder="e.g. Examination Hall A, Seat 42"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500"
+                  className="w-full bg-theme-card border border-theme-bg rounded-xl px-3 py-2 text-xs text-theme-text focus:outline-none focus:border-theme-accent-green"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Syllabus / Key Chapters (Optional)</label>
+                <label className="block text-xs font-semibold text-theme-muted mb-1">Syllabus / Key Chapters (Optional)</label>
                 <textarea
                   rows={2}
                   value={form.syllabus}
                   onChange={(e) => setForm({ ...form, syllabus: e.target.value })}
                   placeholder="e.g. Modules 1 to 4, Trees, Graphs, Sorting Algorithms"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500"
+                  className="w-full bg-theme-card border border-theme-bg rounded-xl px-3 py-2 text-xs text-theme-text focus:outline-none focus:border-theme-accent-green"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-theme-bg">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:bg-theme-bg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm cursor-pointer"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-theme-accent-green hover:bg-theme-accent-green text-theme-text shadow-sm cursor-pointer"
                 >
                   {editingExam ? 'Update Exam' : 'Save Exam'}
                 </button>
@@ -743,25 +743,25 @@ export default function ExamTimetableManager({
 
       {/* Upload Picture, Document & Bulk Import Modal */}
       {bulkModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-xl bg-white rounded-3xl shadow-2xl p-6 relative my-8 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 shrink-0">
-              <h3 className="font-display font-bold text-slate-800 flex items-center gap-2 text-base">
-                <Scan className="w-5 h-5 text-rose-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#B4C6A6]/50 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-xl bg-theme-card rounded-3xl shadow-2xl p-6 relative my-8 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-theme-bg mb-4 shrink-0">
+              <h3 className="font-display font-bold text-theme-text flex items-center gap-2 text-base">
+                <Scan className="w-5 h-5 text-theme-accent-green" />
                 Upload Exam Timetable (Photo, PDF, or CSV)
               </h3>
-              <button onClick={() => setBulkModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+              <button onClick={() => setBulkModalOpen(false)} className="text-theme-border hover:text-theme-muted cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Mode switch */}
-            <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl mb-4 shrink-0">
+            <div className="flex items-center gap-2 p-1 bg-theme-bg rounded-xl mb-4 shrink-0">
               <button
                 type="button"
                 onClick={() => setUploadTab('image_file')}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  uploadTab === 'image_file' ? 'bg-white text-rose-600 shadow-2xs' : 'text-slate-600 hover:text-slate-800'
+                  uploadTab === 'image_file' ? 'bg-theme-card text-theme-accent-green shadow-2xs' : 'text-theme-muted hover:text-theme-text'
                 }`}
               >
                 <ImageIcon className="w-3.5 h-3.5" /> Upload Photo / CSV / File
@@ -770,7 +770,7 @@ export default function ExamTimetableManager({
                 type="button"
                 onClick={() => setUploadTab('paste')}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  uploadTab === 'paste' ? 'bg-white text-rose-600 shadow-2xs' : 'text-slate-600 hover:text-slate-800'
+                  uploadTab === 'paste' ? 'bg-theme-card text-theme-accent-green shadow-2xs' : 'text-theme-muted hover:text-theme-text'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" /> Paste Raw Schedule
@@ -788,8 +788,8 @@ export default function ExamTimetableManager({
                     onClick={() => fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 relative overflow-hidden ${
                       dragActive
-                        ? 'border-rose-500 bg-rose-50/50'
-                        : 'border-slate-300 hover:border-rose-400 hover:bg-slate-50'
+                        ? 'border-theme-accent-green bg-theme-card/50'
+                        : 'border-theme-border hover:border-theme-border hover:bg-theme-card'
                     }`}
                   >
                     <input
@@ -807,20 +807,20 @@ export default function ExamTimetableManager({
                         <img
                           src={imagePreviewUrl}
                           alt="Uploaded Timetable"
-                          className="max-h-36 rounded-xl border border-slate-200 shadow-2xs object-contain"
+                          className="max-h-36 rounded-xl border border-theme-bg shadow-2xs object-contain"
                         />
-                        <p className="text-xs font-bold text-slate-700">{uploadedFileName}</p>
+                        <p className="text-xs font-bold text-theme-muted">{uploadedFileName}</p>
                       </div>
                     ) : (
                       <>
-                        <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-theme-card text-theme-accent-green flex items-center justify-center">
                           <ImageIcon className="w-6 h-6" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-800">
+                          <p className="text-xs font-bold text-theme-text">
                             {uploadedFileName ? uploadedFileName : 'Click to upload a Picture (PNG/JPG) or CSV / Document'}
                           </p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
+                          <p className="text-[11px] text-theme-border mt-0.5">
                             AI Optical Character Recognition (OCR) will automatically scan the photo and detect dates & subjects
                           </p>
                         </div>
@@ -830,29 +830,29 @@ export default function ExamTimetableManager({
 
                   {/* OCR Progress Loading bar */}
                   {ocrLoading && (
-                    <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in">
-                      <div className="flex items-center justify-between text-xs font-bold text-rose-800">
+                    <div className="p-3.5 rounded-2xl bg-theme-card border border-theme-accent-green-light space-y-2 animate-in fade-in">
+                      <div className="flex items-center justify-between text-xs font-bold text-theme-text">
                         <span className="flex items-center gap-2">
-                          <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
+                          <Loader2 className="w-4 h-4 animate-spin text-theme-accent-green" />
                           {ocrStatusText}
                         </span>
                         <span>{ocrProgress}%</span>
                       </div>
-                      <div className="w-full bg-rose-200 h-2 rounded-full overflow-hidden">
+                      <div className="w-full bg-theme-accent-green-light h-2 rounded-full overflow-hidden">
                         <div
-                          className="bg-rose-600 h-full transition-all duration-200"
+                          className="bg-theme-accent-green h-full transition-all duration-200"
                           style={{ width: `${ocrProgress}%` }}
                         />
                       </div>
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+                  <div className="flex items-center justify-between text-xs text-theme-muted px-1">
                     <span>Prefer entering into a spreadsheet?</span>
                     <button
                       type="button"
                       onClick={downloadCSVTemplate}
-                      className="inline-flex items-center gap-1 text-rose-600 font-bold hover:underline cursor-pointer"
+                      className="inline-flex items-center gap-1 text-theme-accent-green font-bold hover:underline cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" /> Download CSV Template
                     </button>
@@ -860,7 +860,7 @@ export default function ExamTimetableManager({
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-theme-muted">
                     Paste your exam timetable text below:
                   </p>
                   <textarea
@@ -871,23 +871,23 @@ export default function ExamTimetableManager({
                       parseRawExams(e.target.value);
                     }}
                     placeholder={`Data Structures, 2026-10-15, 10:00, 12:00, Mid-Term Exam, Midterm, Hall A, Trees and Graphs\nCalculus, 2026-10-20, 14:00, 17:00, Final Exam, Final Exam, Main Auditorium, All Modules`}
-                    className="w-full p-3 font-mono text-xs bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-rose-500"
+                    className="w-full p-3 font-mono text-xs bg-theme-card border border-theme-bg rounded-2xl focus:outline-none focus:border-theme-accent-green"
                   />
                 </div>
               )}
 
               {/* Detected exams preview */}
               {parsedPreview.length > 0 && (
-                <div className="border border-rose-100 bg-rose-50/30 rounded-2xl p-3.5 space-y-2.5">
+                <div className="border border-theme-accent-green-light bg-theme-card/30 rounded-2xl p-3.5 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-rose-900 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span className="text-xs font-bold text-theme-text flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-theme-accent-green" />
                       Detected Exams ({parsedPreview.length} items)
                     </span>
                     <button
                       type="button"
                       onClick={() => setParsedPreview([])}
-                      className="text-[11px] text-rose-500 hover:underline cursor-pointer"
+                      className="text-[11px] text-theme-accent-green hover:underline cursor-pointer"
                     >
                       Clear
                     </button>
@@ -897,27 +897,27 @@ export default function ExamTimetableManager({
                     {parsedPreview.map((item, idx) => (
                       <div
                         key={idx}
-                        className="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs gap-2"
+                        className="bg-theme-card p-2.5 rounded-xl border border-theme-bg flex items-center justify-between text-xs gap-2"
                       >
                         <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                          <span className="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md text-[10px]">
+                          <span className="font-bold text-theme-accent-green bg-theme-card px-2 py-0.5 rounded-md text-[10px]">
                             {fmtDisplayDate(item.date)}
                           </span>
-                          <span className="font-semibold text-slate-800">{item.subject}</span>
-                          <span className="text-[10px] text-slate-400">
+                          <span className="font-semibold text-theme-text">{item.subject}</span>
+                          <span className="text-[10px] text-theme-border">
                             {fmtTime12(item.start)} – {fmtTime12(item.end)}
                           </span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded-full border border-slate-200 bg-slate-50 text-slate-600">
+                          <span className="text-[10px] px-1.5 py-0.2 rounded-full border border-theme-bg bg-theme-card text-theme-muted">
                             {item.weightage}
                           </span>
                           {item.room && (
-                            <span className="text-[10px] text-slate-400">📍 {item.room}</span>
+                            <span className="text-[10px] text-theme-border">📍 {item.room}</span>
                           )}
                         </div>
                         <button
                           type="button"
                           onClick={() => setParsedPreview(parsedPreview.filter((_, i) => i !== idx))}
-                          className="text-slate-400 hover:text-rose-500 p-1 cursor-pointer shrink-0"
+                          className="text-theme-border hover:text-theme-accent-green p-1 cursor-pointer shrink-0"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -928,11 +928,11 @@ export default function ExamTimetableManager({
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-3 shrink-0">
+            <div className="flex justify-end gap-2 pt-4 border-t border-theme-bg mt-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setBulkModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:bg-theme-bg cursor-pointer"
               >
                 Cancel
               </button>
@@ -940,7 +940,7 @@ export default function ExamTimetableManager({
                 type="button"
                 disabled={parsedPreview.length === 0 || ocrLoading}
                 onClick={handleConfirmImport}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-50 shadow-sm cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-theme-accent-green hover:bg-theme-accent-green text-theme-text disabled:opacity-50 shadow-sm cursor-pointer flex items-center gap-1.5"
               >
                 {ocrLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 Import {parsedPreview.length > 0 ? `(${parsedPreview.length}) Exams` : ''}

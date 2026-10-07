@@ -26,9 +26,9 @@ const GRID_HOURS = Array.from({ length: 16 }, (_, i) => i + 7); // 7:00 -> 22:00
 
 const PRIORITY_WEIGHT = { High: 3, Medium: 2, Low: 1 };
 const PRIORITY_STYLES = {
-  High: "bg-[#FFF1F2] text-[#E11D48] border-[#FECDD3]",
-  Medium: "bg-[#FEFCE8] text-[#CA8A04] border-[#FEF08A]",
-  Low: "bg-[#F0FDF4] text-[#16A34A] border-[#BBF7D0]",
+  High: "bg-theme-bg text-theme-text border-theme-accent-green",
+  Medium: "bg-theme-bg text-theme-accent-blue border-theme-accent-green-light",
+  Low: "bg-theme-bg text-theme-accent-blue border-theme-accent-green-light",
 };
 
 const CATEGORIES = ["Assignment", "Exam Prep", "Project", "Homework", "Reading / Lab"];
@@ -248,7 +248,7 @@ function buildWorkQueue(tasks, topics, examSchedule = []) {
     key: `exam-prep-${ex.id}`,
     refId: ex.id,
     type: "exam_prep",
-    title: `⚡ Exam Revision: ${ex.subject}`,
+    title: ` Exam Revision: ${ex.subject}`,
     subtitle: ex.title || ex.weightage,
     subject: ex.subject,
     priority: "High",
@@ -427,7 +427,7 @@ export default function StudentPlanner({
     return [
       {
         id: "nt-1",
-        title: "⚡ Quick Study Rule",
+        title: " Quick Study Rule",
         content: "Pomodoro Focus: 25 mins deep study + 5 mins break. Active recall beats re-reading.",
         color: "yellow",
         tag: "Study Tip",
@@ -904,43 +904,43 @@ export default function StudentPlanner({
   const studentName = student?.name || 'Student';
 
   return (
-    <div className="w-full bg-[#F5F2EB] rounded-[34px] sm:rounded-[38px] p-4 sm:p-6 lg:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-[#E8E2D8] flex flex-col gap-4 sm:gap-6 min-h-[94vh]">
+    <div className="w-full bg-theme-bg rounded-[34px] sm:rounded-[38px] p-4 sm:p-6 lg:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-theme-border flex flex-col gap-4 sm:gap-6 min-h-[94vh]">
       
       {/* ----------------- GLOBAL TOP HEADER: GREETING & PROFILE ----------------- */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8E2D8]/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-theme-border/80">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-display font-black text-xl sm:text-2xl text-[#181A1D] tracking-tight">
+            <h1 className="font-display font-black text-xl sm:text-2xl text-theme-text tracking-tight">
               {timeGreeting}, {studentName}! 👋
             </h1>
             {student.summaryTag && (
-              <span className="px-2.5 py-0.5 rounded-full bg-[#181A1D] text-[#FDE047] text-[10px] font-black tracking-wide shadow-2xs">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#B4C6A6] text-theme-accent-green text-[10px] font-black tracking-wide shadow-2xs">
                 {student.summaryTag}
               </span>
             )}
           </div>
-          <p className="text-xs text-[#78716C] font-medium">
+          <p className="text-xs text-theme-text font-medium">
             {student.courseName ? `Here's your academic workspace for ${student.courseName}. ` : student.program ? `Here's your academic workspace for ${student.program}. ` : ''}
             Manage your routines, exams, study sprint focus, and AI timetables.
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-          <div className="px-3.5 py-1.5 rounded-full bg-white/80 border border-[#ECE6DC] shadow-2xs text-xs font-bold text-[#181A1D] flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5 text-[#EAB308]" />
+          <div className="px-3.5 py-1.5 rounded-full bg-theme-card/80 border border-theme-border shadow-2xs text-xs font-bold text-theme-text flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-theme-accent-blue" />
             <span>{now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
           </div>
           <button
             onClick={onEditProfile}
-            className="px-3.5 py-1.5 rounded-full bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] text-xs font-bold text-[#181A1D] shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all"
+            className="px-3.5 py-1.5 rounded-full bg-theme-card hover:bg-theme-bg border border-theme-border text-xs font-bold text-theme-text shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all"
             title="Edit Profile"
           >
-            <Pencil className="w-3 h-3 text-[#78716C]" />
+            <Pencil className="w-3 h-3 text-theme-text" />
             <span className="hidden sm:inline">Edit Profile</span>
           </button>
           <button
             onClick={onSignOut}
-            className="w-8.5 h-8.5 rounded-full bg-white hover:bg-rose-50 border border-[#ECE6DC] text-[#9CA3AF] hover:text-[#FB7185] shadow-2xs flex items-center justify-center cursor-pointer transition-all"
+            className="w-8.5 h-8.5 rounded-full bg-theme-card hover:bg-theme-card border border-theme-border text-theme-muted hover:text-theme-accent-blue shadow-2xs flex items-center justify-center cursor-pointer transition-all"
             title="Log out"
           >
             <LogOut className="w-4 h-4" />
@@ -949,33 +949,33 @@ export default function StudentPlanner({
       </div>
 
       {/* ----------------- GLOBAL SINGLE LINE ACADEMIC MODULES TASKBAR ----------------- */}
-      <div className="bg-white rounded-[26px] p-2 sm:p-2.5 shadow-xs border border-[#ECE6DC] overflow-x-auto">
+      <div className="bg-theme-card rounded-[26px] p-2 sm:p-2.5 shadow-xs border border-theme-border overflow-x-auto">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 min-w-[720px] lg:min-w-0">
           {/* 1. Dashboard Tab */}
           <button
             onClick={() => setView("dashboard")}
             className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
               view === "dashboard"
-                ? "bg-[#181A1D] text-white border border-[#181A1D]"
-                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+                ? "bg-[#B4C6A6] text-theme-text border border-[#B4C6A6]"
+                : "bg-theme-bg hover:bg-[#B4C6A6] border border-theme-border"
             }`}
           >
             <div className="flex items-center gap-2 min-w-0">
               <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
                 view === "dashboard"
-                  ? "bg-[#FACC15] text-[#181A1D]"
-                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+                  ? "bg-theme-accent-green text-theme-text"
+                  : "bg-[#B4C6A6] group-hover:bg-theme-accent-green text-theme-accent-green group-hover:text-theme-text"
               }`}>
                 <LayoutDashboard className="w-3.5 h-3.5" />
               </div>
               <div className="min-w-0">
                 <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
-                  view === "dashboard" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                  view === "dashboard" ? "text-theme-text" : "text-theme-text group-hover:text-theme-text"
                 }`}>
                   Dashboard
                 </h4>
                 <p className={`text-[9.5px] truncate transition-all ${
-                  view === "dashboard" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                  view === "dashboard" ? "text-theme-muted" : "text-theme-text group-hover:text-theme-muted"
                 }`}>
                   Overview
                 </p>
@@ -983,8 +983,8 @@ export default function StudentPlanner({
             </div>
             <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
               view === "dashboard"
-                ? "bg-white/20 text-white"
-                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+                ? "bg-theme-card/20 text-theme-text"
+                : "bg-theme-card group-hover:bg-theme-card/20 text-theme-text group-hover:text-theme-text"
             }`}>
               Home
             </span>
@@ -995,26 +995,26 @@ export default function StudentPlanner({
             onClick={() => setView("timetable")}
             className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
               view === "timetable"
-                ? "bg-[#181A1D] text-white border border-[#181A1D]"
-                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+                ? "bg-[#B4C6A6] text-theme-text border border-[#B4C6A6]"
+                : "bg-theme-bg hover:bg-[#B4C6A6] border border-theme-border"
             }`}
           >
             <div className="flex items-center gap-2 min-w-0">
               <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
                 view === "timetable"
-                  ? "bg-[#FACC15] text-[#181A1D]"
-                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+                  ? "bg-theme-accent-green text-theme-text"
+                  : "bg-[#B4C6A6] group-hover:bg-theme-accent-green text-theme-accent-green group-hover:text-theme-text"
               }`}>
                 <CalendarRange className="w-3.5 h-3.5" />
               </div>
               <div className="min-w-0">
                 <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
-                  view === "timetable" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                  view === "timetable" ? "text-theme-text" : "text-theme-text group-hover:text-theme-text"
                 }`}>
                   Timetable
                 </h4>
                 <p className={`text-[9.5px] truncate transition-all ${
-                  view === "timetable" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                  view === "timetable" ? "text-theme-muted" : "text-theme-text group-hover:text-theme-muted"
                 }`}>
                   Weekly Plan
                 </p>
@@ -1022,8 +1022,8 @@ export default function StudentPlanner({
             </div>
             <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
               view === "timetable"
-                ? "bg-white/20 text-white"
-                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+                ? "bg-theme-card/20 text-theme-text"
+                : "bg-theme-card group-hover:bg-theme-card/20 text-theme-text group-hover:text-theme-text"
             }`}>
               AI
             </span>
@@ -1034,26 +1034,26 @@ export default function StudentPlanner({
             onClick={() => setView("tasks")}
             className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
               view === "tasks"
-                ? "bg-[#181A1D] text-white border border-[#181A1D]"
-                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+                ? "bg-[#B4C6A6] text-theme-text border border-[#B4C6A6]"
+                : "bg-theme-bg hover:bg-[#B4C6A6] border border-theme-border"
             }`}
           >
             <div className="flex items-center gap-2 min-w-0">
               <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
                 view === "tasks"
-                  ? "bg-[#FACC15] text-[#181A1D]"
-                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+                  ? "bg-theme-accent-green text-theme-text"
+                  : "bg-[#B4C6A6] group-hover:bg-theme-accent-green text-theme-accent-green group-hover:text-theme-text"
               }`}>
                 <CheckSquare className="w-3.5 h-3.5" />
               </div>
               <div className="min-w-0">
                 <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
-                  view === "tasks" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                  view === "tasks" ? "text-theme-text" : "text-theme-text group-hover:text-theme-text"
                 }`}>
                   Tasks
                 </h4>
                 <p className={`text-[9.5px] truncate transition-all ${
-                  view === "tasks" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                  view === "tasks" ? "text-theme-muted" : "text-theme-text group-hover:text-theme-muted"
                 }`}>
                   Assignments
                 </p>
@@ -1061,8 +1061,8 @@ export default function StudentPlanner({
             </div>
             <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
               view === "tasks"
-                ? "bg-white/20 text-white"
-                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+                ? "bg-theme-card/20 text-theme-text"
+                : "bg-theme-card group-hover:bg-theme-card/20 text-theme-text group-hover:text-theme-text"
             }`}>
               {tasks.length}
             </span>
@@ -1073,26 +1073,26 @@ export default function StudentPlanner({
             onClick={() => setView("classes")}
             className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
               view === "classes"
-                ? "bg-[#181A1D] text-white border border-[#181A1D]"
-                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+                ? "bg-[#B4C6A6] text-theme-text border border-[#B4C6A6]"
+                : "bg-theme-bg hover:bg-[#B4C6A6] border border-theme-border"
             }`}
           >
             <div className="flex items-center gap-2 min-w-0">
               <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
                 view === "classes"
-                  ? "bg-[#FACC15] text-[#181A1D]"
-                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+                  ? "bg-theme-accent-green text-theme-text"
+                  : "bg-[#B4C6A6] group-hover:bg-theme-accent-green text-theme-accent-green group-hover:text-theme-text"
               }`}>
                 <School className="w-3.5 h-3.5" />
               </div>
               <div className="min-w-0">
                 <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
-                  view === "classes" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                  view === "classes" ? "text-theme-text" : "text-theme-text group-hover:text-theme-text"
                 }`}>
                   Classes
                 </h4>
                 <p className={`text-[9.5px] truncate transition-all ${
-                  view === "classes" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                  view === "classes" ? "text-theme-muted" : "text-theme-text group-hover:text-theme-muted"
                 }`}>
                   Routine
                 </p>
@@ -1100,8 +1100,8 @@ export default function StudentPlanner({
             </div>
             <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
               view === "classes"
-                ? "bg-white/20 text-white"
-                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+                ? "bg-theme-card/20 text-theme-text"
+                : "bg-theme-card group-hover:bg-theme-card/20 text-theme-text group-hover:text-theme-text"
             }`}>
               {collegeSchedule.length}
             </span>
@@ -1112,26 +1112,26 @@ export default function StudentPlanner({
             onClick={() => setView("exams")}
             className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
               view === "exams"
-                ? "bg-[#181A1D] text-white border border-[#181A1D]"
-                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+                ? "bg-[#B4C6A6] text-theme-text border border-[#B4C6A6]"
+                : "bg-theme-bg hover:bg-[#B4C6A6] border border-theme-border"
             }`}
           >
             <div className="flex items-center gap-2 min-w-0">
               <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
                 view === "exams"
-                  ? "bg-[#FACC15] text-[#181A1D]"
-                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+                  ? "bg-theme-accent-green text-theme-text"
+                  : "bg-[#B4C6A6] group-hover:bg-theme-accent-green text-theme-accent-green group-hover:text-theme-text"
               }`}>
                 <Award className="w-3.5 h-3.5" />
               </div>
               <div className="min-w-0">
                 <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
-                  view === "exams" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                  view === "exams" ? "text-theme-text" : "text-theme-text group-hover:text-theme-text"
                 }`}>
                   Exams
                 </h4>
                 <p className={`text-[9.5px] truncate transition-all ${
-                  view === "exams" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                  view === "exams" ? "text-theme-muted" : "text-theme-text group-hover:text-theme-muted"
                 }`}>
                   Datesheets
                 </p>
@@ -1139,8 +1139,8 @@ export default function StudentPlanner({
             </div>
             <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
               view === "exams"
-                ? "bg-white/20 text-white"
-                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+                ? "bg-theme-card/20 text-theme-text"
+                : "bg-theme-card group-hover:bg-theme-card/20 text-theme-text group-hover:text-theme-text"
             }`}>
               {examSchedule.length}
             </span>
@@ -1151,26 +1151,26 @@ export default function StudentPlanner({
             onClick={() => setView("pomodoro")}
             className={`group p-2.5 rounded-2xl transition-all text-left cursor-pointer flex items-center justify-between gap-2 shadow-2xs ${
               view === "pomodoro"
-                ? "bg-[#181A1D] text-white border border-[#181A1D]"
-                : "bg-[#F8F6F1] hover:bg-[#181A1D] border border-[#ECE6DC]"
+                ? "bg-[#B4C6A6] text-theme-text border border-[#B4C6A6]"
+                : "bg-theme-bg hover:bg-[#B4C6A6] border border-theme-border"
             }`}
           >
             <div className="flex items-center gap-2 min-w-0">
               <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
                 view === "pomodoro"
-                  ? "bg-[#FACC15] text-[#181A1D]"
-                  : "bg-[#181A1D] group-hover:bg-[#FACC15] text-[#FACC15] group-hover:text-[#181A1D]"
+                  ? "bg-theme-accent-green text-theme-text"
+                  : "bg-[#B4C6A6] group-hover:bg-theme-accent-green text-theme-accent-green group-hover:text-theme-text"
               }`}>
                 <Target className="w-3.5 h-3.5" />
               </div>
               <div className="min-w-0">
                 <h4 className={`font-display font-extrabold text-xs truncate transition-all ${
-                  view === "pomodoro" ? "text-white" : "text-[#181A1D] group-hover:text-white"
+                  view === "pomodoro" ? "text-theme-text" : "text-theme-text group-hover:text-theme-text"
                 }`}>
                   Focus Mode
                 </h4>
                 <p className={`text-[9.5px] truncate transition-all ${
-                  view === "pomodoro" ? "text-[#A8A29A]" : "text-[#78716C] group-hover:text-[#A8A29A]"
+                  view === "pomodoro" ? "text-theme-muted" : "text-theme-text group-hover:text-theme-muted"
                 }`}>
                   Pomodoro
                 </p>
@@ -1178,8 +1178,8 @@ export default function StudentPlanner({
             </div>
             <span className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0 transition-all ${
               view === "pomodoro"
-                ? "bg-white/20 text-white"
-                : "bg-white group-hover:bg-white/20 text-[#181A1D] group-hover:text-white"
+                ? "bg-theme-card/20 text-theme-text"
+                : "bg-theme-card group-hover:bg-theme-card/20 text-theme-text group-hover:text-theme-text"
             }`}>
               Timer
             </span>
@@ -1195,31 +1195,31 @@ export default function StudentPlanner({
           <div className="space-y-4 flex-1 flex flex-col min-w-0">
             
             {/* Top Toolbar for Schedule */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[#E8E2D8]/60">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-theme-border/60">
               <div className="flex flex-wrap items-center gap-2.5">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-base sm:text-lg text-[#181A1D] tracking-tight">
+                  <span className="font-medium text-base sm:text-lg text-theme-text tracking-tight">
                     Weekly Timetable
                   </span>
-                  <div className="text-xs font-normal text-[#6B655E] bg-white/80 px-3 py-1 rounded-full border border-[#ECE6DC] flex items-center gap-1.5 shadow-2xs">
-                    <Calendar className="w-3.5 h-3.5 text-[#EAB308]" />
+                  <div className="text-xs font-normal text-theme-text bg-theme-card/80 px-3 py-1 rounded-full border border-theme-border flex items-center gap-1.5 shadow-2xs">
+                    <Calendar className="w-3.5 h-3.5 text-theme-accent-blue" />
                     <span>{fmtDisplayDate(toISODate(weekStart))} – {fmtDisplayDate(toISODate(weekEnd))}</span>
                   </div>
                 </div>
 
                 {/* Subtle weekly summary chips matching dashboard palette */}
                 <div className="hidden md:flex items-center gap-2">
-                  <span className="text-[11px] font-normal text-[#92400E] bg-[#FEF3C7]/80 border border-[#FDE68A] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
+                  <span className="text-[11px] font-normal text-theme-text bg-theme-accent-green-light/80 border border-theme-accent-green-light px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-theme-accent-blue" />
                     {timetable.filter(b => b.type === "study").length} Study Sessions
                   </span>
-                  <span className="text-[11px] font-normal text-[#1E40AF] bg-[#DBEAFE]/80 border border-[#BFDBFE] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
+                  <span className="text-[11px] font-normal text-theme-text bg-theme-bg/80 border border-theme-accent-green px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-theme-accent-blue" />
                     {timetable.filter(b => b.type === "class").length} Classes
                   </span>
                   {timetable.some(b => b.type === "exam") && (
-                    <span className="text-[11px] font-normal text-[#9F1239] bg-[#FFE4E6]/80 border border-[#FECDD3] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" />
+                    <span className="text-[11px] font-normal text-theme-text bg-theme-bg/80 border border-theme-accent-green px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#B4C6A6]" />
                       {timetable.filter(b => b.type === "exam").length} Exams
                     </span>
                   )}
@@ -1230,18 +1230,18 @@ export default function StudentPlanner({
                 <button
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="px-3.5 py-1.5 rounded-full bg-white border border-[#ECE6DC] hover:bg-[#F8F6F1] text-xs font-medium text-[#181A1D] shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all"
+                  className="px-3.5 py-1.5 rounded-full bg-theme-card border border-theme-border hover:bg-theme-bg text-xs font-medium text-theme-text shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all"
                   title="Regenerate Plan"
                 >
-                  <RotateCcw className={`w-3.5 h-3.5 text-[#EAB308] ${generating ? "animate-spin" : ""}`} />
+                  <RotateCcw className={`w-3.5 h-3.5 text-theme-accent-blue ${generating ? "animate-spin" : ""}`} />
                   <span>{generating ? "Building..." : "Regenerate"}</span>
                 </button>
 
                 <button
                   onClick={() => setTaskModal({ open: true, editing: null })}
-                  className="bg-[#181A1D] hover:bg-[#282C33] text-white px-4 py-1.5 rounded-full font-medium text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                  className="bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text px-4 py-1.5 rounded-full font-medium text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
+                  <Plus className="w-3.5 h-3.5 text-theme-accent-green" />
                   <span>Add Task</span>
                 </button>
               </div>
@@ -1262,35 +1262,35 @@ export default function StudentPlanner({
                       key={d} 
                       className={`rounded-[24px] p-2.5 space-y-2 flex flex-col transition-all ${
                         isToday 
-                          ? "bg-[#FFFDF8]/90 border-2 border-[#FDE047]/80 shadow-xs" 
-                          : "bg-white/45 hover:bg-white/60 border border-[#ECE6DC]"
+                          ? "bg-theme-card/90 border-2 border-theme-accent-green/80 shadow-xs" 
+                          : "bg-theme-card/45 hover:bg-theme-card/60 border border-theme-border"
                       }`}
                     >
                       {/* Column Header */}
                       <div className={`p-2.5 rounded-[18px] transition-all ${
                         isToday 
-                          ? "bg-[#FFFBEB] border border-[#FDE68A] shadow-2xs" 
-                          : "bg-white/80 border border-[#ECE6DC]"
+                          ? "bg-theme-bg border border-theme-accent-green-light shadow-2xs" 
+                          : "bg-theme-card/80 border border-theme-border"
                       }`}>
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-xs text-[#252320]">
+                          <span className="font-medium text-xs text-theme-text">
                             <span className="hidden sm:inline">{DAY_LABELS[d]}</span>
                             <span className="sm:hidden">{d}</span>
                           </span>
                           <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-medium transition-colors ${
                             isToday 
-                              ? "bg-[#FACC15] text-[#181A1D] shadow-2xs" 
-                              : "bg-[#F0ECE4] text-[#6B655E]"
+                              ? "bg-theme-accent-green text-theme-text shadow-2xs" 
+                              : "bg-theme-bg text-theme-text"
                           }`}>
                             {colDate.getDate()}
                           </span>
                         </div>
                         <div className="flex items-center justify-between mt-1 text-[10px] font-normal">
-                          <span className="text-[#8E8880]">
+                          <span className="text-theme-muted">
                             {activeBlocks.length === 0 ? "Rest Day" : `${activeBlocks.length} ${activeBlocks.length === 1 ? 'item' : 'items'}`}
                           </span>
                           {isToday && (
-                            <span className="text-[9px] font-medium text-[#92400E] bg-[#FEF08A] px-1.5 py-0.2 rounded-full">
+                            <span className="text-[9px] font-medium text-theme-text bg-theme-accent-green-light px-1.5 py-0.2 rounded-full">
                               Today
                             </span>
                           )}
@@ -1300,10 +1300,10 @@ export default function StudentPlanner({
                       {/* Day Event Cards */}
                       <div className="space-y-2 flex-1">
                         {dayBlocks.length === 0 ? (
-                          <div className="h-36 rounded-[18px] bg-white/30 border border-dashed border-[#E0D8CB] p-4 text-center flex flex-col items-center justify-center gap-1.5 text-[#A8A29E]">
-                            <Coffee className="w-5 h-5 text-[#C4BDB3]" />
-                            <span className="text-[11px] font-normal text-[#8E8880]">Rest Day</span>
-                            <span className="text-[9.5px] text-[#A8A29E]">No sessions scheduled</span>
+                          <div className="h-36 rounded-[18px] bg-theme-card/30 border border-dashed border-theme-border p-4 text-center flex flex-col items-center justify-center gap-1.5 text-theme-muted">
+                            <Coffee className="w-5 h-5 text-theme-muted" />
+                            <span className="text-[11px] font-normal text-theme-muted">Rest Day</span>
+                            <span className="text-[9.5px] text-theme-muted">No sessions scheduled</span>
                           </div>
                         ) : (
                           dayBlocks.map((b) => (
@@ -1463,130 +1463,130 @@ export default function StudentPlanner({
 
 const SUBJECT_THEMES = {
   EDC: {
-    bg: "bg-[#F0F7FF]",
-    border: "border-[#D0E2FF]",
-    hoverBorder: "hover:border-[#93C5FD]",
-    tagBg: "bg-[#DBEAFE]",
-    tagText: "text-[#1E40AF]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green-light",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-bg",
+    tagText: "text-theme-text",
     accent: "#3B82F6",
-    dot: "bg-[#3B82F6]",
-    lightText: "text-[#3B82F6]"
+    dot: "bg-theme-accent-blue",
+    lightText: "text-theme-accent-blue"
   },
   ECA: {
-    bg: "bg-[#FAF5FF]",
-    border: "border-[#E9D8FD]",
-    hoverBorder: "hover:border-[#D8B4FE]",
-    tagBg: "bg-[#F3E8FF]",
-    tagText: "text-[#6B21A8]",
+    bg: "bg-theme-bg",
+    border: "border-theme-border",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-bg",
+    tagText: "text-theme-text",
     accent: "#9333EA",
-    dot: "bg-[#9333EA]",
-    lightText: "text-[#9333EA]"
+    dot: "bg-[#B4C6A6]",
+    lightText: "text-theme-text"
   },
   Calculus: {
-    bg: "bg-[#FFFDF0]",
-    border: "border-[#FDE894]",
-    hoverBorder: "hover:border-[#FCD34D]",
-    tagBg: "bg-[#FEF3C7]",
-    tagText: "text-[#92400E]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green-light",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-accent-green-light",
+    tagText: "text-theme-text",
     accent: "#D97706",
-    dot: "bg-[#D97706]",
-    lightText: "text-[#B45309]"
+    dot: "bg-theme-accent-blue",
+    lightText: "text-theme-text"
   },
   Physics: {
-    bg: "bg-[#FFF5F6]",
-    border: "border-[#FECDD3]",
-    hoverBorder: "hover:border-[#FDA4AF]",
-    tagBg: "bg-[#FFE4E6]",
-    tagText: "text-[#9F1239]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-bg",
+    tagText: "text-theme-text",
     accent: "#E11D48",
-    dot: "bg-[#E11D48]",
-    lightText: "text-[#E11D48]"
+    dot: "bg-[#B4C6A6]",
+    lightText: "text-theme-text"
   },
   "Data Structures": {
-    bg: "bg-[#F0FDFA]",
-    border: "border-[#CCFBF1]",
-    hoverBorder: "hover:border-[#5EEAD4]",
-    tagBg: "bg-[#CCFBF1]",
-    tagText: "text-[#115E59]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green-light",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-accent-green-light",
+    tagText: "text-theme-text",
     accent: "#0D9488",
-    dot: "bg-[#0D9488]",
-    lightText: "text-[#0D9488]"
+    dot: "bg-theme-accent-blue",
+    lightText: "text-theme-accent-blue"
   },
   Marketing: {
-    bg: "bg-[#F2FAF5]",
-    border: "border-[#C6F6D5]",
-    hoverBorder: "hover:border-[#86EFAC]",
-    tagBg: "bg-[#DCFCE7]",
-    tagText: "text-[#166534]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green-light",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-bg",
+    tagText: "text-theme-text",
     accent: "#16A34A",
-    dot: "bg-[#16A34A]",
-    lightText: "text-[#166534]"
+    dot: "bg-theme-accent-blue",
+    lightText: "text-theme-text"
   }
 };
 
 const FALLBACK_PALETTES = [
   {
-    bg: "bg-[#F0F7FF]",
-    border: "border-[#D0E2FF]",
-    hoverBorder: "hover:border-[#93C5FD]",
-    tagBg: "bg-[#DBEAFE]",
-    tagText: "text-[#1E40AF]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green-light",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-bg",
+    tagText: "text-theme-text",
     accent: "#3B82F6",
-    dot: "bg-[#3B82F6]"
+    dot: "bg-theme-accent-blue"
   },
   {
-    bg: "bg-[#FAF5FF]",
-    border: "border-[#E9D8FD]",
-    hoverBorder: "hover:border-[#D8B4FE]",
-    tagBg: "bg-[#F3E8FF]",
-    tagText: "text-[#6B21A8]",
+    bg: "bg-theme-bg",
+    border: "border-theme-border",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-bg",
+    tagText: "text-theme-text",
     accent: "#9333EA",
-    dot: "bg-[#9333EA]"
+    dot: "bg-[#B4C6A6]"
   },
   {
-    bg: "bg-[#FFFDF0]",
-    border: "border-[#FDE894]",
-    hoverBorder: "hover:border-[#FCD34D]",
-    tagBg: "bg-[#FEF3C7]",
-    tagText: "text-[#92400E]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green-light",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-accent-green-light",
+    tagText: "text-theme-text",
     accent: "#D97706",
-    dot: "bg-[#D97706]"
+    dot: "bg-theme-accent-blue"
   },
   {
-    bg: "bg-[#FFF5F6]",
-    border: "border-[#FECDD3]",
-    hoverBorder: "hover:border-[#FDA4AF]",
-    tagBg: "bg-[#FFE4E6]",
-    tagText: "text-[#9F1239]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-bg",
+    tagText: "text-theme-text",
     accent: "#E11D48",
-    dot: "bg-[#E11D48]"
+    dot: "bg-[#B4C6A6]"
   },
   {
-    bg: "bg-[#F2FAF5]",
-    border: "border-[#C6F6D5]",
-    hoverBorder: "hover:border-[#86EFAC]",
-    tagBg: "bg-[#DCFCE7]",
-    tagText: "text-[#166534]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green-light",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-bg",
+    tagText: "text-theme-text",
     accent: "#16A34A",
-    dot: "bg-[#16A34A]"
+    dot: "bg-theme-accent-blue"
   },
   {
-    bg: "bg-[#FFF7ED]",
-    border: "border-[#FED7AA]",
-    hoverBorder: "hover:border-[#FB923C]",
-    tagBg: "bg-[#FFEDD5]",
-    tagText: "text-[#9A3412]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green",
+    hoverBorder: "hover:border-theme-accent-blue",
+    tagBg: "bg-theme-accent-green-light",
+    tagText: "text-theme-text",
     accent: "#EA580C",
-    dot: "bg-[#EA580C]"
+    dot: "bg-theme-accent-blue"
   },
   {
-    bg: "bg-[#F0FDFA]",
-    border: "border-[#CCFBF1]",
-    hoverBorder: "hover:border-[#5EEAD4]",
-    tagBg: "bg-[#CCFBF1]",
-    tagText: "text-[#115E59]",
+    bg: "bg-theme-bg",
+    border: "border-theme-accent-green-light",
+    hoverBorder: "hover:border-theme-accent-green",
+    tagBg: "bg-theme-accent-green-light",
+    tagText: "text-theme-text",
     accent: "#0D9488",
-    dot: "bg-[#0D9488]"
+    dot: "bg-theme-accent-blue"
   }
 ];
 
@@ -1604,8 +1604,8 @@ function ScheduleCardItem({ block, onToggle }) {
   // Break row - Clean, slim, cozy pill divider
   if (block.type === "break") {
     return (
-      <div className="py-0.5 px-2.5 my-0.5 rounded-full bg-[#FAF7F2]/80 border border-[#E8E1D5] text-[9.5px] font-normal text-[#8A8275] flex items-center justify-center gap-1.5 shadow-2xs hover:bg-[#F4EFE6] transition-colors whitespace-nowrap">
-        <Coffee className="w-2.5 h-2.5 text-[#D97706]/80 shrink-0" />
+      <div className="py-0.5 px-2.5 my-0.5 rounded-full bg-theme-bg/80 border border-theme-border text-[9.5px] font-normal text-theme-accent-blue flex items-center justify-center gap-1.5 shadow-2xs hover:bg-theme-bg transition-colors whitespace-nowrap">
+        <Coffee className="w-2.5 h-2.5 text-theme-accent-blue/80 shrink-0" />
         <span>Break · {fmtTime12(block.start)}–{fmtTime12(block.end)}</span>
       </div>
     );
@@ -1616,25 +1616,25 @@ function ScheduleCardItem({ block, onToggle }) {
     const classType = block.assigned?.classType || "Lecture";
     const subject = block.assigned?.subject || "College";
     return (
-      <div className="p-2.5 rounded-[18px] bg-[#F1F7FF] text-[#1E3A8A] border border-[#D0E2FF] shadow-2xs space-y-1.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xs">
+      <div className="p-2.5 rounded-[18px] bg-theme-bg text-theme-text border border-theme-accent-green-light shadow-2xs space-y-1.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xs">
         <div className="flex items-center justify-between gap-1">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-medium bg-[#DBEAFE] text-[#1D4ED8]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB]" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-medium bg-theme-bg text-theme-text">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B4C6A6]" />
             <span className="truncate max-w-[80px]">{subject}</span>
           </span>
-          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-white/80 border border-[#BFDBFE] text-[#1D4ED8] shrink-0">
+          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-theme-card/80 border border-theme-accent-green text-theme-text shrink-0">
             {classType}
           </span>
         </div>
-        <p className="text-[12px] font-medium text-[#1E3A8A] leading-snug line-clamp-2">
+        <p className="text-[12px] font-medium text-theme-text leading-snug line-clamp-2">
           {block.assigned?.title}
         </p>
-        <div className="flex items-center justify-between gap-1 pt-1 border-t border-[#BFDBFE]/50 text-[10px] font-normal text-[#3B82F6]">
+        <div className="flex items-center justify-between gap-1 pt-1 border-t border-theme-accent-green/50 text-[10px] font-normal text-theme-accent-blue">
           <span className="flex items-center gap-1">
             <Clock className="w-2.5 h-2.5 shrink-0" />
             {fmtTime12(block.start)}–{fmtTime12(block.end)}
           </span>
-          <span className="flex items-center gap-1 text-[#2563EB] truncate">
+          <span className="flex items-center gap-1 text-theme-text truncate">
             <MapPin className="w-2.5 h-2.5 shrink-0" />
             <span>{block.assigned?.room || "Room 101"}</span>
           </span>
@@ -1647,20 +1647,20 @@ function ScheduleCardItem({ block, onToggle }) {
   if (block.type === "exam") {
     const subject = block.assigned?.subject || "Exam";
     return (
-      <div className="p-2.5 rounded-[18px] bg-[#FFF2F4] text-[#9F1239] border border-[#FECDD3] shadow-2xs space-y-1.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xs">
+      <div className="p-2.5 rounded-[18px] bg-theme-bg text-theme-text border border-theme-accent-green shadow-2xs space-y-1.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xs">
         <div className="flex items-center justify-between gap-1">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-medium bg-[#FFE4E6] text-[#E11D48]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-medium bg-theme-bg text-theme-text">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B4C6A6]" />
             <span className="truncate max-w-[80px]">{subject}</span>
           </span>
-          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md bg-[#E11D48] text-white shrink-0">
+          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md bg-[#B4C6A6] text-theme-text shrink-0">
             EXAM
           </span>
         </div>
-        <p className="text-[12px] font-medium text-[#9F1239] leading-snug line-clamp-2">
+        <p className="text-[12px] font-medium text-theme-text leading-snug line-clamp-2">
           {block.assigned?.title}
         </p>
-        <div className="flex items-center justify-between gap-1 pt-1 border-t border-[#FECDD3]/60 text-[10px] font-normal text-[#BE123C]">
+        <div className="flex items-center justify-between gap-1 pt-1 border-t border-theme-accent-green/60 text-[10px] font-normal text-theme-text">
           <span className="flex items-center gap-1">
             <Clock className="w-2.5 h-2.5 shrink-0" />
             {fmtTime12(block.start)}–{fmtTime12(block.end)}
@@ -1687,7 +1687,7 @@ function ScheduleCardItem({ block, onToggle }) {
   return (
     <div className={`p-2.5 rounded-[18px] border transition-all duration-150 ${
       block.completed
-        ? "bg-[#FAF8F5]/80 border-[#E8E2D8] opacity-60"
+        ? "bg-theme-bg/80 border-theme-border opacity-60"
         : `${theme.bg} ${theme.border} ${theme.hoverBorder} shadow-2xs hover:-translate-y-0.5 hover:shadow-xs`
     } space-y-1.5`}>
       {/* Top Header: Subject Badge + Type Tag */}
@@ -1698,15 +1698,15 @@ function ScheduleCardItem({ block, onToggle }) {
         </span>
 
         {isExamPrep ? (
-          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md bg-[#FEF3C7] text-[#92400E] shrink-0">
-            ⚡ Prep
+          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md bg-theme-accent-green-light text-theme-text shrink-0">
+             Prep
           </span>
         ) : isTopic ? (
-          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-white/80 text-[#6B655E] border border-black/[0.04] shrink-0">
+          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-theme-card/80 text-theme-text border border-[#B4C6A6]/[0.04] shrink-0">
             Topic
           </span>
         ) : (
-          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-white/80 text-[#6B655E] border border-black/[0.04] shrink-0">
+          <span className="text-[9px] font-normal px-1.5 py-0.5 rounded-md bg-theme-card/80 text-theme-text border border-[#B4C6A6]/[0.04] shrink-0">
             Task
           </span>
         )}
@@ -1716,29 +1716,29 @@ function ScheduleCardItem({ block, onToggle }) {
       <div className="flex items-start gap-1.5">
         <button
           onClick={onToggle}
-          className="mt-0.5 text-[#B5AEA4] hover:text-[#181A1D] transition-colors cursor-pointer shrink-0"
+          className="mt-0.5 text-theme-muted hover:text-theme-text transition-colors cursor-pointer shrink-0"
           title={block.completed ? "Mark incomplete" : "Mark complete"}
         >
           {block.completed ? (
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-theme-accent-blue" />
           ) : (
-            <Circle className="w-3.5 h-3.5 text-[#D1C9BD] hover:text-[#181A1D]" />
+            <Circle className="w-3.5 h-3.5 text-theme-muted hover:text-theme-text" />
           )}
         </button>
         <p className={`text-[12px] font-medium leading-snug line-clamp-2 ${
-          block.completed ? "line-through text-[#9E988E]" : "text-[#1E2024]"
+          block.completed ? "line-through text-theme-muted" : "text-theme-text"
         }`}>
           {displayTitle}
         </p>
       </div>
 
       {/* Card Footer: Time & Duration */}
-      <div className="flex items-center justify-between gap-1 pt-1 border-t border-black/[0.04] text-[10px] font-normal text-[#78716C]">
+      <div className="flex items-center justify-between gap-1 pt-1 border-t border-[#B4C6A6]/[0.04] text-[10px] font-normal text-theme-text">
         <div className="flex items-center gap-1">
-          <Clock className="w-2.5 h-2.5 text-[#A8A29A] shrink-0" />
+          <Clock className="w-2.5 h-2.5 text-theme-muted shrink-0" />
           <span>{fmtTime12(block.start)}–{fmtTime12(block.end)}</span>
         </div>
-        <span className="text-[9.5px] text-[#A8A29A]">50m</span>
+        <span className="text-[9.5px] text-theme-muted">50m</span>
       </div>
     </div>
   );
@@ -2015,23 +2015,23 @@ function AcademicCalendar({
   };
 
   return (
-    <div className="bg-[#181A1D] text-white rounded-[34px] p-5 sm:p-6 shadow-xl border border-[#2B2F36] flex flex-col justify-between space-y-4">
+    <div className="bg-[#B4C6A6] text-theme-text rounded-[34px] p-5 sm:p-6 shadow-xl border border-[#B4C6A6] flex flex-col justify-between space-y-4">
       {/* Calendar Top Header with View Switcher & Add Event */}
       <div>
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#2A2E35]">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#B4C6A6]">
           <div>
-            <h3 className="font-display font-extrabold text-white text-base flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#FACC15]" />
+            <h3 className="font-display font-extrabold text-theme-text text-base flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-theme-accent-green" />
               Academic Calendar & Events
             </h3>
-            <p className="text-[11px] text-[#8E95A2]">Exams, quizzes, assignments & custom event schedules</p>
+            <p className="text-[11px] text-theme-muted">Exams, quizzes, assignments & custom event schedules</p>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Add Event Button */}
             <button
               onClick={() => setEventModal({ open: true, editing: null, defaultDate: selectedDateISO || toISODate(now) })}
-              className="px-2.5 py-1 rounded-full bg-[#A855F7] hover:bg-[#9333EA] text-white text-[10px] font-black shadow-xs flex items-center gap-1 transition-all cursor-pointer"
+              className="px-2.5 py-1 rounded-full bg-theme-accent-blue hover:bg-[#B4C6A6] text-theme-text text-[10px] font-black shadow-xs flex items-center gap-1 transition-all cursor-pointer"
               title="Add New Event"
             >
               <Plus className="w-3 h-3" />
@@ -2039,11 +2039,11 @@ function AcademicCalendar({
             </button>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-[#262A30] rounded-full p-0.5">
+            <div className="flex items-center bg-[#B4C6A6] rounded-full p-0.5">
               <button
                 onClick={() => setCalendarViewMode('grid')}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
-                  calendarViewMode === 'grid' ? 'bg-[#FACC15] text-[#181A1D] shadow-xs' : 'text-[#8E95A2] hover:text-white'
+                  calendarViewMode === 'grid' ? 'bg-theme-accent-green text-theme-text shadow-xs' : 'text-theme-muted hover:text-theme-text'
                 }`}
               >
                 Calendar Grid
@@ -2051,7 +2051,7 @@ function AcademicCalendar({
               <button
                 onClick={() => setCalendarViewMode('agenda')}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
-                  calendarViewMode === 'agenda' ? 'bg-[#FACC15] text-[#181A1D] shadow-xs' : 'text-[#8E95A2] hover:text-white'
+                  calendarViewMode === 'agenda' ? 'bg-theme-accent-green text-theme-text shadow-xs' : 'text-theme-muted hover:text-theme-text'
                 }`}
               >
                 All Upcoming ({allUpcomingItems.length})
@@ -2065,27 +2065,27 @@ function AcademicCalendar({
           <div>
             {/* Month & Jump Controls */}
             <div className="flex items-center justify-between mt-3 mb-2 px-1">
-              <span className="font-display font-extrabold text-xs text-[#FACC15] tracking-wide">
+              <span className="font-display font-extrabold text-xs text-theme-accent-green tracking-wide">
                 {currentMonthDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
               </span>
 
               <div className="flex items-center gap-1">
                 <button
                   onClick={handleJumpToday}
-                  className="px-2 py-0.5 rounded-full bg-[#262A30] hover:bg-[#323740] text-[9px] font-bold text-white transition-all cursor-pointer"
+                  className="px-2 py-0.5 rounded-full bg-[#B4C6A6] hover:bg-[#B4C6A6] text-[9px] font-bold text-theme-text transition-all cursor-pointer"
                 >
                   Today
                 </button>
                 <button
                   onClick={handlePrevMonth}
-                  className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#323740] text-[#8E95A2] hover:text-white transition-all cursor-pointer"
+                  className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#B4C6A6] text-theme-muted hover:text-theme-text transition-all cursor-pointer"
                   title="Previous Month"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={handleNextMonth}
-                  className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#323740] text-[#8E95A2] hover:text-white transition-all cursor-pointer"
+                  className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#B4C6A6] text-theme-muted hover:text-theme-text transition-all cursor-pointer"
                   title="Next Month"
                 >
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -2094,7 +2094,7 @@ function AcademicCalendar({
             </div>
 
             {/* Days of Week Header */}
-            <div className="grid grid-cols-7 text-center text-[10px] font-extrabold text-[#717885] mb-1">
+            <div className="grid grid-cols-7 text-center text-[10px] font-extrabold text-theme-text mb-1">
               <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
             </div>
 
@@ -2119,12 +2119,12 @@ function AcademicCalendar({
                     onClick={() => setSelectedDateISO(iso)}
                     className={`relative h-8 sm:h-9 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
                       isSelected
-                        ? "bg-[#FACC15] text-[#181A1D] font-black shadow-md scale-105 z-10"
+                        ? "bg-theme-accent-green text-theme-text font-black shadow-md scale-105 z-10"
                         : isToday
-                        ? "bg-[#2A2F38] text-[#FACC15] font-black border border-[#FACC15]/40"
+                        ? "bg-[#B4C6A6] text-theme-accent-green font-black border border-theme-accent-green/40"
                         : dayMeta
-                        ? "bg-[#22262E] hover:bg-[#2B303A] text-white font-bold"
-                        : "text-[#8E95A2] hover:bg-[#22262E] hover:text-white"
+                        ? "bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text font-bold"
+                        : "text-theme-muted hover:bg-[#B4C6A6] hover:text-theme-text"
                     }`}
                   >
                     <span className="text-[11px] leading-none">{dayNum}</span>
@@ -2133,13 +2133,13 @@ function AcademicCalendar({
                     {dayMeta && (
                       <div className="flex items-center gap-0.5 mt-0.5">
                         {dayMeta.hasExam && (
-                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#E11D48]" : "bg-[#FB7185]"}`} title="Exam / Quiz" />
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#B4C6A6]" : "bg-theme-accent-blue"}`} title="Exam / Quiz" />
                         )}
                         {dayMeta.hasTask && (
-                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#181A1D]" : "bg-[#FACC15]"}`} title="Assignment / Task" />
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#B4C6A6]" : "bg-theme-accent-green"}`} title="Assignment / Task" />
                         )}
                         {dayMeta.hasEvent && (
-                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#7E22CE]" : "bg-[#C084FC]"}`} title="Event" />
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#B4C6A6]" : "bg-theme-accent-blue"}`} title="Event" />
                         )}
                       </div>
                     )}
@@ -2149,10 +2149,10 @@ function AcademicCalendar({
             </div>
 
             {/* Legend */}
-            <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-[#2A2E35] text-[9px] sm:text-[10px] text-[#8E95A2] flex-wrap gap-1.5">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#FB7185]" /> Exams & Quizzes</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#FACC15]" /> Assignments</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#C084FC]" /> Events</span>
+            <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-[#B4C6A6] text-[9px] sm:text-[10px] text-theme-muted flex-wrap gap-1.5">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-theme-accent-blue" /> Exams & Quizzes</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-theme-accent-green" /> Assignments</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-theme-accent-blue" /> Events</span>
             </div>
           </div>
         )}
@@ -2160,16 +2160,16 @@ function AcademicCalendar({
 
       {/* SELECTED DATE DETAILS (In Grid Mode) */}
       {calendarViewMode === 'grid' && (
-        <div className="bg-[#22262D] rounded-2xl p-3.5 border border-[#2F343E] space-y-2.5">
+        <div className="bg-[#B4C6A6] rounded-2xl p-3.5 border border-[#B4C6A6] space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h4 className="font-display font-extrabold text-xs text-white flex items-center gap-1.5">
+              <h4 className="font-display font-extrabold text-xs text-theme-text flex items-center gap-1.5">
                 <span>{selectedDateFormatted}</span>
                 {selectedDateISO === todayISO && (
-                  <span className="px-1.5 py-0.2 rounded bg-[#FACC15] text-[#181A1D] text-[9px] font-black uppercase">Today</span>
+                  <span className="px-1.5 py-0.2 rounded bg-theme-accent-green text-theme-text text-[9px] font-black uppercase">Today</span>
                 )}
               </h4>
-              <p className="text-[10px] text-[#8E95A2]">
+              <p className="text-[10px] text-theme-muted">
                 {selectedEvents.length} scheduled item{selectedEvents.length === 1 ? '' : 's'}
               </p>
             </div>
@@ -2187,8 +2187,8 @@ function AcademicCalendar({
                   onClick={() => setFilterType(f.id)}
                   className={`px-2 py-0.5 rounded-full font-bold transition-all cursor-pointer ${
                     filterType === f.id
-                      ? 'bg-[#FACC15] text-[#181A1D]'
-                      : 'bg-[#2D323C] text-[#8E95A2] hover:text-white'
+                      ? 'bg-theme-accent-green text-theme-text'
+                      : 'bg-[#B4C6A6] text-theme-muted hover:text-theme-text'
                   }`}
                 >
                   {f.label}
@@ -2200,30 +2200,30 @@ function AcademicCalendar({
           {/* Event Items List */}
           <div className="space-y-2 max-h-[190px] overflow-y-auto pr-1">
             {selectedEvents.length === 0 ? (
-              <div className="py-5 px-3 rounded-xl bg-[#1A1D23] border border-dashed border-[#2F343E] text-center flex flex-col items-center justify-center gap-1 text-[#8E95A2]">
-                <CheckCircle2 className="w-5 h-5 text-[#545C6A]" />
-                <p className="text-xs font-bold text-white">No Items on this Date</p>
-                <p className="text-[10px] text-[#8E95A2]">No exams, homework deadlines, or custom events scheduled.</p>
+              <div className="py-5 px-3 rounded-xl bg-[#B4C6A6] border border-dashed border-[#B4C6A6] text-center flex flex-col items-center justify-center gap-1 text-theme-muted">
+                <CheckCircle2 className="w-5 h-5 text-theme-text" />
+                <p className="text-xs font-bold text-theme-text">No Items on this Date</p>
+                <p className="text-[10px] text-theme-muted">No exams, homework deadlines, or custom events scheduled.</p>
               </div>
             ) : (
               selectedEvents.map(evt => {
                 if (evt.type === 'exam') {
                   return (
-                    <div key={evt.id} className="p-2.5 rounded-xl bg-[#2D1A20] border border-[#FB7185]/40 flex items-start justify-between gap-2">
+                    <div key={evt.id} className="p-2.5 rounded-xl bg-[#B4C6A6] border border-theme-accent-blue/40 flex items-start justify-between gap-2">
                       <div className="space-y-0.5 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-1.5 py-0.2 rounded bg-[#FB7185] text-white text-[9px] font-black uppercase">
+                          <span className="px-1.5 py-0.2 rounded bg-theme-accent-blue text-theme-text text-[9px] font-black uppercase">
                             🚨 {evt.weightage}
                           </span>
-                          <span className="text-xs font-black text-white truncate">{evt.title}</span>
+                          <span className="text-xs font-black text-theme-text truncate">{evt.title}</span>
                         </div>
-                        <p className="text-[10px] text-[#FDA4AF] font-semibold">{evt.subject} · {evt.time}</p>
-                        {evt.venue && <p className="text-[9px] text-[#F43F5E]">📍 {evt.venue}</p>}
-                        {evt.syllabus && <p className="text-[9px] text-[#FDA4AF]/80 italic truncate">Syllabus: {evt.syllabus}</p>}
+                        <p className="text-[10px] text-theme-accent-green font-semibold">{evt.subject} · {evt.time}</p>
+                        {evt.venue && <p className="text-[9px] text-theme-accent-blue">📍 {evt.venue}</p>}
+                        {evt.syllabus && <p className="text-[9px] text-theme-accent-green/80 italic truncate">Syllabus: {evt.syllabus}</p>}
                       </div>
                       <button
                         onClick={() => setView('exams')}
-                        className="px-2 py-0.5 rounded-lg bg-[#FB7185]/20 hover:bg-[#FB7185]/40 text-[#FDA4AF] text-[9px] font-bold shrink-0 transition-all cursor-pointer"
+                        className="px-2 py-0.5 rounded-lg bg-theme-accent-blue/20 hover:bg-theme-accent-blue/40 text-theme-accent-green text-[9px] font-bold shrink-0 transition-all cursor-pointer"
                       >
                         View
                       </button>
@@ -2233,26 +2233,26 @@ function AcademicCalendar({
 
                 if (evt.type === 'task') {
                   return (
-                    <div key={evt.id} className="p-2.5 rounded-xl bg-[#2B2719] border border-[#FACC15]/30 flex items-center justify-between gap-2">
+                    <div key={evt.id} className="p-2.5 rounded-xl bg-[#B4C6A6] border border-theme-accent-green/30 flex items-center justify-between gap-2">
                       <div className="space-y-0.5 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase ${
-                            evt.priority === 'High' ? 'bg-[#E11D48] text-white' : evt.priority === 'Medium' ? 'bg-[#CA8A04] text-white' : 'bg-[#16A34A] text-white'
+                            evt.priority === 'High' ? 'bg-[#B4C6A6] text-theme-text' : evt.priority === 'Medium' ? 'bg-theme-accent-blue text-theme-text' : 'bg-theme-accent-blue text-theme-text'
                           }`}>
                             {evt.priority}
                           </span>
-                          <span className={`text-xs font-bold truncate ${evt.completed ? 'line-through text-[#8E95A2]' : 'text-white'}`}>
+                          <span className={`text-xs font-bold truncate ${evt.completed ? 'line-through text-theme-muted' : 'text-theme-text'}`}>
                             {evt.title}
                           </span>
                         </div>
-                        <p className="text-[10px] text-[#FDE047] font-medium">{evt.subject} · {evt.time} · {evt.category}</p>
+                        <p className="text-[10px] text-theme-accent-green font-medium">{evt.subject} · {evt.time} · {evt.category}</p>
                       </div>
                       <button
                         onClick={() => toggleTask && toggleTask(evt.raw.id)}
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-[#8E95A2] hover:text-[#FACC15] shrink-0 cursor-pointer"
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-theme-muted hover:text-theme-accent-green shrink-0 cursor-pointer"
                         title={evt.completed ? "Mark Incomplete" : "Mark Done"}
                       >
-                        {evt.completed ? <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" /> : <Circle className="w-4 h-4 text-[#717885]" />}
+                        {evt.completed ? <CheckCircle2 className="w-4 h-4 text-theme-accent-green" /> : <Circle className="w-4 h-4 text-theme-text" />}
                       </button>
                     </div>
                   );
@@ -2260,45 +2260,45 @@ function AcademicCalendar({
 
                 if (evt.type === 'event') {
                   return (
-                    <div key={evt.id} className="p-2.5 rounded-xl bg-[#231733] border border-[#A855F7]/35 flex items-start justify-between gap-2 transition-all">
+                    <div key={evt.id} className="p-2.5 rounded-xl bg-[#B4C6A6] border border-theme-accent-blue/35 flex items-start justify-between gap-2 transition-all">
                       <div className="space-y-0.5 min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-1.5 py-0.2 rounded bg-[#9333EA] text-white text-[9px] font-black uppercase">
+                          <span className="px-1.5 py-0.2 rounded bg-[#B4C6A6] text-theme-text text-[9px] font-black uppercase">
                             {evt.categoryLabel}
                           </span>
-                          <span className={`text-xs font-bold truncate ${evt.completed ? 'line-through text-[#8E95A2]' : 'text-white'}`}>
+                          <span className={`text-xs font-bold truncate ${evt.completed ? 'line-through text-theme-muted' : 'text-theme-text'}`}>
                             {evt.title}
                           </span>
                         </div>
-                        <p className="text-[10px] text-[#D8B4FE] font-medium">
+                        <p className="text-[10px] text-theme-accent-green font-medium">
                           {evt.time}{evt.venue ? ` · 📍 ${evt.venue}` : ''}
                         </p>
                         {evt.description && (
-                          <p className="text-[9px] text-[#E9D5FF]/80 italic truncate">{evt.description}</p>
+                          <p className="text-[9px] text-theme-accent-green/80 italic truncate">{evt.description}</p>
                         )}
                       </div>
 
                       <div className="flex items-center gap-1 shrink-0 pt-0.5">
                         <button
                           onClick={() => setEventModal({ open: true, editing: evt.raw, defaultDate: evt.date })}
-                          className="w-6 h-6 rounded-lg bg-[#3B2256] hover:bg-[#581C87] text-[#D8B4FE] hover:text-white flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                          className="w-6 h-6 rounded-lg bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-accent-green hover:text-theme-text flex items-center justify-center text-[10px] transition-all cursor-pointer"
                           title="Edit Event"
                         >
                           <Pencil className="w-3 h-3" />
                         </button>
                         <button
                           onClick={() => onDeleteEvent && onDeleteEvent(evt.raw.id)}
-                          className="w-6 h-6 rounded-lg bg-[#3B2256] hover:bg-[#E11D48] text-[#D8B4FE] hover:text-white flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                          className="w-6 h-6 rounded-lg bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-accent-green hover:text-theme-text flex items-center justify-center text-[10px] transition-all cursor-pointer"
                           title="Delete Event"
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
                         <button
                           onClick={() => onToggleEvent && onToggleEvent(evt.raw.id)}
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-[#8E95A2] hover:text-[#C084FC] cursor-pointer"
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-theme-muted hover:text-theme-accent-blue cursor-pointer"
                           title={evt.completed ? "Mark Incomplete" : "Mark Done"}
                         >
-                          {evt.completed ? <CheckCircle2 className="w-4 h-4 text-[#A855F7]" /> : <Circle className="w-4 h-4 text-[#717885]" />}
+                          {evt.completed ? <CheckCircle2 className="w-4 h-4 text-theme-accent-blue" /> : <Circle className="w-4 h-4 text-theme-text" />}
                         </button>
                       </div>
                     </div>
@@ -2314,21 +2314,21 @@ function AcademicCalendar({
 
       {/* ALL UPCOMING AGENDA VIEW (When Agenda tab selected) */}
       {calendarViewMode === 'agenda' && (
-        <div className="bg-[#22262D] rounded-2xl p-4 border border-[#2F343E] space-y-3">
+        <div className="bg-[#B4C6A6] rounded-2xl p-4 border border-[#B4C6A6] space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="font-display font-extrabold text-xs text-white flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5 text-[#FACC15]" />
+            <h4 className="font-display font-extrabold text-xs text-theme-text flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-theme-accent-green" />
               Chronological Upcoming Deadlines, Milestones & Events
             </h4>
-            <span className="text-[10px] text-[#8E95A2] font-semibold">{allUpcomingItems.length} Total</span>
+            <span className="text-[10px] text-theme-muted font-semibold">{allUpcomingItems.length} Total</span>
           </div>
 
           <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
             {allUpcomingItems.length === 0 ? (
-              <div className="py-8 px-4 rounded-xl bg-[#1A1D23] border border-dashed border-[#2F343E] text-center flex flex-col items-center justify-center gap-1.5 text-[#8E95A2]">
-                <CheckCircle2 className="w-6 h-6 text-[#545C6A]" />
-                <p className="text-xs font-bold text-white">No Upcoming Items in Your Planner</p>
-                <p className="text-[11px] text-[#8E95A2]">Add exams, assignments, or events to automatically view them here.</p>
+              <div className="py-8 px-4 rounded-xl bg-[#B4C6A6] border border-dashed border-[#B4C6A6] text-center flex flex-col items-center justify-center gap-1.5 text-theme-muted">
+                <CheckCircle2 className="w-6 h-6 text-theme-text" />
+                <p className="text-xs font-bold text-theme-text">No Upcoming Items in Your Planner</p>
+                <p className="text-[11px] text-theme-muted">Add exams, assignments, or events to automatically view them here.</p>
               </div>
             ) : (
               allUpcomingItems.map(item => {
@@ -2341,47 +2341,47 @@ function AcademicCalendar({
                     key={item.id}
                     className={`p-3 rounded-xl border transition-all ${
                       isExam
-                        ? 'bg-[#2D1A20] border-[#FB7185]/40'
+                        ? 'bg-[#B4C6A6] border-theme-accent-blue/40'
                         : isEvent
-                        ? 'bg-[#231733] border-[#A855F7]/35'
+                        ? 'bg-[#B4C6A6] border-theme-accent-blue/35'
                         : item.completed
-                        ? 'bg-[#1C2026] border-[#2A2E35] opacity-60'
-                        : 'bg-[#2B2719] border-[#FACC15]/30'
+                        ? 'bg-[#B4C6A6] border-[#B4C6A6] opacity-60'
+                        : 'bg-[#B4C6A6] border-theme-accent-green/30'
                     } flex items-center justify-between gap-3`}
                   >
                     <div className="space-y-1 min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                          isExam ? 'bg-[#FB7185] text-white' : isEvent ? 'bg-[#9333EA] text-white' : item.isQuiz ? 'bg-[#3B82F6] text-white' : 'bg-[#FACC15] text-[#181A1D]'
+                          isExam ? 'bg-theme-accent-blue text-theme-text' : isEvent ? 'bg-[#B4C6A6] text-theme-text' : item.isQuiz ? 'bg-theme-accent-blue text-theme-text' : 'bg-theme-accent-green text-theme-text'
                         }`}>
-                          {isExam ? `🚨 ${item.badge}` : isEvent ? `${item.badge}` : item.isQuiz ? `⚡ ${item.badge}` : `📝 ${item.badge}`}
+                          {isExam ? `🚨 ${item.badge}` : isEvent ? `${item.badge}` : item.isQuiz ? ` ${item.badge}` : `📝 ${item.badge}`}
                         </span>
 
-                        <span className={`text-xs font-bold truncate ${item.completed ? 'line-through text-[#8E95A2]' : 'text-white'}`}>
+                        <span className={`text-xs font-bold truncate ${item.completed ? 'line-through text-theme-muted' : 'text-theme-text'}`}>
                           {item.title}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-[10px] text-[#A8A29E] flex-wrap">
-                        {item.subject && <span className="font-semibold text-white">{item.subject}</span>}
+                      <div className="flex items-center gap-2 text-[10px] text-theme-muted flex-wrap">
+                        {item.subject && <span className="font-semibold text-theme-text">{item.subject}</span>}
                         {item.subject && <span>•</span>}
-                        <span className="text-[#FDE047] font-medium">{fmtDisplayDate(item.date)} ({item.time})</span>
+                        <span className="text-theme-accent-green font-medium">{fmtDisplayDate(item.date)} ({item.time})</span>
                         {item.venue && (
                           <>
                             <span>•</span>
-                            <span className="text-[#D8B4FE]">📍 {item.venue}</span>
+                            <span className="text-theme-accent-green">📍 {item.venue}</span>
                           </>
                         )}
                         {item.description && (
                           <>
                             <span>•</span>
-                            <span className="italic text-[#8E95A2] truncate">{item.description}</span>
+                            <span className="italic text-theme-muted truncate">{item.description}</span>
                           </>
                         )}
                         {item.syllabus && (
                           <>
                             <span>•</span>
-                            <span className="italic text-[#8E95A2] truncate">Syllabus: {item.syllabus}</span>
+                            <span className="italic text-theme-muted truncate">Syllabus: {item.syllabus}</span>
                           </>
                         )}
                       </div>
@@ -2389,8 +2389,8 @@ function AcademicCalendar({
 
                     <div className="flex items-center gap-2 shrink-0">
                       <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${
-                        relativeLabel === 'Today' ? 'bg-[#E11D48] text-white animate-pulse' :
-                        relativeLabel === 'Tomorrow' ? 'bg-[#CA8A04] text-white' : 'bg-[#262A30] text-[#8E95A2]'
+                        relativeLabel === 'Today' ? 'bg-[#B4C6A6] text-theme-text animate-pulse' :
+                        relativeLabel === 'Tomorrow' ? 'bg-theme-accent-blue text-theme-text' : 'bg-[#B4C6A6] text-theme-muted'
                       }`}>
                         {relativeLabel}
                       </span>
@@ -2399,24 +2399,24 @@ function AcademicCalendar({
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => setEventModal({ open: true, editing: item.raw, defaultDate: item.date })}
-                            className="w-6 h-6 rounded-lg bg-[#3B2256] hover:bg-[#581C87] text-[#D8B4FE] hover:text-white flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                            className="w-6 h-6 rounded-lg bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-accent-green hover:text-theme-text flex items-center justify-center text-[10px] transition-all cursor-pointer"
                             title="Edit Event"
                           >
                             <Pencil className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => onDeleteEvent && onDeleteEvent(item.raw.id)}
-                            className="w-6 h-6 rounded-lg bg-[#3B2256] hover:bg-[#E11D48] text-[#D8B4FE] hover:text-white flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                            className="w-6 h-6 rounded-lg bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-accent-green hover:text-theme-text flex items-center justify-center text-[10px] transition-all cursor-pointer"
                             title="Delete Event"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => onToggleEvent && onToggleEvent(item.raw.id)}
-                            className="w-6 h-6 rounded-full flex items-center justify-center text-[#8E95A2] hover:text-[#C084FC] cursor-pointer"
+                            className="w-6 h-6 rounded-full flex items-center justify-center text-theme-muted hover:text-theme-accent-blue cursor-pointer"
                             title={item.completed ? "Mark Incomplete" : "Mark Done"}
                           >
-                            {item.completed ? <CheckCircle2 className="w-4 h-4 text-[#A855F7]" /> : <Circle className="w-4 h-4 text-[#717885]" />}
+                            {item.completed ? <CheckCircle2 className="w-4 h-4 text-theme-accent-blue" /> : <Circle className="w-4 h-4 text-theme-text" />}
                           </button>
                         </div>
                       )}
@@ -2424,17 +2424,17 @@ function AcademicCalendar({
                       {item.type === 'task' && (
                         <button
                           onClick={() => toggleTask && toggleTask(item.raw.id)}
-                          className="w-7 h-7 rounded-full flex items-center justify-center text-[#8E95A2] hover:text-[#FACC15] cursor-pointer"
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-theme-muted hover:text-theme-accent-green cursor-pointer"
                           title={item.completed ? "Mark Incomplete" : "Mark Done"}
                         >
-                          {item.completed ? <CheckCircle2 className="w-5 h-5 text-[#4ADE80]" /> : <Circle className="w-5 h-5 text-[#717885]" />}
+                          {item.completed ? <CheckCircle2 className="w-5 h-5 text-theme-accent-green" /> : <Circle className="w-5 h-5 text-theme-text" />}
                         </button>
                       )}
 
                       {isExam && (
                         <button
                           onClick={() => setView('exams')}
-                          className="px-2.5 py-1 rounded-lg bg-[#FB7185]/20 hover:bg-[#FB7185]/40 text-[#FDA4AF] text-[10px] font-bold transition-all cursor-pointer"
+                          className="px-2.5 py-1 rounded-lg bg-theme-accent-blue/20 hover:bg-theme-accent-blue/40 text-theme-accent-green text-[10px] font-bold transition-all cursor-pointer"
                         >
                           Exam View
                         </button>
@@ -2552,23 +2552,23 @@ function DashboardView({
       {/* Main Dashboard Canvas: Upcoming Alerts & Academic Calendar */}
       <div className="space-y-4">
         {upcomingAlerts.length > 0 && (
-          <div className="bg-white rounded-[28px] p-4 sm:p-5 shadow-xs border border-[#ECE6DC] space-y-2.5">
+          <div className="bg-theme-card rounded-[28px] p-4 sm:p-5 shadow-xs border border-theme-border space-y-2.5">
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-xs text-[#181A1D] flex items-center gap-1.5">
-                <Bell className="w-3.5 h-3.5 text-[#E11D48]" />
+              <h3 className="font-display font-bold text-xs text-theme-text flex items-center gap-1.5">
+                <Bell className="w-3.5 h-3.5 text-theme-text" />
                 Upcoming Next 7 Days
               </h3>
-              <span className="text-[10px] font-bold text-[#8E8880]">{upcomingAlerts.length} Critical Items</span>
+              <span className="text-[10px] font-bold text-theme-muted">{upcomingAlerts.length} Critical Items</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {upcomingAlerts.map(alt => (
-                <div key={alt.id} className="p-2.5 rounded-xl bg-[#F8F6F1] border border-[#ECE6DC] flex items-center justify-between gap-2">
+                <div key={alt.id} className="p-2.5 rounded-xl bg-theme-bg border border-theme-border flex items-center justify-between gap-2">
                   <div className="space-y-0.5 min-w-0">
-                    <p className="text-xs font-bold text-[#181A1D] truncate">{alt.title}</p>
-                    <p className="text-[10px] text-[#8E8880] font-medium">{fmtDisplayDate(alt.date)} {alt.time ? `· ${alt.time}` : ''}</p>
+                    <p className="text-xs font-bold text-theme-text truncate">{alt.title}</p>
+                    <p className="text-[10px] text-theme-muted font-medium">{fmtDisplayDate(alt.date)} {alt.time ? `· ${alt.time}` : ''}</p>
                   </div>
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase shrink-0 ${
-                    alt.kind === 'exam' ? 'bg-[#FFE4E6] text-[#E11D48]' : 'bg-[#FEF9C3] text-[#CA8A04]'
+                    alt.kind === 'exam' ? 'bg-theme-bg text-theme-text' : 'bg-theme-accent-green-light text-theme-accent-blue'
                   }`}>
                     {alt.kind === 'exam' ? 'Exam' : 'Due Soon'}
                   </span>
@@ -2654,83 +2654,83 @@ function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
   return (
     <div className="space-y-4 w-full">
       {/* Header Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#E8E2D8]/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-theme-border/60">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2.5">
-            <h2 className="font-medium text-lg sm:text-xl text-[#181A1D] tracking-tight">Assignments & Tasks</h2>
-            <span className="text-xs font-normal text-[#6B655E] bg-white/80 px-2.5 py-0.5 rounded-full border border-[#ECE6DC] shadow-2xs">
+            <h2 className="font-medium text-lg sm:text-xl text-theme-text tracking-tight">Assignments & Tasks</h2>
+            <span className="text-xs font-normal text-theme-text bg-theme-card/80 px-2.5 py-0.5 rounded-full border border-theme-border shadow-2xs">
               {stats.pending} pending · {stats.completed} done
             </span>
           </div>
-          <p className="text-xs text-[#78716C] font-normal">
+          <p className="text-xs text-theme-text font-normal">
             Track your homework, projects, and upcoming assignment deadlines
           </p>
         </div>
 
         <button
           onClick={onAdd}
-          className="bg-[#181A1D] hover:bg-[#282C33] text-white px-4 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm transition-all cursor-pointer self-start sm:self-auto"
+          className="bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text px-4 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm transition-all cursor-pointer self-start sm:self-auto"
         >
-          <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
+          <Plus className="w-3.5 h-3.5 text-theme-accent-green" />
           <span>Add Task</span>
         </button>
       </div>
 
       {/* Summary KPI Badges (Matching Dashboard Hero/Pill scheme) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <div className="p-3 rounded-[20px] bg-[#FFFDF0] border border-[#FDE894] shadow-2xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
+        <div className="p-3 rounded-[20px] bg-theme-bg border border-theme-accent-green-light shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-theme-accent-green-light text-theme-accent-blue flex items-center justify-center shrink-0">
             <CheckSquare className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-normal text-[#92400E] uppercase tracking-wider">Pending</p>
-            <p className="text-sm font-medium text-[#181A1D]">{stats.pending} tasks</p>
+            <p className="text-[10px] font-normal text-theme-text uppercase tracking-wider">Pending</p>
+            <p className="text-sm font-medium text-theme-text">{stats.pending} tasks</p>
           </div>
         </div>
 
-        <div className="p-3 rounded-[20px] bg-[#FFF5F6] border border-[#FECDD3] shadow-2xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center shrink-0">
+        <div className="p-3 rounded-[20px] bg-theme-bg border border-theme-accent-green shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-text flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-normal text-[#9F1239] uppercase tracking-wider">High Priority</p>
-            <p className="text-sm font-medium text-[#181A1D]">{stats.highPriority} urgent</p>
+            <p className="text-[10px] font-normal text-theme-text uppercase tracking-wider">High Priority</p>
+            <p className="text-sm font-medium text-theme-text">{stats.highPriority} urgent</p>
           </div>
         </div>
 
-        <div className="p-3 rounded-[20px] bg-[#F1F7FF] border border-[#D0E2FF] shadow-2xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#DBEAFE] text-[#2563EB] flex items-center justify-center shrink-0">
+        <div className="p-3 rounded-[20px] bg-theme-bg border border-theme-accent-green-light shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-text flex items-center justify-center shrink-0">
             <Clock className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-normal text-[#1E40AF] uppercase tracking-wider">Est. Workload</p>
-            <p className="text-sm font-medium text-[#181A1D]">{stats.totalEstHours.toFixed(1)} hrs</p>
+            <p className="text-[10px] font-normal text-theme-text uppercase tracking-wider">Est. Workload</p>
+            <p className="text-sm font-medium text-theme-text">{stats.totalEstHours.toFixed(1)} hrs</p>
           </div>
         </div>
 
-        <div className="p-3 rounded-[20px] bg-[#F2FAF5] border border-[#C6F6D5] shadow-2xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center shrink-0">
+        <div className="p-3 rounded-[20px] bg-theme-bg border border-theme-accent-green-light shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-accent-blue flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-normal text-[#166534] uppercase tracking-wider">Completed</p>
-            <p className="text-sm font-medium text-[#181A1D]">{stats.completed} finished</p>
+            <p className="text-[10px] font-normal text-theme-text uppercase tracking-wider">Completed</p>
+            <p className="text-sm font-medium text-theme-text">{stats.completed} finished</p>
           </div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-2.5 rounded-[22px] bg-white/70 border border-[#ECE6DC] shadow-2xs flex flex-wrap items-center justify-between gap-2.5">
+      <div className="p-2.5 rounded-[22px] bg-theme-card/70 border border-theme-border shadow-2xs flex flex-wrap items-center justify-between gap-2.5">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-3.5 h-3.5 text-[#A8A29A] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-theme-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search assignments or subjects..."
-            className="w-full bg-[#FAF8F5] border border-[#E8E2D8] rounded-full pl-8.5 pr-3 py-1.5 text-xs text-[#181A1D] placeholder-[#A8A29E] focus:outline-none focus:border-[#181A1D]"
+            className="w-full bg-theme-bg border border-theme-border rounded-full pl-8.5 pr-3 py-1.5 text-xs text-theme-text placeholder-[#A8A29E] focus:outline-none focus:border-[#B4C6A6]"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A8A29E] hover:text-[#181A1D]">
+            <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-text">
               <X className="w-3 h-3" />
             </button>
           )}
@@ -2749,8 +2749,8 @@ function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
               onClick={() => setSelectedFilter(tab.id)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
                 selectedFilter === tab.id
-                  ? "bg-[#181A1D] text-[#FACC15] shadow-xs"
-                  : "bg-white hover:bg-[#F8F6F1] text-[#6B655E] border border-[#ECE6DC]"
+                  ? "bg-[#B4C6A6] text-theme-accent-green shadow-xs"
+                  : "bg-theme-card hover:bg-theme-bg text-theme-text border border-theme-border"
               }`}
             >
               {tab.label}
@@ -2761,7 +2761,7 @@ function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] text-[#6B655E] rounded-full px-3 py-1 text-xs font-medium cursor-pointer focus:outline-none"
+              className="bg-theme-card hover:bg-theme-bg border border-theme-border text-theme-text rounded-full px-3 py-1 text-xs font-medium cursor-pointer focus:outline-none"
             >
               <option value="all">All Subjects</option>
               {subjects.map(s => (
@@ -2775,10 +2775,10 @@ function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
       {/* Task Cards List */}
       <div className="space-y-2.5">
         {filtered.length === 0 ? (
-          <div className="py-12 px-4 rounded-[26px] bg-white/40 border border-dashed border-[#E0D8CB] text-center flex flex-col items-center justify-center gap-2 text-[#A8A29E]">
-            <CheckSquare className="w-8 h-8 text-[#C4BDB3]" />
-            <p className="text-xs font-medium text-[#78716C]">No tasks found</p>
-            <p className="text-[11px] text-[#A8A29A]">Try changing your search or filter, or click "Add Task" to create one.</p>
+          <div className="py-12 px-4 rounded-[26px] bg-theme-card/40 border border-dashed border-theme-border text-center flex flex-col items-center justify-center gap-2 text-theme-muted">
+            <CheckSquare className="w-8 h-8 text-theme-muted" />
+            <p className="text-xs font-medium text-theme-text">No tasks found</p>
+            <p className="text-[11px] text-theme-muted">Try changing your search or filter, or click "Add Task" to create one.</p>
           </div>
         ) : (
           filtered.map((t) => {
@@ -2790,20 +2790,20 @@ function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
                 key={t.id}
                 className={`p-3.5 sm:p-4 rounded-[22px] border transition-all duration-150 ${
                   t.completed
-                    ? "bg-[#FAF8F5]/80 border-[#E8E2D8] opacity-60"
+                    ? "bg-theme-bg/80 border-theme-border opacity-60"
                     : `${theme.bg} ${theme.border} ${theme.hoverBorder} shadow-2xs hover:-translate-y-0.5 hover:shadow-xs`
                 } flex flex-col sm:flex-row sm:items-center justify-between gap-3`}
               >
                 <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
                   <button
                     onClick={() => onToggle(t.id)}
-                    className="mt-0.5 sm:mt-0 text-[#B5AEA4] hover:text-[#181A1D] transition-colors cursor-pointer shrink-0"
+                    className="mt-0.5 sm:mt-0 text-theme-muted hover:text-theme-text transition-colors cursor-pointer shrink-0"
                     title={t.completed ? "Mark incomplete" : "Mark complete"}
                   >
                     {t.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-[#10B981]" />
+                      <CheckCircle2 className="w-5 h-5 text-theme-accent-blue" />
                     ) : (
-                      <Circle className="w-5 h-5 text-[#D1C9BD] hover:text-[#181A1D]" />
+                      <Circle className="w-5 h-5 text-theme-muted hover:text-theme-text" />
                     )}
                   </button>
 
@@ -2815,32 +2815,32 @@ function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
                       </span>
 
                       {t.category && (
-                        <span className="text-[9.5px] font-normal px-2 py-0.5 rounded-full bg-white/80 text-[#6B655E] border border-black/[0.04]">
+                        <span className="text-[9.5px] font-normal px-2 py-0.5 rounded-full bg-theme-card/80 text-theme-text border border-[#B4C6A6]/[0.04]">
                           {t.category}
                         </span>
                       )}
 
                       {isPriorityHigh && (
-                        <span className="text-[9.5px] font-medium px-2 py-0.2 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center gap-1">
+                        <span className="text-[9.5px] font-medium px-2 py-0.2 rounded-full bg-theme-bg text-theme-text flex items-center gap-1">
                           <Zap className="w-2.5 h-2.5" /> High Priority
                         </span>
                       )}
                     </div>
 
                     <p className={`text-xs sm:text-sm font-medium leading-snug ${
-                      t.completed ? "line-through text-[#9E988E]" : "text-[#181A1D]"
+                      t.completed ? "line-through text-theme-muted" : "text-theme-text"
                     }`}>
                       {t.title}
                     </p>
 
-                    <div className="flex items-center gap-3 text-[10.5px] font-normal text-[#78716C] flex-wrap">
+                    <div className="flex items-center gap-3 text-[10.5px] font-normal text-theme-text flex-wrap">
                       <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-[#A8A29A]" />
+                        <Calendar className="w-3 h-3 text-theme-muted" />
                         <span>Due {fmtDisplayDate(t.dueDate)} {t.dueTime ? `(${fmtTime12(t.dueTime)})` : ""}</span>
                       </span>
                       {t.estHours && (
-                        <span className="flex items-center gap-1 text-[#8A847C]">
-                          <Clock className="w-3 h-3 text-[#A8A29A]" />
+                        <span className="flex items-center gap-1 text-theme-muted">
+                          <Clock className="w-3 h-3 text-theme-muted" />
                           <span>~{t.estHours}h required</span>
                         </span>
                       )}
@@ -2848,17 +2848,17 @@ function TasksView({ tasks, subjectList, onAdd, onEdit, onDelete, onToggle }) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-black/[0.04] w-full sm:w-auto justify-end">
+                <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#B4C6A6]/[0.04] w-full sm:w-auto justify-end">
                   <button
                     onClick={() => onEdit(t)}
-                    className="p-2 rounded-full hover:bg-white/80 text-[#78716C] hover:text-[#181A1D] transition-colors cursor-pointer"
+                    className="p-2 rounded-full hover:bg-theme-card/80 text-theme-text hover:text-theme-text transition-colors cursor-pointer"
                     title="Edit task"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => onDelete(t.id)}
-                    className="p-2 rounded-full hover:bg-[#FFE4E6]/80 text-[#78716C] hover:text-[#E11D48] transition-colors cursor-pointer"
+                    className="p-2 rounded-full hover:bg-theme-bg/80 text-theme-text hover:text-theme-text transition-colors cursor-pointer"
                     title="Delete task"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -2940,77 +2940,77 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
   return (
     <div className="space-y-5 w-full">
       {/* Header Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#E8E2D8]/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-theme-border/60">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2.5">
-            <h2 className="font-medium text-lg sm:text-xl text-[#181A1D] tracking-tight">Study Topics & Mastery</h2>
-            <span className="text-xs font-normal text-[#6B655E] bg-white/80 px-2.5 py-0.5 rounded-full border border-[#ECE6DC] shadow-2xs">
+            <h2 className="font-medium text-lg sm:text-xl text-theme-text tracking-tight">Study Topics & Mastery</h2>
+            <span className="text-xs font-normal text-theme-text bg-theme-card/80 px-2.5 py-0.5 rounded-full border border-theme-border shadow-2xs">
               {stats.completed} of {stats.total} Mastered ({stats.masteryRate}%)
             </span>
           </div>
-          <p className="text-xs text-[#78716C] font-normal">
+          <p className="text-xs text-theme-text font-normal">
             Syllabus breakdown, concept difficulty ratings, and automated revision scheduling
           </p>
         </div>
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-[#181A1D] hover:bg-[#282C33] text-white px-4 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm transition-all cursor-pointer self-start sm:self-auto"
+          className="bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text px-4 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm transition-all cursor-pointer self-start sm:self-auto"
         >
-          <Plus className="w-3.5 h-3.5 text-[#FACC15]" />
+          <Plus className="w-3.5 h-3.5 text-theme-accent-green" />
           <span>{showAddForm ? "Close Form" : "Add Concept"}</span>
         </button>
       </div>
 
       {/* KPI Mastery Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <div className="p-3 rounded-[20px] bg-[#FFFDF0] border border-[#FDE894] shadow-2xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
+        <div className="p-3 rounded-[20px] bg-theme-bg border border-theme-accent-green-light shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-theme-accent-green-light text-theme-accent-blue flex items-center justify-center shrink-0">
             <BookOpenCheck className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-normal text-[#92400E] uppercase tracking-wider">Total Syllabus</p>
-            <p className="text-sm font-medium text-[#181A1D]">{stats.total} concepts</p>
+            <p className="text-[10px] font-normal text-theme-text uppercase tracking-wider">Total Syllabus</p>
+            <p className="text-sm font-medium text-theme-text">{stats.total} concepts</p>
           </div>
         </div>
 
-        <div className="p-3 rounded-[20px] bg-[#FFF5F6] border border-[#FECDD3] shadow-2xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center shrink-0">
+        <div className="p-3 rounded-[20px] bg-theme-bg border border-theme-accent-green shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-text flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-normal text-[#9F1239] uppercase tracking-wider">Hard Topics</p>
-            <p className="text-sm font-medium text-[#181A1D]">{stats.hard} high focus</p>
+            <p className="text-[10px] font-normal text-theme-text uppercase tracking-wider">Hard Topics</p>
+            <p className="text-sm font-medium text-theme-text">{stats.hard} high focus</p>
           </div>
         </div>
 
-        <div className="p-3 rounded-[20px] bg-[#F1F7FF] border border-[#D0E2FF] shadow-2xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#DBEAFE] text-[#2563EB] flex items-center justify-center shrink-0">
+        <div className="p-3 rounded-[20px] bg-theme-bg border border-theme-accent-green-light shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-text flex items-center justify-center shrink-0">
             <Clock className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-normal text-[#1E40AF] uppercase tracking-wider">In Revision</p>
-            <p className="text-sm font-medium text-[#181A1D]">{stats.inProgress} to review</p>
+            <p className="text-[10px] font-normal text-theme-text uppercase tracking-wider">In Revision</p>
+            <p className="text-sm font-medium text-theme-text">{stats.inProgress} to review</p>
           </div>
         </div>
 
-        <div className="p-3 rounded-[20px] bg-[#F2FAF5] border border-[#C6F6D5] shadow-2xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center shrink-0">
+        <div className="p-3 rounded-[20px] bg-theme-bg border border-theme-accent-green-light shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-accent-blue flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-normal text-[#166534] uppercase tracking-wider">Mastered</p>
-            <p className="text-sm font-medium text-[#181A1D]">{stats.completed} solid</p>
+            <p className="text-[10px] font-normal text-theme-text uppercase tracking-wider">Mastered</p>
+            <p className="text-sm font-medium text-theme-text">{stats.completed} solid</p>
           </div>
         </div>
       </div>
 
       {/* Slide-out / Collapsible Add Topic Form */}
       {showAddForm && (
-        <form onSubmit={submit} className="p-4 sm:p-5 rounded-[24px] bg-white border border-[#E2DDD3] shadow-xs space-y-3 transition-all animate-fadeIn">
-          <div className="flex items-center justify-between pb-2 border-b border-[#F4F0E8]">
-            <span className="font-medium text-xs text-[#181A1D]">New Concept / Syllabus Topic</span>
-            <span className="text-[11px] text-[#8E8880]">Will automatically queue into your weekly study plan</span>
+        <form onSubmit={submit} className="p-4 sm:p-5 rounded-[24px] bg-theme-card border border-theme-border shadow-xs space-y-3 transition-all animate-fadeIn">
+          <div className="flex items-center justify-between pb-2 border-b border-theme-border">
+            <span className="font-medium text-xs text-theme-text">New Concept / Syllabus Topic</span>
+            <span className="text-[11px] text-theme-muted">Will automatically queue into your weekly study plan</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
@@ -3019,7 +3019,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Topic / Concept (e.g. MOSFETs, Chain Rule)"
-                className="w-full bg-[#FAF8F5] border border-[#E5DFD4] rounded-full px-4 py-2 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#181A1D]"
+                className="w-full bg-theme-bg border border-theme-border rounded-full px-4 py-2 text-xs text-theme-text placeholder-[#A8A29A] focus:outline-none focus:border-[#B4C6A6]"
                 autoFocus
               />
             </div>
@@ -3029,7 +3029,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
                 placeholder="Subject (e.g. EDC, Calculus)"
-                className="w-full bg-[#FAF8F5] border border-[#E5DFD4] rounded-full px-4 py-2 text-xs text-[#181A1D] placeholder-[#A8A29A] focus:outline-none focus:border-[#181A1D]"
+                className="w-full bg-theme-bg border border-theme-border rounded-full px-4 py-2 text-xs text-theme-text placeholder-[#A8A29A] focus:outline-none focus:border-[#B4C6A6]"
                 list="subjects-datalist"
               />
               <datalist id="subjects-datalist">
@@ -3043,7 +3043,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
               <select
                 value={form.difficulty}
                 onChange={(e) => setForm({ ...form, difficulty: e.target.value })}
-                className="w-full bg-[#FAF8F5] border border-[#E5DFD4] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+                className="w-full bg-theme-bg border border-theme-border rounded-full px-3 py-2 text-xs text-theme-text focus:outline-none cursor-pointer"
               >
                 <option value="Easy">Easy (1h)</option>
                 <option value="Medium">Medium (2h)</option>
@@ -3055,14 +3055,14 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
               <button
                 type="submit"
                 disabled={!form.name.trim() || !form.subject.trim()}
-                className="w-full bg-[#181A1D] hover:bg-[#282C33] text-white py-2 rounded-full text-xs font-medium cursor-pointer shadow-sm transition-all disabled:opacity-40"
+                className="w-full bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text py-2 rounded-full text-xs font-medium cursor-pointer shadow-sm transition-all disabled:opacity-40"
               >
                 Save
               </button>
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="p-2 text-[#8E8880] hover:text-[#181A1D] cursor-pointer"
+                className="p-2 text-theme-muted hover:text-theme-text cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -3072,17 +3072,17 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
       )}
 
       {/* Filter and Search Bar */}
-      <div className="p-2.5 rounded-[22px] bg-white/70 border border-[#ECE6DC] shadow-2xs flex flex-wrap items-center justify-between gap-2.5">
+      <div className="p-2.5 rounded-[22px] bg-theme-card/70 border border-theme-border shadow-2xs flex flex-wrap items-center justify-between gap-2.5">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-3.5 h-3.5 text-[#A8A29A] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-theme-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search concepts or subjects..."
-            className="w-full bg-[#FAF8F5] border border-[#E8E2D8] rounded-full pl-8.5 pr-3 py-1.5 text-xs text-[#181A1D] placeholder-[#A8A29E] focus:outline-none focus:border-[#181A1D]"
+            className="w-full bg-theme-bg border border-theme-border rounded-full pl-8.5 pr-3 py-1.5 text-xs text-theme-text placeholder-[#A8A29E] focus:outline-none focus:border-[#B4C6A6]"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A8A29E] hover:text-[#181A1D]">
+            <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-text">
               <X className="w-3 h-3" />
             </button>
           )}
@@ -3093,7 +3093,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
           <select
             value={activeSubjectFilter}
             onChange={(e) => setActiveSubjectFilter(e.target.value)}
-            className="bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] text-[#6B655E] rounded-full px-3 py-1 text-xs font-medium cursor-pointer focus:outline-none"
+            className="bg-theme-card hover:bg-theme-bg border border-theme-border text-theme-text rounded-full px-3 py-1 text-xs font-medium cursor-pointer focus:outline-none"
           >
             <option value="all">All Subjects</option>
             {distinctSubjects.map((s) => (
@@ -3103,7 +3103,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
 
           {[
             { id: "all", label: "All Difficulties" },
-            { id: "Hard", label: "⚡ Hard" },
+            { id: "Hard", label: " Hard" },
             { id: "Medium", label: "Medium" },
             { id: "Easy", label: "Easy" },
           ].map((tab) => (
@@ -3112,8 +3112,8 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
               onClick={() => setDifficultyFilter(tab.id)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
                 difficultyFilter === tab.id
-                  ? "bg-[#181A1D] text-[#FACC15] shadow-xs"
-                  : "bg-white hover:bg-[#F8F6F1] text-[#6B655E] border border-[#ECE6DC]"
+                  ? "bg-[#B4C6A6] text-theme-accent-green shadow-xs"
+                  : "bg-theme-card hover:bg-theme-bg text-theme-text border border-theme-border"
               }`}
             >
               {tab.label}
@@ -3124,10 +3124,10 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
 
       {/* Structured Subject Modules */}
       {Object.keys(groupedBySubject).length === 0 ? (
-        <div className="py-12 px-4 rounded-[26px] bg-white/40 border border-dashed border-[#E0D8CB] text-center flex flex-col items-center justify-center gap-2 text-[#A8A29E]">
-          <BookOpenCheck className="w-8 h-8 text-[#C4BDB3]" />
-          <p className="text-xs font-medium text-[#78716C]">No syllabus topics found</p>
-          <p className="text-[11px] text-[#A8A29A]">Click "Add Concept" above to begin structuring your revision topics.</p>
+        <div className="py-12 px-4 rounded-[26px] bg-theme-card/40 border border-dashed border-theme-border text-center flex flex-col items-center justify-center gap-2 text-theme-muted">
+          <BookOpenCheck className="w-8 h-8 text-theme-muted" />
+          <p className="text-xs font-medium text-theme-text">No syllabus topics found</p>
+          <p className="text-[11px] text-theme-muted">Click "Add Concept" above to begin structuring your revision topics.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -3137,32 +3137,32 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
             const subjPct = Math.round((subjCompleted / items.length) * 100);
 
             return (
-              <div key={subj} className="rounded-[24px] bg-white/60 border border-[#ECE6DC] p-4 sm:p-5 shadow-2xs space-y-3.5">
+              <div key={subj} className="rounded-[24px] bg-theme-card/60 border border-theme-border p-4 sm:p-5 shadow-2xs space-y-3.5">
                 {/* Subject Header */}
-                <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#F0EBE2]">
+                <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-theme-border">
                   <div className="flex items-center gap-2">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-medium ${theme.tagBg} ${theme.tagText}`}>
                       <span className={`w-2 h-2 rounded-full ${theme.dot}`} />
                       <span>{subj}</span>
                     </span>
-                    <span className="text-xs font-normal text-[#78716C]">
+                    <span className="text-xs font-normal text-theme-text">
                       {subjCompleted} of {items.length} Mastered
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <div className="hidden sm:flex items-center gap-2">
-                      <div className="w-24 bg-[#F0EBE2] h-1.5 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#181A1D] rounded-full transition-all duration-300" style={{ width: `${subjPct}%` }} />
+                      <div className="w-24 bg-theme-bg h-1.5 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#B4C6A6] rounded-full transition-all duration-300" style={{ width: `${subjPct}%` }} />
                       </div>
-                      <span className="text-[10.5px] font-normal text-[#8A847C]">{subjPct}%</span>
+                      <span className="text-[10.5px] font-normal text-theme-muted">{subjPct}%</span>
                     </div>
 
                     <button
                       onClick={() => openAddForSubject(subj)}
-                      className="text-[11px] font-medium text-[#181A1D] hover:text-black bg-white hover:bg-[#F8F6F1] border border-[#ECE6DC] px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+                      className="text-[11px] font-medium text-theme-text hover:text-theme-text bg-theme-card hover:bg-theme-bg border border-theme-border px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
                     >
-                      <Plus className="w-3 h-3 text-[#EAB308]" />
+                      <Plus className="w-3 h-3 text-theme-accent-blue" />
                       <span>Add Concept</span>
                     </button>
                   </div>
@@ -3172,9 +3172,9 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {items.map((t) => {
                     const difficultyBadge =
-                      t.difficulty === "Hard" ? "bg-[#FFE4E6] text-[#E11D48] border border-[#FECDD3]" :
-                      t.difficulty === "Medium" ? "bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]" :
-                      "bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0]";
+                      t.difficulty === "Hard" ? "bg-theme-bg text-theme-text border border-theme-accent-green" :
+                      t.difficulty === "Medium" ? "bg-theme-accent-green-light text-theme-text border border-theme-accent-green-light" :
+                      "bg-theme-bg text-theme-text border border-theme-accent-green-light";
 
                     const estTime = t.difficulty === "Hard" ? "3.0h" : t.difficulty === "Medium" ? "2.0h" : "1.0h";
 
@@ -3183,26 +3183,26 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
                         key={t.id}
                         className={`p-3 rounded-[18px] border transition-all duration-150 ${
                           t.completed
-                            ? "bg-[#FAF8F5]/80 border-[#E8E2D8] opacity-60"
+                            ? "bg-theme-bg/80 border-theme-border opacity-60"
                             : `${theme.bg} ${theme.border} ${theme.hoverBorder} shadow-2xs hover:-translate-y-0.5 hover:shadow-xs`
                         } flex items-center justify-between gap-3`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <button
                             onClick={() => onToggle(t.id)}
-                            className="text-[#B5AEA4] hover:text-[#181A1D] transition-colors cursor-pointer shrink-0"
+                            className="text-theme-muted hover:text-theme-text transition-colors cursor-pointer shrink-0"
                             title={t.completed ? "Mark incomplete" : "Mark mastered"}
                           >
                             {t.completed ? (
-                              <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                              <CheckCircle2 className="w-4 h-4 text-theme-accent-blue" />
                             ) : (
-                              <Circle className="w-4 h-4 text-[#D1C9BD] hover:text-[#181A1D]" />
+                              <Circle className="w-4 h-4 text-theme-muted hover:text-theme-text" />
                             )}
                           </button>
 
                           <div className="min-w-0 flex-1">
                             <p className={`text-xs font-medium leading-snug truncate ${
-                              t.completed ? "line-through text-[#9E988E]" : "text-[#1E2024]"
+                              t.completed ? "line-through text-theme-muted" : "text-theme-text"
                             }`}>
                               {t.name}
                             </p>
@@ -3210,8 +3210,8 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
                               <span className={`text-[9px] font-medium px-1.5 py-0.2 rounded-md ${difficultyBadge}`}>
                                 {t.difficulty}
                               </span>
-                              <span className="text-[10px] font-normal text-[#8A847C] flex items-center gap-1">
-                                <Clock className="w-2.5 h-2.5 text-[#A8A29A]" />
+                              <span className="text-[10px] font-normal text-theme-muted flex items-center gap-1">
+                                <Clock className="w-2.5 h-2.5 text-theme-muted" />
                                 <span>~{estTime} revision</span>
                               </span>
                             </div>
@@ -3220,7 +3220,7 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
 
                         <button
                           onClick={() => onDelete(t.id)}
-                          className="p-1.5 rounded-full text-[#8E8880] hover:text-[#E11D48] hover:bg-[#FFE4E6]/60 transition-colors cursor-pointer shrink-0"
+                          className="p-1.5 rounded-full text-theme-muted hover:text-theme-text hover:bg-theme-bg/60 transition-colors cursor-pointer shrink-0"
                           title="Delete concept"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -3251,20 +3251,20 @@ function TaskModal({ editing, subjectList, onClose, onSave }) {
   const valid = form.title.trim() && form.subject.trim() && form.dueDate;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md bg-white rounded-[32px] shadow-2xl p-6 border border-[#ECE6DC] space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-[#F4F1EB]">
-          <h3 className="font-medium text-base text-[#181A1D]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#B4C6A6]/40 backdrop-blur-xs p-4">
+      <div className="w-full max-w-md bg-theme-card rounded-[32px] shadow-2xl p-6 border border-theme-border space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-theme-border">
+          <h3 className="font-medium text-base text-theme-text">
             {editing ? "Edit Task / Event" : "Add Task, Assignment or Quiz"}
           </h3>
-          <button onClick={onClose} className="text-[#8E8880] hover:text-[#181A1D] transition-colors"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors"><X className="w-5 h-5" /></button>
         </div>
         <div className="space-y-3">
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder="Title (e.g. Calculus Quiz 1, Physics Problem Set 4)"
-            className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2.5 text-xs text-[#181A1D] focus:outline-none"
+            className="w-full bg-theme-bg border border-theme-border rounded-full px-4 py-2.5 text-xs text-theme-text focus:outline-none"
             autoFocus
           />
           <div className="grid grid-cols-2 gap-2">
@@ -3272,15 +3272,15 @@ function TaskModal({ editing, subjectList, onClose, onSave }) {
               value={form.subject}
               onChange={(e) => setForm({ ...form, subject: e.target.value })}
               placeholder="Subject (e.g. Calculus)"
-              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
+              className="w-full bg-theme-bg border border-theme-border rounded-full px-4 py-2 text-xs text-theme-text focus:outline-none"
             />
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+              className="w-full bg-theme-bg border border-theme-border rounded-full px-3 py-2 text-xs text-theme-text focus:outline-none cursor-pointer"
             >
               <option value="Assignment">📝 Assignment</option>
-              <option value="Quiz / Test">⚡ Quiz / Test</option>
+              <option value="Quiz / Test"> Quiz / Test</option>
               <option value="Exam Prep">🚨 Exam Prep</option>
               <option value="Project">📊 Project</option>
               <option value="Homework">📚 Homework</option>
@@ -3289,21 +3289,21 @@ function TaskModal({ editing, subjectList, onClose, onSave }) {
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Due Date</label>
+              <label className="text-[10px] font-bold text-theme-muted ml-2 block mb-1">Due Date</label>
               <input
                 type="date"
                 value={form.dueDate}
                 onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+                className="w-full bg-theme-bg border border-theme-border rounded-full px-3 py-2 text-xs text-theme-text focus:outline-none cursor-pointer"
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Due Time</label>
+              <label className="text-[10px] font-bold text-theme-muted ml-2 block mb-1">Due Time</label>
               <input
                 type="time"
                 value={form.dueTime}
                 onChange={(e) => setForm({ ...form, dueTime: e.target.value })}
-                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+                className="w-full bg-theme-bg border border-theme-border rounded-full px-3 py-2 text-xs text-theme-text focus:outline-none cursor-pointer"
               />
             </div>
           </div>
@@ -3311,7 +3311,7 @@ function TaskModal({ editing, subjectList, onClose, onSave }) {
             <select
               value={form.priority}
               onChange={(e) => setForm({ ...form, priority: e.target.value })}
-              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-3 py-2 text-xs text-[#181A1D] focus:outline-none cursor-pointer"
+              className="w-full bg-theme-bg border border-theme-border rounded-full px-3 py-2 text-xs text-theme-text focus:outline-none cursor-pointer"
             >
               <option value="High">🔴 High Priority</option>
               <option value="Medium">🟡 Medium Priority</option>
@@ -3324,13 +3324,13 @@ function TaskModal({ editing, subjectList, onClose, onSave }) {
               value={form.estHours}
               onChange={(e) => setForm({ ...form, estHours: parseFloat(e.target.value) || 1 })}
               placeholder="Est. Hours"
-              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-full px-4 py-2 text-xs text-[#181A1D] focus:outline-none"
+              className="w-full bg-theme-bg border border-theme-border rounded-full px-4 py-2 text-xs text-theme-text focus:outline-none"
             />
           </div>
         </div>
-        <div className="flex justify-end gap-2 pt-3 border-t border-[#F4F1EB]">
-          <button onClick={onClose} className="px-4 py-2 text-xs font-medium text-[#8E8880] hover:text-[#181A1D] cursor-pointer">Cancel</button>
-          <button disabled={!valid} onClick={() => onSave(form)} className="px-5 py-2 rounded-full bg-[#181A1D] hover:bg-black text-white text-xs font-medium cursor-pointer shadow-sm transition-all disabled:opacity-50">Save</button>
+        <div className="flex justify-end gap-2 pt-3 border-t border-theme-border">
+          <button onClick={onClose} className="px-4 py-2 text-xs font-medium text-theme-muted hover:text-theme-text cursor-pointer">Cancel</button>
+          <button disabled={!valid} onClick={() => onSave(form)} className="px-5 py-2 rounded-full bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text text-xs font-medium cursor-pointer shadow-sm transition-all disabled:opacity-50">Save</button>
         </div>
       </div>
     </div>
@@ -3351,44 +3351,44 @@ function EventModal({ editing, defaultDate, onClose, onSave }) {
   const valid = form.title.trim() && form.date;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md bg-white rounded-[32px] shadow-2xl p-6 border border-[#ECE6DC] space-y-4 animate-in fade-in zoom-in duration-150">
-        <div className="flex items-center justify-between pb-3 border-b border-[#F4F1EB]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#B4C6A6]/50 backdrop-blur-xs p-4">
+      <div className="w-full max-w-md bg-theme-card rounded-[32px] shadow-2xl p-6 border border-theme-border space-y-4 animate-in fade-in zoom-in duration-150">
+        <div className="flex items-center justify-between pb-3 border-b border-theme-border">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-full bg-theme-bg text-theme-text flex items-center justify-center font-bold">
               <Calendar className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-display font-extrabold text-base text-[#181A1D]">
+              <h3 className="font-display font-extrabold text-base text-theme-text">
                 {editing ? "Edit Calendar Event" : "Add Calendar Event"}
               </h3>
-              <p className="text-[11px] text-[#8E8880]">Hackathons, fests, club meets, workshops & more</p>
+              <p className="text-[11px] text-theme-muted">Hackathons, fests, club meets, workshops & more</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[#8E8880] hover:text-[#181A1D] transition-colors cursor-pointer">
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="space-y-3">
           <div>
-            <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Event Title *</label>
+            <label className="text-[10px] font-bold text-theme-muted ml-2 block mb-1">Event Title *</label>
             <input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="e.g. 24h AI Hackathon, Robotics Club Meet, Cultural Fest"
-              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-4 py-2.5 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7]"
+              className="w-full bg-theme-bg border border-theme-border rounded-2xl px-4 py-2.5 text-xs text-theme-text font-medium focus:outline-none focus:border-theme-accent-blue"
               autoFocus
             />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Event Category</label>
+              <label className="text-[10px] font-bold text-theme-muted ml-2 block mb-1">Event Category</label>
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] cursor-pointer"
+                className="w-full bg-theme-bg border border-theme-border rounded-2xl px-3 py-2 text-xs text-theme-text font-medium focus:outline-none focus:border-theme-accent-blue cursor-pointer"
               >
                 <option value="🎯 Hackathon">🎯 Hackathon</option>
                 <option value="🎪 Fest / Cultural">🎪 Fest / Cultural</option>
@@ -3401,63 +3401,63 @@ function EventModal({ editing, defaultDate, onClose, onSave }) {
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Event Date *</label>
+              <label className="text-[10px] font-bold text-theme-muted ml-2 block mb-1">Event Date *</label>
               <input
                 type="date"
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] cursor-pointer"
+                className="w-full bg-theme-bg border border-theme-border rounded-2xl px-3 py-2 text-xs text-theme-text font-medium focus:outline-none focus:border-theme-accent-blue cursor-pointer"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Start Time</label>
+              <label className="text-[10px] font-bold text-theme-muted ml-2 block mb-1">Start Time</label>
               <input
                 type="time"
                 value={form.startTime || ""}
                 onChange={(e) => setForm({ ...form, startTime: e.target.value })}
-                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] cursor-pointer"
+                className="w-full bg-theme-bg border border-theme-border rounded-2xl px-3 py-2 text-xs text-theme-text font-medium focus:outline-none focus:border-theme-accent-blue cursor-pointer"
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">End Time</label>
+              <label className="text-[10px] font-bold text-theme-muted ml-2 block mb-1">End Time</label>
               <input
                 type="time"
                 value={form.endTime || ""}
                 onChange={(e) => setForm({ ...form, endTime: e.target.value })}
-                className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-3 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] cursor-pointer"
+                className="w-full bg-theme-bg border border-theme-border rounded-2xl px-3 py-2 text-xs text-theme-text font-medium focus:outline-none focus:border-theme-accent-blue cursor-pointer"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Venue / Location</label>
+            <label className="text-[10px] font-bold text-theme-muted ml-2 block mb-1">Venue / Location</label>
             <input
               value={form.venue || ""}
               onChange={(e) => setForm({ ...form, venue: e.target.value })}
               placeholder="e.g. Main Auditorium, Lab 402, Online Zoom"
-              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-4 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7]"
+              className="w-full bg-theme-bg border border-theme-border rounded-2xl px-4 py-2 text-xs text-theme-text font-medium focus:outline-none focus:border-theme-accent-blue"
             />
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-[#8E8880] ml-2 block mb-1">Description / Notes (Optional)</label>
+            <label className="text-[10px] font-bold text-theme-muted ml-2 block mb-1">Description / Notes (Optional)</label>
             <textarea
               rows={2}
               value={form.description || ""}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="e.g. Bring laptop & ID card, team registration link: ..."
-              className="w-full bg-[#F8F6F1] border border-[#ECE6DC] rounded-2xl px-4 py-2 text-xs text-[#181A1D] font-medium focus:outline-none focus:border-[#A855F7] resize-none"
+              className="w-full bg-theme-bg border border-theme-border rounded-2xl px-4 py-2 text-xs text-theme-text font-medium focus:outline-none focus:border-theme-accent-blue resize-none"
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#F4F1EB]">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-theme-border">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-full text-xs font-bold text-[#78716C] hover:bg-[#F8F6F1] transition-all cursor-pointer"
+            className="px-4 py-2 rounded-full text-xs font-bold text-theme-text hover:bg-theme-bg transition-all cursor-pointer"
           >
             Cancel
           </button>
@@ -3468,7 +3468,7 @@ function EventModal({ editing, defaultDate, onClose, onSave }) {
               onSave(form);
               onClose();
             }}
-            className="px-5 py-2 rounded-full bg-[#A855F7] hover:bg-[#9333EA] disabled:opacity-50 text-white text-xs font-black shadow-md transition-all cursor-pointer"
+            className="px-5 py-2 rounded-full bg-theme-accent-blue hover:bg-[#B4C6A6] disabled:opacity-50 text-theme-text text-xs font-black shadow-md transition-all cursor-pointer"
           >
             {editing ? "Save Changes" : "Create Event"}
           </button>
@@ -3482,16 +3482,16 @@ function NotificationDrawer({ alerts, onClose, setView }) {
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="absolute right-6 top-16 w-80 sm:w-96 max-h-96 overflow-y-auto rounded-3xl border border-[#ECE6DC] bg-white shadow-2xl z-50 p-2">
-        <div className="px-4 py-3 border-b border-[#F4F1EB] flex items-center justify-between">
-          <p className="font-medium text-sm text-[#181A1D]">Reminders & Alerts</p>
-          <button onClick={onClose} className="text-[#8E8880] hover:text-[#181A1D]"><X className="w-4 h-4" /></button>
+      <div className="absolute right-6 top-16 w-80 sm:w-96 max-h-96 overflow-y-auto rounded-3xl border border-theme-border bg-theme-card shadow-2xl z-50 p-2">
+        <div className="px-4 py-3 border-b border-theme-border flex items-center justify-between">
+          <p className="font-medium text-sm text-theme-text">Reminders & Alerts</p>
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text"><X className="w-4 h-4" /></button>
         </div>
-        <ul className="divide-y divide-[#F4F1EB] max-h-72 overflow-y-auto">
+        <ul className="divide-y divide-theme-bg max-h-72 overflow-y-auto">
           {alerts.map((a) => (
-            <li key={a.id} className="px-4 py-3 hover:bg-[#F8F6F1] text-xs transition-colors">
-              <p className="font-medium text-[#181A1D]">{a.title}</p>
-              <p className="text-[11px] text-[#8E8880] font-normal">{a.subject} · {fmtDisplayDate(a.dueDate)} ({fmtTime12(a.dueTime)})</p>
+            <li key={a.id} className="px-4 py-3 hover:bg-theme-bg text-xs transition-colors">
+              <p className="font-medium text-theme-text">{a.title}</p>
+              <p className="text-[11px] text-theme-muted font-normal">{a.subject} · {fmtDisplayDate(a.dueDate)} ({fmtTime12(a.dueTime)})</p>
             </li>
           ))}
         </ul>
