@@ -3877,7 +3877,6 @@ function TopicsView({ topics, subjectList, onAdd, onDelete, onToggle, availabili
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-theme-border/60">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-2.5">
             <h2 className="font-medium text-lg sm:text-xl text-theme-text tracking-tight">Study Topics & Priorities</h2>
             <span className="text-xs font-normal text-theme-text bg-theme-card/80 px-2.5 py-0.5 rounded-full border border-theme-border shadow-2xs">
               {stats.completed} of {stats.total} Mastered ({stats.masteryRate}%)
