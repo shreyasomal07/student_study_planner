@@ -201,7 +201,7 @@ export default function App() {
       dashboardNotes: [
         {
           id: "nt-1",
-          title: "⚡ Quick Study Rule",
+          title: " Quick Study Rule",
           content: "Pomodoro Focus: 25 mins deep study + 5 mins break. Active recall beats re-reading.",
           color: "yellow",
           tag: "Study Tip",
@@ -385,7 +385,7 @@ export default function App() {
     if (!target) return;
 
     const targetName = accounts[target]?.profile?.name || target;
-    if (window.confirm(`⚠️ Are you sure you want to permanently delete the profile for "${targetName}" (@${target})?\n\nAll saved tasks, study topics, availability, and AI timetables will be permanently erased. This action cannot be undone.`)) {
+    if (window.confirm(`️ Are you sure you want to permanently delete the profile for "${targetName}" (@${target})?\n\nAll saved tasks, study topics, availability, and AI timetables will be permanently erased. This action cannot be undone.`)) {
       try {
         await api.deleteAccount(target);
       } catch (e) {
@@ -468,7 +468,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#EBE6DF] text-[#1E2024] font-sans antialiased p-3 sm:p-5 lg:p-7 flex items-center justify-center">
+    <div className="min-h-screen bg-theme-bg text-theme-text font-sans antialiased p-3 sm:p-5 lg:p-7 flex items-center justify-center">
       <StudentPlanner
         key={`${currentUser.username}_${currentUser.plannerData?.lastGenerated || ''}_${currentUser.profile?.dailyTargetHours || ''}`}
         userProfile={currentUser.profile || currentUser}
