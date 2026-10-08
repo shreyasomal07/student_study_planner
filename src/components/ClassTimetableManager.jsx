@@ -29,11 +29,11 @@ const DAY_LABELS = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thur
 
 const CLASS_TYPES = ["Lecture", "Lab", "Tutorial", "Seminar", "Workshop"];
 const CLASS_TYPE_BADGES = {
-  Lecture: "bg-theme-card text-theme-accent-green border-theme-accent-green-light",
-  Lab: "bg-theme-card text-theme-accent-green border-theme-accent-green-light",
-  Tutorial: "bg-theme-card text-theme-accent-green border-theme-accent-green-light",
-  Seminar: "bg-theme-card text-theme-accent-green border-theme-accent-green-light",
-  Workshop: "bg-theme-card text-theme-accent-green border-theme-accent-green-light",
+  Lecture: "bg-steady-renewal text-liminal-night border-rooted-strength/60",
+  Lab: "bg-calm-awakening/20 text-calm-awakening border-calm-awakening/40",
+  Tutorial: "bg-inner-resolve/20 text-liminal-night border-inner-resolve/40",
+  Seminar: "bg-vital-spark/20 text-liminal-night border-vital-spark/40",
+  Workshop: "bg-wild-light text-liminal-night border-rooted-strength/40",
 };
 
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -320,49 +320,49 @@ export default function ClassTimetableManager({
   return (
     <div className="space-y-6">
       {/* Header controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-theme-card p-4 sm:p-5 rounded-[28px] border border-theme-border shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-none border border-rooted-strength/50 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="font-display font-extrabold text-theme-text text-base sm:text-lg flex items-center gap-2">
-              <School className="w-5 h-5 text-theme-text" />
+            <h2 className="font-serif font-bold text-liminal-night text-base sm:text-lg flex items-center gap-2">
+              <School className="w-5 h-5 text-liminal-night" />
               Class & College Timetable
             </h2>
             {timetablePhoto && (
-              <span className="px-2 py-0.5 rounded-full bg-theme-bg border border-theme-accent-green-light text-theme-text text-[10px] font-bold flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-theme-accent-blue" /> Photo Added
+              <span className="px-2.5 py-0.5 rounded-full bg-steady-renewal border border-rooted-strength/60 text-liminal-night text-[10px] font-bold flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-calm-awakening" /> Photo Added
               </span>
             )}
           </div>
-          <p className="text-xs text-theme-muted mt-0.5">
+          <p className="text-xs text-liminal-night/70 mt-0.5 font-medium">
             View your original timetable photo directly or manage scheduled lectures.
           </p>
         </div>
 
         {/* View Switcher Tabs & Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center p-1 bg-theme-bg border border-theme-border rounded-full shadow-2xs">
+          <div className="flex items-center p-1 bg-steady-renewal border border-rooted-strength/50 rounded-full shadow-2xs">
             <button
               type="button"
               onClick={() => setActiveTab('photo')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'photo'
-                  ? 'bg-[#B4C6A6] text-theme-text shadow-2xs'
-                  : 'text-theme-text hover:text-theme-text'
+                  ? 'bg-calm-awakening text-wild-light shadow-2xs'
+                  : 'text-liminal-night hover:text-liminal-night'
               }`}
             >
-              <ImageIcon className="w-3.5 h-3.5 text-theme-accent-green" />
+              <ImageIcon className="w-3.5 h-3.5" />
               <span>Photo Timetable</span>
               {timetablePhoto && (
-                <span className="w-2 h-2 rounded-full bg-theme-accent-green" />
+                <span className="w-2 h-2 rounded-full bg-vital-spark" />
               )}
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('classes')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'classes'
-                  ? 'bg-[#B4C6A6] text-theme-text shadow-2xs'
-                  : 'text-theme-text hover:text-theme-text'
+                  ? 'bg-calm-awakening text-wild-light shadow-2xs'
+                  : 'text-liminal-night hover:text-liminal-night'
               }`}
             >
               <CalendarRange className="w-3.5 h-3.5" />
@@ -378,16 +378,16 @@ export default function ClassTimetableManager({
               setUploadedFileName('');
               setImagePreviewUrl(null);
             }}
-            className="px-4 py-2 rounded-full text-xs font-bold bg-theme-bg hover:bg-theme-bg text-theme-text border border-theme-border transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            className="px-4 py-2 rounded-full text-xs font-bold bg-wild-light hover:bg-steady-renewal text-liminal-night border border-rooted-strength transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
-            <Upload className="w-3.5 h-3.5 text-theme-text" /> Upload Photo / File
+            <Upload className="w-3.5 h-3.5 text-liminal-night" /> Upload Photo / File
           </button>
 
           <button
             onClick={openAddModal}
-            className="px-4 py-2 rounded-full text-xs font-bold bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+            className="px-4 py-2 rounded-full text-xs font-bold bg-liminal-night hover:bg-liminal-night/90 text-wild-light shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
-            <Plus className="w-4 h-4 text-theme-accent-green" /> Add Class
+            <Plus className="w-4 h-4 text-vital-spark" /> Add Class
           </button>
         </div>
       </div>
@@ -405,18 +405,18 @@ export default function ClassTimetableManager({
         <div className="space-y-4">
           {/* If photo is uploaded, show a subtle quick toggle banner */}
           {timetablePhoto && (
-            <div className="bg-theme-card/80 border border-theme-border rounded-2xl p-2.5 px-4 flex items-center justify-between text-xs text-theme-text shadow-2xs">
+            <div className="bg-white border border-rooted-strength/50 rounded-none p-2.5 px-4 flex items-center justify-between text-xs text-liminal-night shadow-2xs">
               <div className="flex items-center gap-2 min-w-0">
-                <ImageIcon className="w-4 h-4 text-theme-accent-blue shrink-0" />
+                <ImageIcon className="w-4 h-4 text-liminal-night shrink-0" />
                 <span className="font-bold">Original Timetable Photo Attached:</span>
-                <span className="text-theme-text truncate max-w-xs">{timetablePhoto.name || 'Uploaded Photo'}</span>
+                <span className="text-liminal-night/80 truncate max-w-xs">{timetablePhoto.name || 'Uploaded Photo'}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setActiveTab('photo')}
-                className="px-3 py-1 rounded-full bg-[#B4C6A6] text-theme-text font-bold hover:bg-[#B4C6A6] text-[11px] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                className="px-3.5 py-1 rounded-full bg-steady-renewal text-liminal-night font-bold hover:bg-rooted-strength/30 text-[11px] border border-rooted-strength/60 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
               >
-                <Eye className="w-3 h-3 text-theme-accent-green" /> View Timetable Photo
+                <Eye className="w-3 h-3 text-calm-awakening" /> View Timetable Photo
               </button>
             </div>
           )}
@@ -426,7 +426,7 @@ export default function ClassTimetableManager({
             <button
               onClick={() => setSelectedDayFilter('All')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                selectedDayFilter === 'All' ? 'bg-[#B4C6A6] text-theme-text shadow-xs' : 'bg-theme-card border border-theme-border text-theme-muted hover:text-theme-text'
+                selectedDayFilter === 'All' ? 'bg-calm-awakening text-wild-light shadow-xs' : 'bg-white border border-rooted-strength text-liminal-night hover:bg-steady-renewal'
               }`}
             >
               All Days ({classes.length})
@@ -439,12 +439,12 @@ export default function ClassTimetableManager({
                   key={d}
                   onClick={() => setSelectedDayFilter(d)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                    isActive ? 'bg-[#B4C6A6] text-theme-text shadow-xs' : 'bg-theme-card border border-theme-border text-theme-muted hover:text-theme-text'
+                    isActive ? 'bg-calm-awakening text-wild-light shadow-xs' : 'bg-white border border-rooted-strength text-liminal-night hover:bg-steady-renewal'
                   }`}
                 >
                   <span>{d}</span>
                   {count > 0 && (
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-theme-accent-green text-theme-text' : 'bg-theme-bg text-theme-muted'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-vital-spark text-liminal-night' : 'bg-steady-renewal text-liminal-night'}`}>
                       {count}
                     </span>
                   )}
@@ -455,7 +455,7 @@ export default function ClassTimetableManager({
 
           {/* Classes Grid View */}
           {classes.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-theme-border bg-theme-card p-10 text-center space-y-3">
+            <div className="rounded-none border border-dashed border-theme-border bg-theme-card p-10 text-center space-y-3">
               <div className="w-14 h-14 rounded-2xl bg-theme-card text-theme-accent-green flex items-center justify-center mx-auto shadow-2xs">
                 <School className="w-7 h-7" />
               </div>
@@ -469,15 +469,15 @@ export default function ClassTimetableManager({
                     setBulkModalOpen(true);
                     setUploadTab('photo_direct');
                   }}
-                  className="px-4 py-2.5 rounded-full bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-full bg-liminal-night hover:bg-liminal-night/90 text-wild-light text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2"
                 >
-                  <ImageIcon className="w-4 h-4 text-theme-accent-green" /> Upload Timetable Photo (Direct View)
+                  <ImageIcon className="w-4 h-4 text-vital-spark" /> Upload Timetable Photo (Direct View)
                 </button>
                 <button
                   onClick={openAddModal}
-                  className="px-4 py-2.5 rounded-full bg-theme-bg hover:bg-theme-bg text-theme-muted text-xs font-semibold transition-all cursor-pointer flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-full bg-steady-renewal hover:bg-rooted-strength/30 text-liminal-night text-xs font-bold transition-all cursor-pointer flex items-center gap-2 border border-rooted-strength/40"
                 >
-                  <Plus className="w-4 h-4 text-theme-accent-green" /> Add Class Manually
+                  <Plus className="w-4 h-4 text-calm-awakening" /> Add Class Manually
                 </button>
               </div>
             </div>
@@ -487,14 +487,14 @@ export default function ClassTimetableManager({
               {DAY_KEYS.map((day) => {
                 const dayList = classesByDay[day] || [];
                 return (
-                  <div key={day} className="rounded-2xl border border-theme-bg bg-theme-card shadow-2xs overflow-hidden flex flex-col">
-                    <div className="p-3.5 bg-theme-card/80 border-b border-theme-bg flex items-center justify-between">
-                      <span className="font-display font-bold text-theme-text text-sm">{DAY_LABELS[day]}</span>
-                      <span className="text-xs font-bold text-theme-border">{dayList.length} classes</span>
+                  <div key={day} className="rounded-none border border-rooted-strength/40 bg-steady-renewal shadow-2xs overflow-hidden flex flex-col">
+                    <div className="p-3.5 bg-wild-light border-b border-rooted-strength/30 flex items-center justify-between">
+                      <span className="font-display font-bold text-liminal-night text-sm">{DAY_LABELS[day]}</span>
+                      <span className="text-xs font-bold text-liminal-night/60">{dayList.length} classes</span>
                     </div>
                     <div className="p-3 flex-1 space-y-2.5 min-h-[140px]">
                       {dayList.length === 0 ? (
-                        <div className="h-full flex items-center justify-center text-center py-6 text-theme-border text-xs">
+                        <div className="h-full flex items-center justify-center text-center py-6 text-liminal-night/50 text-xs font-medium">
                           No classes scheduled
                         </div>
                       ) : (
@@ -509,13 +509,13 @@ export default function ClassTimetableManager({
             </div>
           ) : (
             /* Single Day List View */
-            <div className="rounded-2xl border border-theme-bg bg-theme-card p-5 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between pb-3 border-b border-theme-bg">
-                <h3 className="font-display font-bold text-theme-text">{DAY_LABELS[selectedDayFilter]} Schedule</h3>
-                <span className="text-xs text-theme-muted font-semibold">{filteredClasses.length} sessions</span>
+            <div className="rounded-none border border-rooted-strength/40 bg-steady-renewal p-5 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between pb-3 border-b border-rooted-strength/30">
+                <h3 className="font-display font-bold text-liminal-night">{DAY_LABELS[selectedDayFilter]} Schedule</h3>
+                <span className="text-xs text-liminal-night/70 font-semibold">{filteredClasses.length} sessions</span>
               </div>
               {filteredClasses.length === 0 ? (
-                <p className="text-xs text-theme-border py-8 text-center">No classes on {DAY_LABELS[selectedDayFilter]}</p>
+                <p className="text-xs text-liminal-night/50 py-8 text-center font-medium">No classes on {DAY_LABELS[selectedDayFilter]}</p>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {filteredClasses.map((item) => (
@@ -530,38 +530,38 @@ export default function ClassTimetableManager({
 
       {/* Add / Edit Single Class Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#B4C6A6]/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-theme-card rounded-3xl shadow-2xl p-6 relative">
-            <div className="flex items-center justify-between pb-3 border-b border-theme-bg mb-4">
-              <h3 className="font-display font-bold text-theme-text flex items-center gap-2">
-                <School className="w-4 h-4 text-theme-accent-green" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-liminal-night/30 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-wild-light rounded-3xl shadow-2xl p-6 relative border border-rooted-strength/40">
+            <div className="flex items-center justify-between pb-3 border-b border-rooted-strength/30 mb-4">
+              <h3 className="font-display font-bold text-liminal-night flex items-center gap-2">
+                <School className="w-4 h-4 text-calm-awakening" />
                 {editingClass ? 'Edit Class' : 'Add Class / Lecture'}
               </h3>
-              <button onClick={() => setModalOpen(false)} className="text-theme-border hover:text-theme-muted cursor-pointer">
+              <button onClick={() => setModalOpen(false)} className="text-liminal-night/50 hover:text-liminal-night cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-theme-muted mb-1">Subject / Course Name *</label>
+                <label className="block text-xs font-bold text-liminal-night/70 mb-1">Subject / Course Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Data Structures & Algorithms"
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-theme-bg text-xs focus:outline-none focus:border-theme-accent-green bg-theme-card font-medium"
+                  className="w-full p-2.5 rounded-full border border-rooted-strength/40 text-xs focus:outline-none focus:border-liminal-night bg-steady-renewal font-medium text-liminal-night"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-theme-muted mb-1">Day of Week</label>
+                  <label className="block text-xs font-bold text-liminal-night/70 mb-1">Day of Week</label>
                   <select
                     value={form.day}
                     onChange={(e) => setForm({ ...form, day: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-theme-bg text-xs focus:outline-none focus:border-theme-accent-green bg-theme-card font-medium cursor-pointer"
+                    className="w-full p-2.5 rounded-full border border-rooted-strength/40 text-xs focus:outline-none focus:border-liminal-night bg-steady-renewal font-bold text-liminal-night cursor-pointer"
                   >
                     {DAY_KEYS.map((d) => (
                       <option key={d} value={d}>{DAY_LABELS[d]}</option>
@@ -570,11 +570,11 @@ export default function ClassTimetableManager({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-theme-muted mb-1">Class Type</label>
+                  <label className="block text-xs font-bold text-liminal-night/70 mb-1">Class Type</label>
                   <select
                     value={form.type}
                     onChange={(e) => setForm({ ...form, type: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-theme-bg text-xs focus:outline-none focus:border-theme-accent-green bg-theme-card font-medium cursor-pointer"
+                    className="w-full p-2.5 rounded-full border border-rooted-strength/40 text-xs focus:outline-none focus:border-liminal-night bg-steady-renewal font-bold text-liminal-night cursor-pointer"
                   >
                     {CLASS_TYPES.map((t) => (
                       <option key={t} value={t}>{t}</option>
@@ -585,50 +585,50 @@ export default function ClassTimetableManager({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-theme-muted mb-1">Start Time</label>
+                  <label className="block text-xs font-bold text-liminal-night/70 mb-1">Start Time</label>
                   <input
                     type="time"
                     required
                     value={form.start}
                     onChange={(e) => setForm({ ...form, start: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-theme-bg text-xs focus:outline-none focus:border-theme-accent-green bg-theme-card font-medium"
+                    className="w-full p-2.5 rounded-full border border-rooted-strength/40 text-xs focus:outline-none focus:border-liminal-night bg-steady-renewal font-bold text-liminal-night"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-theme-muted mb-1">End Time</label>
+                  <label className="block text-xs font-bold text-liminal-night/70 mb-1">End Time</label>
                   <input
                     type="time"
                     required
                     value={form.end}
                     onChange={(e) => setForm({ ...form, end: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-theme-bg text-xs focus:outline-none focus:border-theme-accent-green bg-theme-card font-medium"
+                    className="w-full p-2.5 rounded-full border border-rooted-strength/40 text-xs focus:outline-none focus:border-liminal-night bg-steady-renewal font-bold text-liminal-night"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-theme-muted mb-1">Room / Location (Optional)</label>
+                <label className="block text-xs font-bold text-liminal-night/70 mb-1">Room / Location (Optional)</label>
                 <input
                   type="text"
                   placeholder="e.g. Hall 302 / Online Teams"
                   value={form.room}
                   onChange={(e) => setForm({ ...form, room: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-theme-bg text-xs focus:outline-none focus:border-theme-accent-green bg-theme-card font-medium"
+                  className="w-full p-2.5 rounded-full border border-rooted-strength/40 text-xs focus:outline-none focus:border-liminal-night bg-steady-renewal font-medium text-liminal-night"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-theme-bg">
+              <div className="flex justify-end gap-2 pt-3 border-t border-rooted-strength/30">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:bg-theme-bg cursor-pointer"
+                  className="px-4 py-2 rounded-full text-xs font-bold text-liminal-night/70 hover:bg-steady-renewal cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-theme-accent-green hover:bg-theme-accent-green text-theme-text shadow-sm cursor-pointer"
+                  className="px-5 py-2 rounded-full text-xs font-bold bg-liminal-night hover:bg-liminal-night/90 text-wild-light shadow-sm cursor-pointer"
                 >
                   {editingClass ? 'Update Class' : 'Save Class'}
                 </button>
@@ -640,25 +640,25 @@ export default function ClassTimetableManager({
 
       {/* Upload Timetable Photo & Document Modal */}
       {bulkModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#B4C6A6]/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-xl bg-theme-card rounded-3xl shadow-2xl p-6 relative my-8 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-theme-bg mb-4 shrink-0">
-              <h3 className="font-display font-bold text-theme-text flex items-center gap-2 text-base">
-                <ImageIcon className="w-5 h-5 text-theme-accent-green" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-liminal-night/30 backdrop-blur-xs p-4 overflow-y-auto animate-in fade-in duration-150">
+          <div className="w-full max-w-xl bg-wild-light rounded-3xl shadow-2xl p-6 relative my-8 max-h-[90vh] flex flex-col border border-rooted-strength/40">
+            <div className="flex items-center justify-between pb-3 border-b border-rooted-strength/30 mb-4 shrink-0">
+              <h3 className="font-display font-bold text-liminal-night flex items-center gap-2 text-base">
+                <ImageIcon className="w-5 h-5 text-calm-awakening" />
                 Upload Timetable Photo & Routine
               </h3>
-              <button onClick={() => setBulkModalOpen(false)} className="text-theme-border hover:text-theme-muted cursor-pointer">
+              <button onClick={() => setBulkModalOpen(false)} className="text-liminal-night/50 hover:text-liminal-night cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Mode switch */}
-            <div className="flex items-center gap-2 p-1 bg-theme-bg rounded-xl mb-4 shrink-0">
+            <div className="flex items-center gap-2 p-1 bg-steady-renewal rounded-2xl mb-4 shrink-0 border border-rooted-strength/40">
               <button
                 type="button"
                 onClick={() => setUploadTab('photo_direct')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  uploadTab === 'photo_direct' ? 'bg-theme-card text-theme-accent-green shadow-2xs' : 'text-theme-muted hover:text-theme-text'
+                className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  uploadTab === 'photo_direct' ? 'bg-liminal-night text-wild-light shadow-2xs' : 'text-liminal-night/70 hover:text-liminal-night'
                 }`}
               >
                 <ImageIcon className="w-3.5 h-3.5" /> Upload Photo (Direct View)
@@ -666,8 +666,8 @@ export default function ClassTimetableManager({
               <button
                 type="button"
                 onClick={() => setUploadTab('paste')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  uploadTab === 'paste' ? 'bg-theme-card text-theme-accent-green shadow-2xs' : 'text-theme-muted hover:text-theme-text'
+                className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  uploadTab === 'paste' ? 'bg-liminal-night text-wild-light shadow-2xs' : 'text-liminal-night/70 hover:text-liminal-night'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" /> Paste CSV / Text
@@ -685,8 +685,8 @@ export default function ClassTimetableManager({
                     onClick={() => fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-3 relative overflow-hidden ${
                       dragActive
-                        ? 'border-theme-accent-green bg-theme-card/50'
-                        : 'border-theme-border hover:border-theme-border hover:bg-theme-card'
+                        ? 'border-calm-awakening bg-steady-renewal'
+                        : 'border-rooted-strength/50 hover:border-liminal-night/50 hover:bg-steady-renewal/50'
                     }`}
                   >
                     <input
@@ -699,21 +699,21 @@ export default function ClassTimetableManager({
                       className="hidden"
                     />
 
-                    <div className="w-14 h-14 rounded-2xl bg-theme-card text-theme-accent-green flex items-center justify-center shadow-2xs">
+                    <div className="w-14 h-14 rounded-2xl bg-steady-renewal text-calm-awakening flex items-center justify-center shadow-2xs border border-rooted-strength/40">
                       <ImageIcon className="w-7 h-7" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-theme-text">
+                      <p className="text-sm font-bold text-liminal-night">
                         Select or Drop Timetable Photo
                       </p>
-                      <p className="text-xs text-theme-border mt-1 max-w-sm">
+                      <p className="text-xs text-liminal-night/65 mt-1 max-w-sm">
                         Displays your original timetable picture directly on the page with instant zoom, pan, and full screen view.
                       </p>
                     </div>
 
                     <button
                       type="button"
-                      className="mt-2 px-4 py-2 rounded-full bg-theme-accent-green text-theme-text text-xs font-bold shadow-xs hover:bg-theme-accent-green transition-all pointer-events-none"
+                      className="mt-2 px-4 py-2 rounded-full bg-liminal-night text-wild-light text-xs font-bold shadow-xs hover:bg-liminal-night/90 transition-all pointer-events-none"
                     >
                       Browse Image File
                     </button>
@@ -721,8 +721,8 @@ export default function ClassTimetableManager({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs text-theme-muted">
-                    Paste your schedule below (Format: <code className="bg-theme-bg px-1 rounded text-theme-accent-green">Day, StartTime, EndTime, Subject, Type, Room</code>):
+                  <p className="text-xs text-liminal-night/70">
+                    Paste your schedule below (Format: <code className="bg-steady-renewal px-1.5 py-0.5 rounded text-liminal-night font-mono">Day, StartTime, EndTime, Subject, Type, Room</code>):
                   </p>
                   <textarea
                     rows={5}
@@ -732,21 +732,21 @@ export default function ClassTimetableManager({
                       parseRawSchedule(e.target.value);
                     }}
                     placeholder={`Mon, 09:00, 10:30, Calculus, Lecture, Room 101\nMon, 11:00, 13:00, Data Structures, Lab, CS Lab\nTue, 10:00, 11:30, Physics, Lecture, Hall A`}
-                    className="w-full p-3 font-mono text-xs bg-theme-card border border-theme-bg rounded-2xl focus:outline-none focus:border-theme-accent-green"
+                    className="w-full p-3 font-mono text-xs bg-steady-renewal border border-rooted-strength/50 rounded-2xl text-liminal-night focus:outline-none focus:border-liminal-night"
                   />
 
                   {/* Detected items preview table */}
                   {parsedPreview.length > 0 && (
-                    <div className="border border-theme-accent-green-light bg-theme-card/30 rounded-2xl p-3.5 space-y-2.5">
+                    <div className="border border-rooted-strength/50 bg-steady-renewal/50 rounded-2xl p-3.5 space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-theme-text flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-theme-accent-green" />
+                        <span className="text-xs font-bold text-liminal-night flex items-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4 text-calm-awakening" />
                           Detected Classes ({parsedPreview.length} items)
                         </span>
                         <button
                           type="button"
                           onClick={() => setParsedPreview([])}
-                          className="text-[11px] text-theme-accent-green hover:underline cursor-pointer"
+                          className="text-[11px] text-liminal-night/70 hover:text-liminal-night hover:underline cursor-pointer"
                         >
                           Clear
                         </button>
@@ -756,21 +756,21 @@ export default function ClassTimetableManager({
                         {parsedPreview.map((item, idx) => (
                           <div
                             key={idx}
-                            className="bg-theme-card p-2 rounded-xl border border-theme-bg flex items-center justify-between text-xs gap-2"
+                            className="bg-wild-light p-2.5 rounded-xl border border-rooted-strength/40 flex items-center justify-between text-xs gap-2"
                           >
                             <div className="flex items-center gap-2 min-w-0">
-                              <span className="font-bold text-theme-accent-green bg-theme-card px-2 py-0.5 rounded-md text-[10px]">
+                              <span className="font-bold text-calm-awakening bg-calm-awakening/15 px-2 py-0.5 rounded-full text-[10px]">
                                 {item.day}
                               </span>
-                              <span className="font-semibold text-theme-text truncate">{item.subject}</span>
-                              <span className="text-[10px] text-theme-border">
+                              <span className="font-semibold text-liminal-night truncate">{item.subject}</span>
+                              <span className="text-[10px] text-liminal-night/60">
                                 {fmtTime12(item.start)} – {fmtTime12(item.end)}
                               </span>
                             </div>
                             <button
                               type="button"
                               onClick={() => setParsedPreview(parsedPreview.filter((_, i) => i !== idx))}
-                              className="text-theme-border hover:text-theme-accent-green p-1 cursor-pointer"
+                              className="text-liminal-night/40 hover:text-rose-600 p-1 cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -780,12 +780,12 @@ export default function ClassTimetableManager({
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between text-xs text-theme-muted px-1 pt-1">
+                  <div className="flex items-center justify-between text-xs text-liminal-night/70 px-1 pt-1">
                     <span>Need template?</span>
                     <button
                       type="button"
                       onClick={downloadCSVTemplate}
-                      className="inline-flex items-center gap-1 text-theme-accent-green font-bold hover:underline cursor-pointer"
+                      className="inline-flex items-center gap-1 text-liminal-night font-bold hover:underline cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" /> Download CSV Template
                     </button>
@@ -794,11 +794,11 @@ export default function ClassTimetableManager({
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t border-theme-bg mt-3 shrink-0">
+            <div className="flex justify-end gap-2 pt-4 border-t border-rooted-strength/30 mt-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setBulkModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:bg-theme-bg cursor-pointer"
+                className="px-4 py-2 rounded-full text-xs font-semibold text-liminal-night/70 hover:bg-rooted-strength/20 cursor-pointer"
               >
                 Cancel
               </button>
@@ -807,7 +807,7 @@ export default function ClassTimetableManager({
                   type="button"
                   disabled={parsedPreview.length === 0}
                   onClick={handleConfirmImport}
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-theme-accent-green hover:bg-theme-accent-green text-theme-text disabled:opacity-50 shadow-sm cursor-pointer flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-full text-xs font-bold bg-calm-awakening hover:bg-calm-awakening/90 text-wild-light disabled:opacity-50 shadow-xs cursor-pointer flex items-center gap-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   Import ({parsedPreview.length}) Classes
@@ -824,7 +824,7 @@ export default function ClassTimetableManager({
 function ClassCard({ item, onEdit, onDelete }) {
   const badgeClass = CLASS_TYPE_BADGES[item.type] || CLASS_TYPE_BADGES.Lecture;
   return (
-    <div className="p-3 rounded-xl border border-theme-bg bg-theme-card hover:border-theme-accent-green-light transition-all shadow-2xs space-y-1.5 group">
+    <div className="p-3 rounded-none border border-rooted-strength/40 bg-steady-renewal/80 hover:border-rooted-strength hover:shadow-xs transition-all space-y-1.5 group">
       <div className="flex items-start justify-between gap-1.5">
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeClass}`}>
           {item.type}
@@ -832,14 +832,14 @@ function ClassCard({ item, onEdit, onDelete }) {
         <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onEdit(item)}
-            className="p-1 rounded-md text-theme-border hover:text-theme-accent-green hover:bg-theme-card cursor-pointer"
+            className="p-1 rounded-lg text-liminal-night/60 hover:text-liminal-night hover:bg-wild-light cursor-pointer"
             title="Edit"
           >
             <Pencil className="w-3 h-3" />
           </button>
           <button
             onClick={() => onDelete(item.id)}
-            className="p-1 rounded-md text-theme-border hover:text-theme-accent-green hover:bg-theme-card cursor-pointer"
+            className="p-1 rounded-lg text-liminal-night/60 hover:text-rose-600 hover:bg-wild-light cursor-pointer"
             title="Delete"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -848,15 +848,15 @@ function ClassCard({ item, onEdit, onDelete }) {
       </div>
 
       <div>
-        <p className="text-xs font-bold text-theme-text leading-snug">{item.subject}</p>
-        <div className="flex items-center gap-2 mt-1 text-[11px] text-theme-muted">
+        <p className="text-xs font-bold text-liminal-night leading-snug">{item.subject}</p>
+        <div className="flex items-center gap-2 mt-1 text-[11px] text-liminal-night/70">
           <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3 text-theme-border" />
+            <Clock className="w-3 h-3 text-liminal-night/50" />
             {fmtTime12(item.start)} – {fmtTime12(item.end)}
           </span>
           {item.room && (
-            <span className="flex items-center gap-1 text-theme-border">
-              <MapPin className="w-3 h-3 text-theme-border" />
+            <span className="flex items-center gap-1 text-liminal-night/60">
+              <MapPin className="w-3 h-3 text-liminal-night/50" />
               {item.room}
             </span>
           )}

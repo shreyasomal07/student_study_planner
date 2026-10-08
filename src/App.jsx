@@ -468,7 +468,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-theme-bg text-theme-text font-sans antialiased p-3 sm:p-5 lg:p-7 flex items-center justify-center">
+    <div className="min-h-screen w-full bg-wild-light text-liminal-night font-sans antialiased flex flex-col items-stretch selection:bg-vital-spark/30">
       <StudentPlanner
         key={`${currentUser.username}_${currentUser.plannerData?.lastGenerated || ''}_${currentUser.profile?.dailyTargetHours || ''}`}
         userProfile={currentUser.profile || currentUser}

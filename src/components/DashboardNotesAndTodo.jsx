@@ -23,22 +23,21 @@ import {
   Filter
 } from "lucide-react";
 
-// Predefined Color Themes for Sticky Notes
+// Predefined Color Themes for Sticky Notes within the Palette
 export const NOTE_COLORS = [
-  { id: "yellow", name: "Amber Gold", bg: "bg-theme-bg", border: "border-theme-accent-green-light", text: "text-theme-text", accent: "#CA8A04", dot: "bg-theme-border" },
-  { id: "purple", name: "Lavender", bg: "bg-theme-bg", border: "border-theme-accent-green", text: "text-theme-text", accent: "#9333EA", dot: "bg-theme-border" },
-  { id: "green", name: "Mint Sage", bg: "bg-theme-bg", border: "border-theme-accent-green-light", text: "text-theme-text", accent: "#16A34A", dot: "bg-theme-border" },
-  { id: "blue", name: "Sky Ice", bg: "bg-theme-bg", border: "border-theme-accent-green", text: "text-theme-text", accent: "#0284C7", dot: "bg-theme-border" },
-  { id: "rose", name: "Rose Coral", bg: "bg-theme-bg", border: "border-theme-accent-green", text: "text-theme-text", accent: "#E11D48", dot: "bg-theme-border" },
-  { id: "dark", name: "Dark Velvet", bg: "bg-[#B4C6A6]", border: "border-[#B4C6A6]", text: "text-theme-bg", accent: "#FACC15", dot: "bg-theme-muted" }
+  { id: "yellow", name: "Steady Renewal", bg: "bg-steady-renewal", border: "border-rooted-strength", text: "text-liminal-night", accent: "#C0A381", dot: "bg-vital-spark" },
+  { id: "green", name: "Calm Awakening", bg: "bg-calm-awakening/20", border: "border-calm-awakening/50", text: "text-liminal-night", accent: "#92A5A8", dot: "bg-calm-awakening" },
+  { id: "blue", name: "Inner Resolve", bg: "bg-inner-resolve/15", border: "border-inner-resolve/40", text: "text-liminal-night", accent: "#556574", dot: "bg-inner-resolve" },
+  { id: "rose", name: "Rooted Strength", bg: "bg-rooted-strength/20", border: "border-rooted-strength", text: "text-liminal-night", accent: "#C0A381", dot: "bg-rooted-strength" },
+  { id: "dark", name: "Liminal Night", bg: "bg-liminal-night", border: "border-liminal-night", text: "text-wild-light", accent: "#E06F32", dot: "bg-liminal-night" }
 ];
 
 export const TODO_TAGS = [
-  { label: "Quick Task", icon: Zap, color: "bg-theme-accent-green-light text-theme-text border-theme-accent-green-light" },
-  { label: "Assignment", icon: BookOpen, color: "bg-theme-accent-green-light text-theme-text border-theme-accent-green-light" },
-  { label: "Revision", icon: Sparkles, color: "bg-theme-accent-green-light text-theme-text border-theme-accent-green-light" },
-  { label: "Reminder", icon: Clock, color: "bg-theme-accent-green-light text-theme-text border-theme-accent-green-light" },
-  { label: "General", icon: Tag, color: "bg-theme-bg text-theme-text border-theme-bg" }
+  { label: "Quick Task", icon: Zap, color: "bg-vital-spark/20 text-liminal-night border-vital-spark/40" },
+  { label: "Assignment", icon: BookOpen, color: "bg-inner-resolve/20 text-liminal-night border-inner-resolve/40" },
+  { label: "Revision", icon: Sparkles, color: "bg-calm-awakening/20 text-liminal-night border-calm-awakening/40" },
+  { label: "Reminder", icon: Clock, color: "bg-steady-renewal text-liminal-night border-rooted-strength/60" },
+  { label: "General", icon: Tag, color: "bg-wild-light text-liminal-night border-rooted-strength/40" }
 ];
 
 export default function DashboardNotesAndTodo({
@@ -78,7 +77,6 @@ export default function DashboardNotesAndTodo({
   // Scratchpad local state with instant debounced feedback
   const [localScratchpad, setLocalScratchpad] = useState(scratchpad || "");
 
-  // Update local scratchpad if parent prop changes
   React.useEffect(() => {
     setLocalScratchpad(scratchpad || "");
   }, [scratchpad]);
@@ -191,7 +189,6 @@ export default function DashboardNotesAndTodo({
     }, 2000);
   };
 
-  // Sorted and filtered notes (Pinned first)
   const filteredNotes = useMemo(() => {
     let list = [...notes];
     if (notesSearch.trim()) {
@@ -214,36 +211,36 @@ export default function DashboardNotesAndTodo({
   };
 
   return (
-    <div className="bg-theme-card rounded-[32px] p-5 sm:p-6 shadow-xs border border-theme-border space-y-5">
+    <div className="bg-white rounded-none p-5 sm:p-6 shadow-xs border border-rooted-strength/40 space-y-5">
       {/* ----------------- SECTION HEADER & NAVIGATION ----------------- */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-theme-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-rooted-strength/30">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#B4C6A6] text-theme-accent-green flex items-center justify-center shadow-xs">
+          <div className="w-8 h-8 rounded-xl bg-calm-awakening text-wild-light flex items-center justify-center shadow-xs">
             <CheckSquare className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-display font-extrabold text-base text-theme-text tracking-tight">
+              <h2 className="font-serif font-bold text-base text-liminal-night tracking-tight">
                 Daily Focus & Notes
               </h2>
-              <span className="px-2 py-0.5 rounded-full bg-theme-bg border border-theme-border text-[10px] font-bold text-theme-text">
+              <span className="px-2.5 py-0.5 rounded-full bg-steady-renewal border border-rooted-strength/60 text-[10px] font-bold text-liminal-night">
                 {completedCount}/{totalTodos} To-Dos Done
               </span>
             </div>
-            <p className="text-[11px] text-theme-text font-medium">
+            <p className="text-[11px] text-liminal-night/70 font-medium">
               Manage your quick daily checklists & study notes
             </p>
           </div>
         </div>
 
         {/* View Switcher Chips */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-theme-bg border border-theme-border self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-full bg-steady-renewal border border-rooted-strength/50 self-start sm:self-auto">
           <button
             onClick={() => setActiveTab("dual")}
-            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === "dual"
-                ? "bg-[#B4C6A6] text-theme-text shadow-2xs"
-                : "text-theme-text hover:text-theme-text hover:bg-theme-card/60"
+                ? "bg-calm-awakening text-wild-light shadow-2xs"
+                : "text-liminal-night hover:text-liminal-night hover:bg-white/60"
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -251,32 +248,32 @@ export default function DashboardNotesAndTodo({
           </button>
           <button
             onClick={() => setActiveTab("todos")}
-            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === "todos"
-                ? "bg-[#B4C6A6] text-theme-text shadow-2xs"
-                : "text-theme-text hover:text-theme-text hover:bg-theme-card/60"
+                ? "bg-calm-awakening text-wild-light shadow-2xs"
+                : "text-liminal-night hover:text-liminal-night hover:bg-white/60"
             }`}
           >
             <CheckSquare className="w-3.5 h-3.5" />
             <span>To-Do List</span>
             {todos.length > 0 && (
-              <span className="w-4 h-4 rounded-full bg-theme-border text-theme-text text-[9px] font-black flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full bg-vital-spark text-liminal-night text-[9px] font-bold flex items-center justify-center">
                 {todos.filter(t => !t.completed).length}
               </span>
             )}
           </button>
           <button
             onClick={() => setActiveTab("notes")}
-            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === "notes"
-                ? "bg-[#B4C6A6] text-theme-text shadow-2xs"
-                : "text-theme-text hover:text-theme-text hover:bg-theme-card/60"
+                ? "bg-calm-awakening text-wild-light shadow-2xs"
+                : "text-liminal-night hover:text-liminal-night hover:bg-white/60"
             }`}
           >
             <StickyNote className="w-3.5 h-3.5" />
             <span>Notes</span>
             {notes.length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-theme-accent-green-light text-theme-text text-[9px] font-bold">
+              <span className="px-1.5 py-0.2 rounded-full bg-vital-spark/30 text-liminal-night text-[9px] font-bold">
                 {notes.length}
               </span>
             )}
@@ -298,37 +295,37 @@ export default function DashboardNotesAndTodo({
             {/* To-Do Header & Filters */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <h3 className="font-display font-bold text-sm text-theme-text flex items-center gap-1.5">
-                  <Zap className="w-4 h-4 text-theme-accent-green fill-theme-border" />
+                <h3 className="font-serif font-bold text-sm text-liminal-night flex items-center gap-1.5">
+                  <Zap className="w-4 h-4 text-vital-spark fill-vital-spark" />
                   Daily To-Do List
                 </h3>
-                <span className="text-[11px] font-bold text-theme-muted">
+                <span className="text-[11px] font-bold text-liminal-night/60">
                   ({filteredTodos.length} items)
                 </span>
               </div>
 
               {/* Status Filter Chips */}
-              <div className="flex items-center gap-1 text-[10px] font-bold bg-theme-bg p-0.5 rounded-lg border border-theme-border">
+              <div className="flex items-center gap-1 text-[10px] font-bold bg-steady-renewal p-0.5 rounded-full border border-rooted-strength/50">
                 <button
                   onClick={() => setTodoFilter("all")}
-                  className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
-                    todoFilter === "all" ? "bg-theme-card text-theme-text shadow-2xs" : "text-theme-text"
+                  className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                    todoFilter === "all" ? "bg-white text-liminal-night shadow-2xs font-black" : "text-liminal-night/80 hover:text-liminal-night"
                   }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setTodoFilter("active")}
-                  className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
-                    todoFilter === "active" ? "bg-theme-card text-theme-text shadow-2xs" : "text-theme-text"
+                  className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                    todoFilter === "active" ? "bg-white text-liminal-night shadow-2xs font-black" : "text-liminal-night/80 hover:text-liminal-night"
                   }`}
                 >
                   Active
                 </button>
                 <button
                   onClick={() => setTodoFilter("completed")}
-                  className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
-                    todoFilter === "completed" ? "bg-theme-card text-theme-text shadow-2xs" : "text-theme-text"
+                  className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                    todoFilter === "completed" ? "bg-white text-liminal-night shadow-2xs font-black" : "text-liminal-night/80 hover:text-liminal-night"
                   }`}
                 >
                   Done
@@ -339,13 +336,13 @@ export default function DashboardNotesAndTodo({
             {/* Quick Progress Bar */}
             {totalTodos > 0 && (
               <div className="space-y-1">
-                <div className="flex items-center justify-between text-[10px] font-bold text-theme-text">
+                <div className="flex items-center justify-between text-[10px] font-bold text-liminal-night">
                   <span>Progress today</span>
-                  <span className="text-theme-text">{progressPercent}% Completed</span>
+                  <span className="text-calm-awakening font-bold">{progressPercent}% Completed</span>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-theme-bg overflow-hidden">
+                <div className="w-full h-2 rounded-full bg-steady-renewal overflow-hidden border border-rooted-strength/30">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-theme-border to-theme-accent-green transition-all duration-300"
+                    className="h-full rounded-full bg-gradient-to-r from-vital-spark via-calm-awakening to-calm-awakening transition-all duration-300"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -354,20 +351,20 @@ export default function DashboardNotesAndTodo({
 
             {/* Quick Add Bar */}
             <form onSubmit={handleAddTodoSubmit} className="space-y-2">
-              <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-theme-bg border border-theme-border focus-within:border-[#B4C6A6] transition-all">
+              <div className="flex items-center gap-2 p-1.5 rounded-full bg-wild-light border border-rooted-strength focus-within:border-liminal-night focus-within:ring-1 focus-within:ring-liminal-night/20 transition-all shadow-2xs">
                 <input
                   type="text"
                   value={todoInput}
                   onChange={(e) => setTodoInput(e.target.value)}
                   placeholder="Add a to-do, task or daily focus... (Press Enter)"
-                  className="flex-1 px-2.5 py-1.5 bg-transparent text-xs text-theme-text placeholder-[#A8A29E] font-medium outline-none"
+                  className="flex-1 px-3 py-1 bg-transparent text-xs text-liminal-night placeholder-liminal-night/40 font-medium outline-none"
                 />
                 
                 {/* Priority Selector Pill */}
                 <select
                   value={todoPriority}
                   onChange={(e) => setTodoPriority(e.target.value)}
-                  className="px-2 py-1 rounded-xl bg-theme-card text-[10px] font-bold text-theme-text border border-theme-border outline-none cursor-pointer"
+                  className="px-2.5 py-1 rounded-full bg-white text-[10px] font-bold text-liminal-night border border-rooted-strength outline-none cursor-pointer"
                 >
                   <option value="High">🔴 High</option>
                   <option value="Medium">🟡 Medium</option>
@@ -378,7 +375,7 @@ export default function DashboardNotesAndTodo({
                 <select
                   value={todoTag}
                   onChange={(e) => setTodoTag(e.target.value)}
-                  className="px-2 py-1 rounded-xl bg-theme-card text-[10px] font-bold text-theme-text border border-theme-border outline-none cursor-pointer hidden sm:inline-block"
+                  className="px-2.5 py-1 rounded-full bg-white text-[10px] font-bold text-liminal-night border border-rooted-strength outline-none cursor-pointer hidden sm:inline-block"
                 >
                   {TODO_TAGS.map(t => (
                     <option key={t.label} value={t.label}>{t.label}</option>
@@ -388,7 +385,7 @@ export default function DashboardNotesAndTodo({
                 <button
                   type="submit"
                   disabled={!todoInput.trim()}
-                  className="w-7 h-7 rounded-xl bg-[#B4C6A6] hover:bg-[#B4C6A6] disabled:opacity-40 text-theme-text flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-2xs"
+                  className="w-7 h-7 rounded-full bg-liminal-night hover:bg-liminal-night/90 disabled:opacity-40 text-wild-light flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-2xs"
                   title="Add To-Do"
                 >
                   <Plus className="w-4 h-4" />
@@ -399,14 +396,14 @@ export default function DashboardNotesAndTodo({
             {/* To-Do Items List */}
             <div className="space-y-2 max-h-[290px] overflow-y-auto pr-1">
               {filteredTodos.length === 0 ? (
-                <div className="py-8 px-4 text-center rounded-2xl border border-dashed border-theme-border bg-theme-bg/60 space-y-1.5">
-                  <div className="w-8 h-8 rounded-full bg-theme-accent-green-light text-theme-accent-green mx-auto flex items-center justify-center">
+                <div className="py-8 px-4 text-center rounded-none border border-dashed border-rooted-strength bg-wild-light space-y-1.5">
+                  <div className="w-8 h-8 rounded-full bg-steady-renewal text-liminal-night mx-auto flex items-center justify-center border border-rooted-strength/50">
                     <CheckSquare className="w-4 h-4" />
                   </div>
-                  <p className="text-xs font-bold text-theme-text">
+                  <p className="text-xs font-bold text-liminal-night">
                     {todoFilter === "completed" ? "No completed items yet" : "No to-dos on your list!"}
                   </p>
-                  <p className="text-[11px] text-theme-muted">
+                  <p className="text-[11px] text-liminal-night/60">
                     {todoFilter === "completed"
                       ? "Check off tasks above to see them marked as done."
                       : "Add your first study goal or task for today using the input bar."}
@@ -419,10 +416,10 @@ export default function DashboardNotesAndTodo({
                   return (
                     <div
                       key={todo.id}
-                      className={`group p-2.5 rounded-2xl border transition-all flex items-center justify-between gap-2.5 ${
+                      className={`group p-2.5 rounded-none border transition-all flex items-center justify-between gap-2.5 ${
                         todo.completed
-                          ? "bg-theme-bg/70 border-theme-border opacity-75"
-                          : "bg-theme-card hover:bg-theme-bg border-theme-border shadow-2xs hover:border-theme-border"
+                          ? "bg-wild-light/60 border-rooted-strength/30 opacity-75"
+                          : "bg-wild-light hover:bg-steady-renewal/40 border-rooted-strength/50 shadow-2xs"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -430,10 +427,10 @@ export default function DashboardNotesAndTodo({
                         <button
                           type="button"
                           onClick={() => onToggleTodo && onToggleTodo(todo.id)}
-                          className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+                          className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all cursor-pointer ${
                             todo.completed
-                              ? "bg-[#B4C6A6] text-theme-accent-green"
-                              : "border-2 border-theme-border hover:border-[#B4C6A6] bg-theme-card text-transparent"
+                              ? "bg-calm-awakening text-wild-light shadow-2xs"
+                              : "border-2 border-rooted-strength hover:border-calm-awakening bg-white text-transparent"
                           }`}
                         >
                           <Check className="w-3.5 h-3.5 stroke-[3]" />
@@ -444,8 +441,8 @@ export default function DashboardNotesAndTodo({
                           <p
                             className={`text-xs font-semibold leading-snug break-words ${
                               todo.completed
-                                ? "line-through text-theme-muted"
-                                : "text-theme-text"
+                                ? "line-through text-liminal-night/50"
+                                : "text-liminal-night"
                             }`}
                           >
                             {todo.text}
@@ -457,12 +454,12 @@ export default function DashboardNotesAndTodo({
                       <div className="flex items-center gap-1.5 shrink-0">
                         {/* Priority Badge */}
                         <span
-                          className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
                             isHigh
-                              ? "bg-theme-accent-green-light text-theme-accent-green border border-theme-accent-green-light"
+                              ? "bg-liminal-night text-wild-light"
                               : isMed
-                              ? "bg-theme-accent-green-light text-theme-text border border-theme-accent-green-light"
-                              : "bg-theme-accent-green-light text-theme-text border border-theme-accent-green-light"
+                              ? "bg-vital-spark text-liminal-night"
+                              : "bg-calm-awakening/20 text-calm-awakening"
                           }`}
                         >
                           {todo.priority || "Med"}
@@ -470,7 +467,7 @@ export default function DashboardNotesAndTodo({
 
                         {/* Tag Badge */}
                         {todo.tag && (
-                          <span className="hidden sm:inline-block px-1.5 py-0.5 rounded-md bg-theme-bg text-theme-text text-[9px] font-bold">
+                          <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-steady-renewal text-liminal-night text-[9px] font-semibold border border-rooted-strength/40">
                             {todo.tag}
                           </span>
                         )}
@@ -478,7 +475,7 @@ export default function DashboardNotesAndTodo({
                         {/* Delete Button */}
                         <button
                           onClick={() => onDeleteTodo && onDeleteTodo(todo.id)}
-                          className="w-6 h-6 rounded-lg text-theme-muted hover:text-theme-accent-green hover:bg-theme-card flex items-center justify-center opacity-70 group-hover:opacity-100 transition-all cursor-pointer"
+                          className="w-6 h-6 rounded-full text-liminal-night/40 hover:text-liminal-night hover:bg-white flex items-center justify-center opacity-70 group-hover:opacity-100 transition-all cursor-pointer"
                           title="Delete to-do"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -492,13 +489,13 @@ export default function DashboardNotesAndTodo({
 
             {/* Clear Completed Footer */}
             {completedCount > 0 && (
-              <div className="flex items-center justify-between pt-2 border-t border-theme-border text-xs">
-                <span className="text-[11px] font-bold text-theme-muted">
+              <div className="flex items-center justify-between pt-2 border-t border-rooted-strength/30 text-xs">
+                <span className="text-[11px] font-bold text-liminal-night/60">
                   {completedCount} completed task{completedCount > 1 ? "s" : ""}
                 </span>
                 <button
                   onClick={onClearCompletedTodos}
-                  className="text-[11px] font-bold text-theme-accent-green hover:text-theme-accent-green transition-all cursor-pointer flex items-center gap-1"
+                  className="text-[11px] font-bold text-calm-awakening hover:text-liminal-night transition-all cursor-pointer flex items-center gap-1"
                 >
                   <Trash2 className="w-3 h-3" />
                   Clear Completed
@@ -517,11 +514,11 @@ export default function DashboardNotesAndTodo({
             {/* Notes Header with Add & Search */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <h3 className="font-display font-bold text-sm text-theme-text flex items-center gap-1.5">
-                  <StickyNote className="w-4 h-4 text-theme-accent-green fill-theme-border" />
-                  Notes
+                <h3 className="font-serif font-bold text-sm text-liminal-night flex items-center gap-1.5">
+                  <StickyNote className="w-4 h-4 text-inner-resolve" />
+                  Notes & Highlights
                 </h3>
-                <span className="text-[11px] font-bold text-theme-muted">
+                <span className="text-[11px] font-bold text-liminal-night/60">
                   ({filteredNotes.length} notes)
                 </span>
               </div>
@@ -529,9 +526,9 @@ export default function DashboardNotesAndTodo({
               <div className="flex items-center gap-2">
                 <button
                   onClick={startCreateNote}
-                  className="px-2.5 py-1 rounded-xl bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text text-[10px] font-black shadow-2xs flex items-center gap-1 transition-all cursor-pointer"
+                  className="px-3 py-1 rounded-full bg-liminal-night hover:bg-liminal-night/90 text-wild-light text-[10px] font-bold shadow-2xs flex items-center gap-1 transition-all cursor-pointer"
                 >
-                  <Plus className="w-3 h-3 text-theme-accent-green" />
+                  <Plus className="w-3 h-3" />
                   <span>New Note</span>
                 </button>
               </div>
@@ -544,7 +541,7 @@ export default function DashboardNotesAndTodo({
                 {isCreatingNote && (
                   <form
                     onSubmit={handleSaveNote}
-                    className="p-3.5 rounded-2xl bg-theme-bg border-2 border-[#B4C6A6] space-y-3 shadow-sm animate-in fade-in zoom-in-95 duration-150"
+                    className="p-4 rounded-none bg-steady-renewal border border-rooted-strength space-y-3 shadow-sm animate-in fade-in duration-150"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <input
@@ -552,13 +549,13 @@ export default function DashboardNotesAndTodo({
                         value={noteTitle}
                         onChange={(e) => setNoteTitle(e.target.value)}
                         placeholder="Note title (e.g., Physics Formula, Quiz Reminder)"
-                        className="w-full bg-theme-card px-2.5 py-1.5 rounded-xl border border-theme-border text-xs font-bold text-theme-text placeholder-[#A8A29E] outline-none"
+                        className="w-full bg-white px-3 py-1.5 rounded-xl border border-rooted-strength text-xs font-bold text-liminal-night placeholder-liminal-night/40 outline-none"
                         autoFocus
                       />
                       <button
                         type="button"
                         onClick={() => setIsCreatingNote(false)}
-                        className="w-6 h-6 rounded-lg text-theme-text hover:bg-theme-card flex items-center justify-center cursor-pointer"
+                        className="w-6 h-6 rounded-full text-liminal-night/60 hover:bg-white flex items-center justify-center cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -569,21 +566,21 @@ export default function DashboardNotesAndTodo({
                       onChange={(e) => setNoteContent(e.target.value)}
                       rows={3}
                       placeholder="Write your note, equations, link, or key concept here..."
-                      className="w-full bg-theme-card p-2.5 rounded-xl border border-theme-border text-xs font-medium text-theme-text placeholder-[#A8A29E] outline-none resize-none leading-relaxed"
+                      className="w-full bg-white p-3 rounded-xl border border-rooted-strength text-xs font-medium text-liminal-night placeholder-liminal-night/40 outline-none resize-none leading-relaxed"
                     />
 
                     {/* Color Picker & Tag Controls */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-theme-border">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-rooted-strength/30">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-bold text-theme-text">Theme:</span>
-                        <div className="flex items-center gap-1">
+                        <span className="text-[10px] font-bold text-liminal-night">Palette:</span>
+                        <div className="flex items-center gap-1.5">
                           {NOTE_COLORS.map(c => (
                             <button
                               key={c.id}
                               type="button"
                               onClick={() => setNoteColor(c.id)}
-                              className={`w-4.5 h-4.5 rounded-full ${c.dot} border transition-all cursor-pointer ${
-                                noteColor === c.id ? "scale-125 ring-2 ring-theme-text ring-offset-1" : "opacity-80 hover:opacity-100"
+                              className={`w-5 h-5 rounded-full ${c.dot} border border-rooted-strength/60 transition-all cursor-pointer ${
+                                noteColor === c.id ? "scale-125 ring-2 ring-liminal-night ring-offset-1" : "opacity-80 hover:opacity-100"
                               }`}
                               title={c.name}
                             />
@@ -592,20 +589,20 @@ export default function DashboardNotesAndTodo({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <label className="flex items-center gap-1 text-[10px] font-bold text-theme-text cursor-pointer">
+                        <label className="flex items-center gap-1 text-[10px] font-bold text-liminal-night cursor-pointer">
                           <input
                             type="checkbox"
                             checked={noteIsPinned}
                             onChange={(e) => setNoteIsPinned(e.target.checked)}
-                            className="rounded text-theme-accent-green"
+                            className="rounded text-calm-awakening"
                           />
-                          <Pin className="w-3 h-3 text-theme-accent-green fill-theme-border" />
-                          <span>Pin to top</span>
+                          <Pin className="w-3 h-3 text-calm-awakening fill-calm-awakening" />
+                          <span>Pin note</span>
                         </label>
 
                         <button
                           type="submit"
-                          className="px-3 py-1 rounded-xl bg-[#B4C6A6] hover:bg-[#B4C6A6] text-theme-text text-[11px] font-extrabold shadow-2xs transition-all cursor-pointer"
+                          className="px-3.5 py-1 rounded-full bg-liminal-night hover:bg-liminal-night/90 text-wild-light text-[11px] font-bold shadow-2xs transition-all cursor-pointer"
                         >
                           {editingNoteId ? "Update Note" : "Save Note"}
                         </button>
@@ -617,12 +614,12 @@ export default function DashboardNotesAndTodo({
                 {/* Sticky Notes Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[290px] overflow-y-auto pr-1">
                   {filteredNotes.length === 0 && !isCreatingNote ? (
-                    <div className="sm:col-span-2 py-8 px-4 text-center rounded-2xl border border-dashed border-theme-border bg-theme-bg/60 space-y-1.5">
-                      <div className="w-8 h-8 rounded-full bg-theme-accent-green-light text-theme-accent-green mx-auto flex items-center justify-center">
+                    <div className="sm:col-span-2 py-8 px-4 text-center rounded-none border border-dashed border-rooted-strength bg-wild-light space-y-1.5">
+                      <div className="w-8 h-8 rounded-full bg-steady-renewal text-liminal-night mx-auto flex items-center justify-center border border-rooted-strength/50">
                         <StickyNote className="w-4 h-4" />
                       </div>
-                      <p className="text-xs font-bold text-theme-text">No sticky notes yet</p>
-                      <p className="text-[11px] text-theme-muted">
+                      <p className="text-xs font-bold text-liminal-night">No sticky notes yet</p>
+                      <p className="text-[11px] text-liminal-night/60">
                         Click "+ New Note" above to pin study formulas, lecture takeaways, or revision reminders.
                       </p>
                     </div>
@@ -634,52 +631,52 @@ export default function DashboardNotesAndTodo({
                       return (
                         <div
                           key={note.id}
-                          className={`group p-3 rounded-2xl border shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-2.5 relative ${colorCfg.bg} ${colorCfg.border} ${colorCfg.text}`}
+                          className={`group p-3.5 rounded-2xl border shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-2.5 relative ${colorCfg.bg} ${colorCfg.border} ${colorCfg.text}`}
                         >
                           {/* Note Top Bar: Title & Pin status */}
                           <div className="flex items-start justify-between gap-1.5">
                             <div className="flex items-center gap-1.5 min-w-0">
                               {note.isPinned && (
-                                <Pin className="w-3.5 h-3.5 text-theme-accent-green fill-theme-border shrink-0" />
+                                <Pin className="w-3.5 h-3.5 text-calm-awakening fill-calm-awakening shrink-0" />
                               )}
-                              <h4 className="font-display font-extrabold text-xs leading-snug truncate">
+                              <h4 className="font-serif font-bold text-xs leading-snug truncate">
                                 {note.title || "Note"}
                               </h4>
                             </div>
 
                             {/* Action Buttons Toolbar */}
-                            <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-all shrink-0">
+                            <div className="flex items-center gap-1 opacity-75 group-hover:opacity-100 transition-all shrink-0">
                               <button
                                 onClick={() => onPinNote && onPinNote(note.id)}
-                                className="w-5 h-5 rounded hover:bg-[#B4C6A6]/10 flex items-center justify-center cursor-pointer transition-all"
+                                className="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center cursor-pointer transition-all"
                                 title={note.isPinned ? "Unpin note" : "Pin note to top"}
                               >
-                                <Pin className={`w-3 h-3 ${note.isPinned ? "text-theme-accent-green fill-theme-border" : "text-theme-muted"}`} />
+                                <Pin className={`w-3 h-3 ${note.isPinned ? "text-calm-awakening fill-calm-awakening" : "text-liminal-night/40"}`} />
                               </button>
 
                               <button
                                 onClick={() => handleCopyNote(note)}
-                                className="w-5 h-5 rounded hover:bg-[#B4C6A6]/10 flex items-center justify-center cursor-pointer transition-all"
+                                className="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center cursor-pointer transition-all"
                                 title="Copy note text"
                               >
                                 {isCopied ? (
-                                  <Check className="w-3 h-3 text-theme-accent-green stroke-[3]" />
+                                  <Check className="w-3 h-3 text-calm-awakening stroke-[3]" />
                                 ) : (
-                                  <Copy className="w-3 h-3 text-theme-muted" />
+                                  <Copy className="w-3 h-3 text-liminal-night/50" />
                                 )}
                               </button>
 
                               <button
                                 onClick={() => startEditNote(note)}
-                                className="w-5 h-5 rounded hover:bg-[#B4C6A6]/10 flex items-center justify-center cursor-pointer transition-all"
+                                className="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center cursor-pointer transition-all"
                                 title="Edit note"
                               >
-                                <Edit3 className="w-3 h-3 text-theme-muted" />
+                                <Edit3 className="w-3 h-3 text-liminal-night/50" />
                               </button>
 
                               <button
                                 onClick={() => onDeleteNote && onDeleteNote(note.id)}
-                                className="w-5 h-5 rounded hover:bg-theme-accent-green hover:text-theme-text flex items-center justify-center cursor-pointer transition-all"
+                                className="w-5 h-5 rounded hover:bg-black/10 flex items-center justify-center cursor-pointer transition-all"
                                 title="Delete note"
                               >
                                 <Trash2 className="w-3 h-3" />
@@ -693,7 +690,7 @@ export default function DashboardNotesAndTodo({
                           </p>
 
                           {/* Note Footer: Tag & Date */}
-                          <div className="flex items-center justify-between text-[9px] font-bold opacity-75 pt-1.5 border-t border-[#B4C6A6]/5">
+                          <div className="flex items-center justify-between text-[9px] font-bold opacity-75 pt-1.5 border-t border-rooted-strength/20">
                             <span>{note.tag || "General"}</span>
                             <span>{new Date(note.updatedAt || note.createdAt || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
                           </div>

@@ -5,7 +5,7 @@ import {
   Clock, Target, BookOpen, Award, AlertCircle, ArrowRight, Flame,
   SlidersHorizontal, Layers, Lightbulb, Trash2, ShieldCheck, CornerDownLeft
 } from 'lucide-react';
-import { addDays, toISODate, startOfWeek, DAY_KEYS } from '../StudentPlanner';
+import { addDays, toISODate, startOfWeek, DAY_KEYS } from '../utils/dateUtils';
 
 /* ============================================================================
    AI TIMETABLE SYNTHESIZER & INTENT PARSER
@@ -638,31 +638,31 @@ export default function AIChatScheduleAssistant({
 
   return (
     <div
-      className={`fixed z-50 transition-all duration-300 flex flex-col shadow-2xl bg-[#181A1D] border border-[#373A40] text-white overflow-hidden ${
+      className={`fixed z-50 transition-all duration-300 flex flex-col shadow-2xl bg-white border border-rooted-strength text-liminal-night overflow-hidden ${
         isExpanded
-          ? 'inset-4 sm:inset-10 rounded-[32px]'
-          : 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[92vw] sm:w-[460px] h-[580px] sm:h-[640px] rounded-[28px]'
+          ? 'inset-4 sm:inset-10 rounded-[36px]'
+          : 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[92vw] sm:w-[460px] h-[580px] sm:h-[640px] rounded-[30px]'
       }`}
     >
       {/* Top Header Bar */}
-      <div className="p-4 sm:p-4.5 bg-[#121316] border-b border-[#2C2E33] flex items-center justify-between shrink-0">
+      <div className="p-4 sm:p-4.5 bg-liminal-night text-wild-light border-b border-liminal-night/80 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="w-9 h-9 rounded-2xl bg-[#FACC15] text-[#181A1D] flex items-center justify-center font-black shadow-md">
+            <div className="w-9 h-9 rounded-2xl bg-vital-spark text-liminal-night flex items-center justify-center font-black shadow-md">
               <Sparkles className="w-5 h-5 fill-current" />
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#10B981] border-2 border-[#181A1D] rounded-full" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-calm-awakening border-2 border-liminal-night rounded-full" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-display font-extrabold text-sm sm:text-base text-white tracking-tight">
+              <h3 className="font-serif font-bold text-sm sm:text-base text-wild-light tracking-tight">
                 AI Schedule Copilot
               </h3>
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#FEF08A]/10 text-[#FACC15] border border-[#FACC15]/20 uppercase">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-vital-spark/20 text-vital-spark border border-vital-spark/30 uppercase">
                 Active AI
               </span>
             </div>
-            <p className="text-[11px] text-[#A8A29A]">
+            <p className="text-[11px] text-wild-light/80 font-medium">
               Personalized for exams, college hours & daily goals
             </p>
           </div>
@@ -672,21 +672,21 @@ export default function AIChatScheduleAssistant({
         <div className="flex items-center gap-1">
           <button
             onClick={handleClearHistory}
-            className="p-1.5 rounded-xl hover:bg-white/10 text-[#A8A29A] hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-white/10 text-wild-light/70 hover:text-wild-light transition-colors cursor-pointer"
             title="Clear Chat History"
           >
             <Trash2 className="w-4 h-4" />
           </button>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 rounded-xl hover:bg-white/10 text-[#A8A29A] hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-white/10 text-wild-light/70 hover:text-wild-light transition-colors cursor-pointer"
             title={isExpanded ? 'Collapse' : 'Expand'}
           >
             {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-white/10 text-[#A8A29A] hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-white/10 text-wild-light/70 hover:text-wild-light transition-colors cursor-pointer"
             title="Close Chat"
           >
             <X className="w-4 h-4" />
@@ -695,7 +695,7 @@ export default function AIChatScheduleAssistant({
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-[#181A1D]/95">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-wild-light">
         {messages.map((msg) => {
           const isAi = msg.sender === 'ai';
           return (
@@ -706,7 +706,7 @@ export default function AIChatScheduleAssistant({
               }`}
             >
               {isAi && (
-                <div className="w-7 h-7 rounded-xl bg-[#282B30] text-[#FACC15] flex items-center justify-center shrink-0 mt-0.5 border border-[#3A3E45]">
+                <div className="w-7 h-7 rounded-xl bg-steady-renewal text-liminal-night flex items-center justify-center shrink-0 mt-0.5 border border-rooted-strength/60 shadow-2xs">
                   <Bot className="w-4 h-4" />
                 </div>
               )}
@@ -714,28 +714,27 @@ export default function AIChatScheduleAssistant({
               <div
                 className={`max-w-[85%] rounded-2xl p-3.5 space-y-2.5 ${
                   isAi
-                    ? 'bg-[#22252A] border border-[#32363D] text-[#ECE6DC]'
-                    : 'bg-[#FACC15] text-[#181A1D] font-medium ml-auto shadow-md'
+                    ? 'bg-white border border-rooted-strength/60 text-liminal-night shadow-xs'
+                    : 'bg-liminal-night text-wild-light font-medium ml-auto shadow-sm'
                 }`}
               >
                 {/* Formatted Text Content */}
                 <div className="whitespace-pre-wrap leading-relaxed">
                   {msg.text.split('\n').map((line, idx) => {
-                    // Check bold markdown formatting **text**
                     const parts = line.split(/(\*\*.*?\*\*)/g);
                     return (
                       <p key={idx} className={idx > 0 ? 'mt-1' : ''}>
                         {parts.map((part, pIdx) => {
                           if (part.startsWith('**') && part.endsWith('**')) {
                             return (
-                              <strong key={pIdx} className={isAi ? 'text-[#FACC15] font-extrabold' : 'font-extrabold text-black'}>
+                              <strong key={pIdx} className={isAi ? 'text-liminal-night font-extrabold' : 'font-extrabold text-vital-spark'}>
                                 {part.slice(2, -2)}
                               </strong>
                             );
                           }
                           if (part.startsWith('*') && part.endsWith('*')) {
                             return (
-                              <em key={pIdx} className={isAi ? 'text-[#E5E0D8]' : 'text-black'}>
+                              <em key={pIdx} className={isAi ? 'text-liminal-night/80' : 'text-wild-light/90'}>
                                 {part.slice(1, -1)}
                               </em>
                             );
@@ -749,13 +748,13 @@ export default function AIChatScheduleAssistant({
 
                 {/* AI Plan Proposal Card & Apply Button */}
                 {isAi && msg.actionPlan && (
-                  <div className="mt-3 p-3 rounded-xl bg-[#181A1D] border border-[#373A40] space-y-2.5">
-                    <div className="flex items-center justify-between gap-2 border-b border-[#2C2E33] pb-2">
-                      <span className="text-[11px] font-black uppercase tracking-wider text-[#FACC15] flex items-center gap-1.5">
-                        <Zap className="w-3.5 h-3.5 fill-current" />
+                  <div className="mt-3 p-3 rounded-2xl bg-steady-renewal border border-rooted-strength/60 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2 border-b border-rooted-strength/40 pb-2">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-liminal-night flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-vital-spark fill-vital-spark" />
                         <span>Proposed AI Schedule</span>
                       </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#2A2E35] text-[#ECE6DC]">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-liminal-night border border-rooted-strength/50">
                         {msg.actionPlan.stats?.totalStudySprints || 0} Sprints ({msg.actionPlan.stats?.studyHours || 0}h)
                       </span>
                     </div>
@@ -763,16 +762,16 @@ export default function AIChatScheduleAssistant({
                     {/* Tags breakdown */}
                     <div className="flex flex-wrap gap-1.5">
                       {msg.actionPlan.stats?.prioritizedSubjects?.map((subj) => (
-                        <span key={subj} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FEF08A]/10 text-[#FACC15] border border-[#FACC15]/20">
+                        <span key={subj} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-liminal-night border border-rooted-strength/50">
                           🎯 {subj}
                         </span>
                       ))}
                       {msg.actionPlan.stats?.examFocusCount > 0 && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FB7185]/20 text-[#FB7185] border border-[#FB7185]/30">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-vital-spark text-liminal-night border border-vital-spark/60">
                           ⚡ Exam Priority
                         </span>
                       )}
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#25282E] text-[#A8A29A]">
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-wild-light text-liminal-night/70 border border-rooted-strength/40">
                         {msg.actionPlan.stats?.targetDay}
                       </span>
                     </div>
@@ -780,16 +779,16 @@ export default function AIChatScheduleAssistant({
                     {/* Action buttons */}
                     <div className="flex items-center gap-2 pt-1">
                       {msg.applied ? (
-                        <div className="w-full py-2 px-3 rounded-xl bg-[#065F46]/40 border border-[#10B981]/40 text-[#34D399] font-extrabold text-xs flex items-center justify-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                        <div className="w-full py-2 px-3 rounded-full bg-calm-awakening/20 border border-calm-awakening/40 text-calm-awakening font-bold text-xs flex items-center justify-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4 text-calm-awakening" />
                           <span>Applied to Timetable!</span>
                         </div>
                       ) : (
                         <button
                           onClick={() => handleApplyActionPlan(msg.id, msg.actionPlan)}
-                          className="w-full py-2 px-3 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-[#181A1D] font-extrabold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-[0.98]"
+                          className="w-full py-2 px-3 rounded-full bg-liminal-night hover:bg-liminal-night/90 text-wild-light font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-all active:scale-[0.98]"
                         >
-                          <Check className="w-4 h-4" />
+                          <Check className="w-4 h-4 text-vital-spark" />
                           <span>Apply Changes to Schedule</span>
                         </button>
                       )}
@@ -801,17 +800,17 @@ export default function AIChatScheduleAssistant({
                             setSelectedTimetableDate(toISODate(new Date()));
                           }
                         }}
-                        className="py-2 px-3 rounded-xl bg-[#2A2E35] hover:bg-[#32363D] text-[#ECE6DC] font-bold text-xs flex items-center justify-center gap-1 cursor-pointer transition-all shrink-0"
+                        className="py-2 px-3 rounded-full bg-white hover:bg-wild-light border border-rooted-strength text-liminal-night font-bold text-xs flex items-center justify-center gap-1 cursor-pointer transition-all shrink-0"
                         title="View in Timetable tab"
                       >
                         <span>View</span>
-                        <ArrowRight className="w-3.5 h-3.5 text-[#FACC15]" />
+                        <ArrowRight className="w-3.5 h-3.5 text-liminal-night" />
                       </button>
                     </div>
                   </div>
                 )}
 
-                <div className={`text-[10px] font-medium text-right ${isAi ? 'text-[#857F76]' : 'text-[#5A554E]'}`}>
+                <div className={`text-[10px] font-medium text-right ${isAi ? 'text-liminal-night/40' : 'text-wild-light/60'}`}>
                   {msg.timestamp}
                 </div>
               </div>
@@ -821,9 +820,9 @@ export default function AIChatScheduleAssistant({
 
         {/* Thinking Indicator */}
         {isProcessing && (
-          <div className="flex items-center gap-2.5 text-xs text-[#A8A29A] p-2 animate-pulse">
-            <div className="w-6 h-6 rounded-lg bg-[#282B30] text-[#FACC15] flex items-center justify-center border border-[#3A3E45]">
-              <Sparkles className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-2.5 text-xs text-liminal-night/70 p-2 animate-pulse">
+            <div className="w-6 h-6 rounded-lg bg-steady-renewal text-liminal-night flex items-center justify-center border border-rooted-strength/50">
+              <Sparkles className="w-3.5 h-3.5 text-vital-spark" />
             </div>
             <span>AI Copilot is analyzing subjects & synthesizing your schedule...</span>
           </div>
@@ -833,14 +832,14 @@ export default function AIChatScheduleAssistant({
       </div>
 
       {/* Quick Suggestion Chips */}
-      <div className="px-3.5 py-2 bg-[#141518] border-t border-[#282B30] overflow-x-auto flex gap-2 shrink-0 scrollbar-none">
+      <div className="px-3.5 py-2 bg-steady-renewal border-t border-rooted-strength/40 overflow-x-auto flex gap-2 shrink-0 scrollbar-none">
         {quickPrompts.map((qp, i) => (
           <button
             key={i}
             type="button"
             onClick={() => handleSendMessage(qp.prompt)}
             disabled={isProcessing}
-            className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-[#202227] hover:bg-[#2A2D33] text-[#D8D2C7] hover:text-[#FACC15] border border-[#32353C] whitespace-nowrap cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+            className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-white hover:bg-wild-light text-liminal-night border border-rooted-strength whitespace-nowrap cursor-pointer transition-all active:scale-95 disabled:opacity-50 shadow-2xs"
           >
             {qp.label}
           </button>
@@ -848,13 +847,13 @@ export default function AIChatScheduleAssistant({
       </div>
 
       {/* Bottom Input Box */}
-      <div className="p-3.5 bg-[#121316] border-t border-[#2C2E33] shrink-0">
+      <div className="p-3.5 bg-white border-t border-rooted-strength/30 shrink-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSendMessage();
           }}
-          className="flex items-center gap-2 bg-[#1E2024] rounded-2xl p-1.5 border border-[#373A40] focus-within:border-[#FACC15] focus-within:ring-1 focus-within:ring-[#FACC15]/40 transition-all"
+          className="flex items-center gap-2 bg-wild-light rounded-full p-1.5 border border-rooted-strength focus-within:border-liminal-night focus-within:ring-1 focus-within:ring-liminal-night/30 transition-all shadow-2xs"
         >
           <input
             type="text"
@@ -862,19 +861,19 @@ export default function AIChatScheduleAssistant({
             onChange={(e) => setInputPrompt(e.target.value)}
             placeholder="Ask AI to customize your schedule or prioritize exams..."
             disabled={isProcessing}
-            className="flex-1 bg-transparent px-3 py-1.5 text-xs sm:text-sm text-white placeholder-[#78716C] focus:outline-none disabled:opacity-60"
+            className="flex-1 bg-transparent px-3 py-1 text-xs sm:text-sm text-liminal-night placeholder-liminal-night/40 focus:outline-none disabled:opacity-60 font-medium"
           />
 
           <button
             type="submit"
             disabled={!inputPrompt.trim() || isProcessing}
-            className="w-8 h-8 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] disabled:bg-[#32353C] disabled:text-[#666] text-[#181A1D] flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-xs"
+            className="w-8 h-8 rounded-full bg-liminal-night hover:bg-liminal-night/90 disabled:bg-rooted-strength/40 disabled:text-liminal-night/40 text-wild-light flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-xs"
             title="Send prompt to AI"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-4 h-4 text-vital-spark" />
           </button>
         </form>
-        <p className="text-[10px] text-[#6B655E] text-center mt-1.5">
+        <p className="text-[10px] text-liminal-night/50 text-center mt-1.5 font-medium">
           Ask to prioritize exams, balance subjects, shift hours, or clear rest days.
         </p>
       </div>

@@ -92,66 +92,66 @@ export default function AnalyticsView({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-steady-renewal p-5 sm:p-6 rounded-none border border-rooted-strength/40 shadow-xs">
         <div>
-          <h2 className="font-display text-xl font-extrabold text-theme-text flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-theme-text" />
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-liminal-night flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-inner-resolve" />
             Study Progress & Analytics
           </h2>
-          <p className="text-xs sm:text-sm text-theme-muted">
+          <p className="text-xs sm:text-sm text-liminal-night/70 mt-0.5">
             Track your consistency, subject allocation, and assignment resolution rate.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#B4C6A6] text-theme-text text-xs font-bold shadow-xs">
-          <Flame className="w-4 h-4 text-theme-accent-green fill-theme-accent-green" />
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-calm-awakening/20 border border-calm-awakening/40 text-liminal-night text-xs font-bold shadow-xs">
+          <Flame className="w-4 h-4 text-calm-awakening fill-calm-awakening" />
           <span>{streakDays > 0 ? `${streakDays}-Day Study Streak Active! 🔥` : '0-Day Streak (Start studying today!) 🔥'}</span>
         </div>
       </div>
 
       {/* KPI Overview Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-[30px] border border-theme-border bg-theme-card p-5 shadow-xs">
-          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-text flex items-center justify-center mb-3">
+        <div className="rounded-none border border-rooted-strength/40 bg-steady-renewal p-5 shadow-xs hover:border-inner-resolve/40 transition-all">
+          <div className="w-10 h-10 rounded-2xl bg-wild-light text-inner-resolve border border-rooted-strength/30 flex items-center justify-center mb-3 shadow-xs">
             <Clock className="w-4 h-4" />
           </div>
-          <p className="font-display text-2xl font-extrabold text-theme-text">{completedHours}h <span className="text-xs text-theme-muted font-normal">/ {scheduledHours}h</span></p>
-          <p className="text-xs text-theme-muted mt-0.5 font-medium">Study Time Logged</p>
-          <div className="w-full bg-theme-bg rounded-full h-2 mt-3 overflow-hidden">
-            <div className="bg-[#B4C6A6] h-2 rounded-full transition-all" style={{ width: `${scheduledHours ? (completedHours / scheduledHours) * 100 : 0}%` }} />
+          <p className="font-display text-2xl font-bold text-liminal-night">{completedHours}h <span className="text-xs text-liminal-night/60 font-normal">/ {scheduledHours}h</span></p>
+          <p className="text-xs text-liminal-night/70 mt-0.5 font-medium">Study Time Logged</p>
+          <div className="w-full bg-rooted-strength/30 rounded-full h-2 mt-3 overflow-hidden">
+            <div className="bg-calm-awakening h-2 rounded-full transition-all duration-500" style={{ width: `${scheduledHours ? (completedHours / scheduledHours) * 100 : 0}%` }} />
           </div>
         </div>
 
-        <div className="rounded-[30px] border border-theme-border bg-theme-card p-5 shadow-xs">
-          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-accent-blue flex items-center justify-center mb-3">
+        <div className="rounded-none border border-rooted-strength/40 bg-steady-renewal p-5 shadow-xs hover:border-inner-resolve/40 transition-all">
+          <div className="w-10 h-10 rounded-2xl bg-wild-light text-inner-resolve border border-rooted-strength/30 flex items-center justify-center mb-3 shadow-xs">
             <CheckCircle2 className="w-4 h-4" />
           </div>
-          <p className="font-display text-2xl font-extrabold text-theme-text">{taskCompletionRate}%</p>
-          <p className="text-xs text-theme-muted mt-0.5 font-medium">{completedTasks} of {totalTasks} Tasks Done</p>
-          <div className="w-full bg-theme-bg rounded-full h-2 mt-3 overflow-hidden">
-            <div className="bg-theme-accent-blue h-2 rounded-full transition-all" style={{ width: `${taskCompletionRate}%` }} />
+          <p className="font-display text-2xl font-bold text-liminal-night">{taskCompletionRate}%</p>
+          <p className="text-xs text-liminal-night/70 mt-0.5 font-medium">{completedTasks} of {totalTasks} Tasks Done</p>
+          <div className="w-full bg-rooted-strength/30 rounded-full h-2 mt-3 overflow-hidden">
+            <div className="bg-liminal-night h-2 rounded-full transition-all duration-500" style={{ width: `${taskCompletionRate}%` }} />
           </div>
         </div>
 
-        <div className="rounded-[30px] border border-theme-border bg-theme-card p-5 shadow-xs">
-          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-accent-blue flex items-center justify-center mb-3">
+        <div className="rounded-none border border-rooted-strength/40 bg-steady-renewal p-5 shadow-xs hover:border-inner-resolve/40 transition-all">
+          <div className="w-10 h-10 rounded-2xl bg-wild-light text-calm-awakening border border-rooted-strength/30 flex items-center justify-center mb-3 shadow-xs">
             <BookOpen className="w-4 h-4" />
           </div>
-          <p className="font-display text-2xl font-extrabold text-theme-text">{topicCompletionRate}%</p>
-          <p className="text-xs text-theme-muted mt-0.5 font-medium">{completedTopics} of {totalTopics} Topics Revised</p>
-          <div className="w-full bg-theme-bg rounded-full h-2 mt-3 overflow-hidden">
-            <div className="bg-theme-accent-green h-2 rounded-full transition-all" style={{ width: `${topicCompletionRate}%` }} />
+          <p className="font-display text-2xl font-bold text-liminal-night">{topicCompletionRate}%</p>
+          <p className="text-xs text-liminal-night/70 mt-0.5 font-medium">{completedTopics} of {totalTopics} Topics Revised</p>
+          <div className="w-full bg-rooted-strength/30 rounded-full h-2 mt-3 overflow-hidden">
+            <div className="bg-calm-awakening h-2 rounded-full transition-all duration-500" style={{ width: `${topicCompletionRate}%` }} />
           </div>
         </div>
 
-        <div className="rounded-[30px] border border-theme-border bg-theme-card p-5 shadow-xs">
-          <div className="w-9 h-9 rounded-full bg-theme-bg text-theme-text flex items-center justify-center mb-3">
+        <div className="rounded-none border border-rooted-strength/40 bg-steady-renewal p-5 shadow-xs hover:border-inner-resolve/40 transition-all">
+          <div className="w-10 h-10 rounded-2xl bg-wild-light text-vital-spark border border-rooted-strength/30 flex items-center justify-center mb-3 shadow-xs">
             <Target className="w-4 h-4" />
           </div>
-          <p className="font-display text-2xl font-extrabold text-theme-text">{goalProgress}%</p>
-          <p className="text-xs text-theme-muted mt-0.5 font-medium">Weekly Goal ({weeklyGoalHours}h)</p>
-          <div className="w-full bg-theme-bg rounded-full h-2 mt-3 overflow-hidden">
-            <div className="bg-theme-accent-blue h-2 rounded-full transition-all" style={{ width: `${goalProgress}%` }} />
+          <p className="font-display text-2xl font-bold text-liminal-night">{goalProgress}%</p>
+          <p className="text-xs text-liminal-night/70 mt-0.5 font-medium">Weekly Goal ({weeklyGoalHours}h)</p>
+          <div className="w-full bg-rooted-strength/30 rounded-full h-2 mt-3 overflow-hidden">
+            <div className="bg-vital-spark h-2 rounded-full transition-all duration-500" style={{ width: `${goalProgress}%` }} />
           </div>
         </div>
       </div>
@@ -159,29 +159,29 @@ export default function AnalyticsView({
       <div className="grid lg:grid-cols-2 gap-5">
         
         {/* Subject-Wise Time Allocation */}
-        <div className="rounded-[32px] border border-theme-border bg-theme-card p-6 shadow-xs">
+        <div className="rounded-none border border-rooted-strength/40 bg-steady-renewal p-6 shadow-xs">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-extrabold text-theme-text text-sm sm:text-base flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-theme-text" />
+            <h3 className="font-display font-bold text-liminal-night text-base flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-inner-resolve" />
               Subject Time Distribution
             </h3>
-            <span className="text-xs text-theme-muted font-bold">{subjectStats.length} Subjects</span>
+            <span className="text-xs text-liminal-night/70 font-semibold px-2.5 py-0.5 rounded-full bg-wild-light border border-rooted-strength/40">{subjectStats.length} Subjects</span>
           </div>
 
           {subjectStats.length === 0 ? (
-            <p className="text-xs text-theme-muted py-6 text-center">Generate a timetable to view subject time analytics.</p>
+            <p className="text-xs text-liminal-night/60 py-8 text-center bg-wild-light/50 rounded-2xl border border-dashed border-rooted-strength/40">Generate a timetable to view subject time analytics.</p>
           ) : (
             <div className="space-y-3.5">
               {subjectStats.map((item, idx) => (
                 <div key={item.subject}>
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-bold text-theme-text">{item.subject}</span>
-                    <span className="text-theme-muted font-semibold">{item.hours}h ({item.percent}%)</span>
+                    <span className="font-semibold text-liminal-night">{item.subject}</span>
+                    <span className="text-liminal-night/70 font-medium">{item.hours}h ({item.percent}%)</span>
                   </div>
-                  <div className="w-full bg-theme-bg rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-rooted-strength/30 rounded-full h-2 overflow-hidden">
                     <div
-                      className={`h-2 rounded-full transition-all ${
-                        idx === 0 ? 'bg-[#B4C6A6]' : idx === 1 ? 'bg-theme-accent-green' : idx === 2 ? 'bg-theme-accent-blue' : 'bg-theme-accent-blue'
+                      className={`h-2 rounded-full transition-all duration-500 ${
+                        idx === 0 ? 'bg-calm-awakening' : idx === 1 ? 'bg-inner-resolve' : idx === 2 ? 'bg-vital-spark' : 'bg-liminal-night'
                       }`}
                       style={{ width: `${item.percent}%` }}
                     />
@@ -193,55 +193,55 @@ export default function AnalyticsView({
         </div>
 
         {/* Priority Task Execution Status */}
-        <div className="rounded-[32px] border border-theme-border bg-theme-card p-6 shadow-xs">
+        <div className="rounded-none border border-rooted-strength/40 bg-steady-renewal p-6 shadow-xs">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-extrabold text-theme-text text-sm sm:text-base flex items-center gap-2">
-              <Award className="w-4 h-4 text-theme-accent-green" />
+            <h3 className="font-display font-bold text-liminal-night text-base flex items-center gap-2">
+              <Award className="w-4 h-4 text-calm-awakening" />
               Priority-Based Task Completion
             </h3>
-            <span className="text-xs text-theme-muted font-bold">{completedTasks}/{totalTasks} Done</span>
+            <span className="text-xs text-liminal-night/70 font-semibold px-2.5 py-0.5 rounded-full bg-wild-light border border-rooted-strength/40">{completedTasks}/{totalTasks} Done</span>
           </div>
 
           <div className="space-y-3">
             {/* High Priority */}
-            <div className="p-3.5 rounded-2xl border border-theme-accent-green bg-theme-bg">
+            <div className="p-4 rounded-2xl border border-rooted-strength/40 bg-wild-light/80">
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-bold text-theme-text flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#B4C6A6]" />
+                <span className="font-semibold text-liminal-night flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-liminal-night" />
                   High Priority Tasks
                 </span>
-                <span className="text-theme-text font-bold">{highDone} of {highPriority.length} completed</span>
+                <span className="text-liminal-night font-bold">{highDone} of {highPriority.length} completed</span>
               </div>
-              <div className="w-full bg-theme-card rounded-full h-2 overflow-hidden">
-                <div className="bg-[#B4C6A6] h-2 rounded-full transition-all" style={{ width: `${highPriority.length ? (highDone / highPriority.length) * 100 : 0}%` }} />
+              <div className="w-full bg-rooted-strength/30 rounded-full h-2 overflow-hidden">
+                <div className="bg-liminal-night h-2 rounded-full transition-all duration-500" style={{ width: `${highPriority.length ? (highDone / highPriority.length) * 100 : 0}%` }} />
               </div>
             </div>
 
             {/* Medium Priority */}
-            <div className="p-3.5 rounded-2xl border border-theme-accent-green-light bg-theme-bg">
+            <div className="p-4 rounded-2xl border border-rooted-strength/40 bg-wild-light/80">
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-bold text-theme-accent-blue flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-theme-accent-blue" />
+                <span className="font-semibold text-liminal-night flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-vital-spark" />
                   Medium Priority Tasks
                 </span>
-                <span className="text-theme-text font-bold">{medDone} of {medPriority.length} completed</span>
+                <span className="text-liminal-night font-bold">{medDone} of {medPriority.length} completed</span>
               </div>
-              <div className="w-full bg-theme-card rounded-full h-2 overflow-hidden">
-                <div className="bg-theme-accent-blue h-2 rounded-full transition-all" style={{ width: `${medPriority.length ? (medDone / medPriority.length) * 100 : 0}%` }} />
+              <div className="w-full bg-rooted-strength/30 rounded-full h-2 overflow-hidden">
+                <div className="bg-vital-spark h-2 rounded-full transition-all duration-500" style={{ width: `${medPriority.length ? (medDone / medPriority.length) * 100 : 0}%` }} />
               </div>
             </div>
 
             {/* Low Priority */}
-            <div className="p-3.5 rounded-2xl border border-theme-accent-green-light bg-theme-bg">
+            <div className="p-4 rounded-2xl border border-rooted-strength/40 bg-wild-light/80">
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-bold text-theme-accent-blue flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-theme-accent-blue" />
+                <span className="font-semibold text-liminal-night flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-calm-awakening" />
                   Low Priority Tasks
                 </span>
-                <span className="text-theme-text font-bold">{lowDone} of {lowPriority.length} completed</span>
+                <span className="text-liminal-night font-bold">{lowDone} of {lowPriority.length} completed</span>
               </div>
-              <div className="w-full bg-theme-card rounded-full h-2 overflow-hidden">
-                <div className="bg-theme-accent-blue h-2 rounded-full transition-all" style={{ width: `${lowPriority.length ? (lowDone / lowPriority.length) * 100 : 0}%` }} />
+              <div className="w-full bg-rooted-strength/30 rounded-full h-2 overflow-hidden">
+                <div className="bg-calm-awakening h-2 rounded-full transition-all duration-500" style={{ width: `${lowPriority.length ? (lowDone / lowPriority.length) * 100 : 0}%` }} />
               </div>
             </div>
           </div>
@@ -250,22 +250,22 @@ export default function AnalyticsView({
       </div>
 
       {/* AI Recommendations */}
-      <div className="rounded-[32px] border border-theme-border bg-[#B4C6A6] text-theme-text p-6">
-        <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-full bg-[#B4C6A6] text-theme-accent-green shrink-0 mt-0.5">
-            <Sparkles className="w-5 h-5" />
+      <div className="rounded-none border border-rooted-strength/40 bg-steady-renewal p-6 shadow-xs">
+        <div className="flex items-start gap-4">
+          <div className="p-3 rounded-2xl bg-calm-awakening/20 border border-calm-awakening/40 text-calm-awakening shrink-0 mt-0.5">
+            <Sparkles className="w-5 h-5 text-calm-awakening" />
           </div>
           <div>
-            <h4 className="font-display font-extrabold text-theme-text text-sm sm:text-base">
+            <h4 className="font-display font-bold text-liminal-night text-base">
               AI Study Optimization Insights
             </h4>
-            <p className="text-xs sm:text-sm text-theme-muted mt-1 leading-relaxed">
+            <p className="text-xs sm:text-sm text-liminal-night/75 mt-1 leading-relaxed">
               Based on your {safeStudent.dailyTargetHours || 4}h daily target, your study schedule is distributed evenly with 10-minute rest intervals. You have scheduled <strong>{scheduledHours} hours</strong> of focused study across the week.
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold text-theme-text">
-              <span className="px-3 py-1 rounded-full bg-[#B4C6A6]"> Balanced Routine</span>
-              <span className="px-3 py-1 rounded-full bg-[#B4C6A6]">️ Pomodoro Paced</span>
-              <span className="px-3 py-1 rounded-full bg-[#B4C6A6]">🎯 Exam Ready</span>
+            <div className="mt-3.5 flex flex-wrap items-center gap-2 text-xs font-semibold">
+              <span className="px-3 py-1 rounded-full bg-wild-light border border-rooted-strength/50 text-liminal-night shadow-2xs">🌿 Balanced Routine</span>
+              <span className="px-3 py-1 rounded-full bg-wild-light border border-rooted-strength/50 text-liminal-night shadow-2xs">⏱️ Pomodoro Paced</span>
+              <span className="px-3 py-1 rounded-full bg-wild-light border border-rooted-strength/50 text-liminal-night shadow-2xs">🎯 Exam Ready</span>
             </div>
           </div>
         </div>
